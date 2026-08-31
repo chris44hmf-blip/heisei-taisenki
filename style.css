@@ -2170,26 +2170,50 @@ h2 {
 @media screen and (max-height: 500px) {
 
   #prologue-screen {
-    justify-content: center;
-    padding: 10px 20px;
-    box-sizing: border-box;
+  justify-content: center;
+  padding: 5px 20px;
+  box-sizing: border-box;
+}
+
+.prologue-line {
+  font-size: 17px;
+  margin: 4px 0;
+  line-height: 1.25;
+}
+
+.prologue-final {
+  font-size: 28px;
+  margin: 8px 0;
+  line-height: 1.15;
+}
+
+#prologue-start {
+  font-size: 15px;
+  margin-top: 6px;
+  padding: 10px 24px;
+}@media screen and (max-height: 500px) {
+
+  #game {
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
   }
 
-  .prologue-line {
-    font-size: 18px;
-    margin: 6px 0;
-    line-height: 1.35;
+  .screen {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
   }
 
-  .prologue-final {
-    font-size: 30px;
-    margin: 12px 0;
-    line-height: 1.2;
-  }
-
-  #prologue-start {
-    font-size: 16px;
-    margin-top: 10px;
+  #home-screen,
+  #timeline-screen,
+  #battle-screen {
+    transform: scale(0.88);
+    transform-origin: top center;
+    width: 113.6%;
+    height: 113.6%;
+    left: -6.8%;
   }
 
 }
