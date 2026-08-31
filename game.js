@@ -2575,9 +2575,22 @@ window.addEventListener(
     setTimeout(
       () => {
 
+        const activeScreen =
+          document.querySelector(
+            ".screen.active"
+          );
+
+        /*
+          プロローグ中だけ
+          横向きになったら再読み込み
+        */
+
         if (
+          activeScreen &&
+          activeScreen.id ===
+            "prologue-screen" &&
           window.innerWidth >
-          window.innerHeight
+            window.innerHeight
         ) {
 
           location.reload();
