@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no"
+  >
+
+  <title>平成大戦期</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+  <main id="game">
+
+<!-- =========================
+     PROLOGUE
+========================= -->
+
+<section
+  id="prologue-screen"
+  class="screen active"
+>
+
+  <div class="prologue-content">
+
+    <p class="prologue-line">
+      時は、令和。
+    </p>
+
+    <p class="prologue-line">
+      しかし――
+    </p>
+
+    <p class="prologue-line">
+      時代の流れに取り残された<br>
+      漢達がいた。
+    </p>
+
+    <p class="prologue-line">
+      彼らが目指すものは、ただ一つ。
+    </p>
+
+    <p class="prologue-final">
+      平成を、抜け出すこと。
+    </p>
+
+    <button
+      id="prologue-start"
+      type="button"
+    >
+      TAP TO START
+    </button>
+
+  </div>
+
+</section>
+
+    <!-- タイトル画面 -->
+    <section id="title-screen" class="screen">
+
+      <div class="title-box">
+        <div class="title-small">平成に取り残された漢達の</div>
+
+        <h1>平成大戦期</h1>
+
+        <h2>〜平成に取り残された漢達〜</h2>
+
+        <button id="start-button" class="main-button">
+          平成を抜け出す
+        </button>
+
+        <div class="version">
+          Ver.0.1
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ホーム画面 -->
+    <section id="home-screen" class="screen">
+
+      <!-- 上部ステータス -->
+      <header class="top-bar">
+
+        <div class="player-info">
+          <span class="rank">RANK 1</span>
+        </div>
+
+        <div class="resources">
+
+          <div class="resource">
+            💴 <span id="money">1000</span>
+          </div>
+
+          <div class="resource">
+            🎫 <span id="bs-pass">300</span>
+          </div>
+
+          <div class="resource">
+            ❤️ <span id="stamina">100</span>/100
+          </div>
+
+        </div>
+
+      </header>
+
+
+      <!-- ホーム中央 -->
+      <div class="home-main">
+
+        <div class="home-message">
+          <span class="year-label">現在地</span>
+
+          <strong>平成元年</strong>
+
+          <p>平成から抜け出せ。</p>
+        </div>
+
+        <!-- 後でキャラ画像を置く場所 -->
+        <div class="character-area">
+
+          <div class="character-placeholder">
+            🎸
+          </div>
+
+          <div class="character-name">
+            せな
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- メニュー -->
+      <nav class="home-menu">
+
+        <button class="menu-button" data-menu="formation">
+          <span>👥</span>
+          編成
+        </button>
+
+        <button class="menu-button sortie" data-menu="sortie">
+          <span>⚔️</span>
+          出陣
+        </button>
+
+        <button class="menu-button" data-menu="gacha">
+          <span>🎫</span>
+          ガチャ
+        </button>
+
+        <button class="menu-button" data-menu="upgrade">
+          <span>🔥</span>
+          強化
+        </button>
+
+      </nav>
+
+    </section>
+
+  </main>
+
+<!-- 平成年表 -->
+<section id="timeline-screen" class="screen">
+
+  <header class="timeline-header">
+
+    <button id="timeline-back" class="back-button">
+      ← 戻る
+    </button>
+
+    <div>
+      <h3>平成大戦期</h3>
+      <p>── 平成年表 ──</p>
+    </div>
+
+    <div class="timeline-resource">
+      ❤️ <span id="timeline-stamina">100</span>/100
+    </div>
+
+  </header>
+
+
+  <div class="timeline-body">
+
+    <div class="timeline-scroll">
+
+      <div class="timeline-line"></div>
+
+
+      <!-- 平成元年 -->
+      <button
+        class="year-node unlocked selected"
+        data-year="1"
+        data-title="バブルの狂騒"
+        data-stamina="10"
+      >
+        <span class="year-circle">1</span>
+
+        <strong>平成元年</strong>
+
+        <small>バブルの狂騒</small>
+      </button>
+
+
+      <!-- 平成2年 -->
+      <button class="year-node locked" data-year="2">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成2年</strong>
+
+        <small>？？？</small>
+
+      </button>
+
+
+      <!-- 平成3年 -->
+      <button class="year-node locked" data-year="3">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成3年</strong>
+
+        <small>🥁 楓加入</small>
+
+      </button>
+
+
+      <!-- 平成4年 -->
+      <button class="year-node locked" data-year="4">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成4年</strong>
+
+        <small>？？？</small>
+
+      </button>
+
+
+      <!-- 平成5年 -->
+      <button class="year-node locked" data-year="5">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成5年</strong>
+
+        <small>🎸 カイリ加入</small>
+
+      </button>
+
+
+      <!-- 平成6年 -->
+      <button class="year-node locked" data-year="6">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成6年</strong>
+
+        <small>？？？</small>
+
+      </button>
+
+
+      <!-- 平成7年 -->
+      <button class="year-node locked" data-year="7">
+
+        <span class="year-circle">🔒</span>
+
+        <strong>平成7年</strong>
+
+        <small>🎸 Chris加入</small>
+
+      </button>
+
+    </div>
+
+
+    <!-- ステージ詳細 -->
+    <div class="stage-detail">
+
+      <div>
+
+        <span class="stage-label">
+          STAGE 01
+        </span>
+
+        <h4 id="stage-year">
+          平成元年
+        </h4>
+
+        <p id="stage-title">
+          バブルの狂騒
+        </p>
+
+      </div>
+
+
+      <div class="stage-info">
+
+        <span>
+          消費体力
+          ❤️
+          <strong id="stage-cost">10</strong>
+        </span>
+
+        <button id="stage-start-button">
+          出陣
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     BATTLE
+========================= -->
+
+<section id="battle-screen" class="screen">
+
+  <!-- バトル上部 -->
+  <header class="battle-header">
+
+    <div class="battle-stage-name">
+      <small>平成元年</small>
+      <strong>バブルの狂騒</strong>
+    </div>
+
+    <div class="battle-center">
+      BATTLE
+    </div>
+
+    <button id="battle-quit" class="battle-quit">
+      撤退
+    </button>
+
+  </header>
+
+
+  <!-- 戦場 -->
+  <div id="battle-field">
+
+    <!-- 味方拠点 -->
+    <div id="player-base" class="base player-base">
+
+      <div class="floating-speaker">
+        🔊
+      </div>
+
+      <div class="van">
+        🚐
+      </div>
+
+      <div class="base-name">
+        機材車
+      </div>
+
+      <div class="base-hp">
+        <div
+          id="player-base-hp-bar"
+          class="base-hp-bar"
+        ></div>
+      </div>
+
+      <small id="player-base-hp-text">
+        10000 / 10000
+      </small>
+
+    </div>
+
+
+    <!-- キャラが出てくる場所 -->
+    <div id="unit-layer"></div>
+
+
+    <!-- 敵拠点 仮 -->
+    <div id="enemy-base" class="base enemy-base">
+
+      <div class="enemy-building">
+        🏢
+      </div>
+
+      <div class="base-name">
+        バブル本社
+      </div>
+
+      <div class="base-hp">
+        <div class="base-hp-bar"></div>
+      </div>
+
+      <small>
+        10000 / 10000
+      </small>
+
+    </div>
+
+  </div>
+
+
+  <!-- 下部操作パネル -->
+  <div class="battle-ui">
+
+    <!-- ヤニ＆喫煙所 -->
+    <div class="yani-panel">
+
+      <div class="yani-display">
+
+        🚬
+        <strong id="yani-now">
+          0
+        </strong>
+
+        /
+
+        <span id="yani-max">
+          1000
+        </span>
+
+        ヤニ
+
+      </div>
+
+
+      <button id="smoking-area-button">
+
+        <span>
+          🚬 喫煙所
+        </span>
+
+        <strong>
+          Lv.<span id="smoking-level">1</span>
+        </strong>
+
+        <small>
+          強化：
+          <span id="smoking-cost">200</span>
+          ヤニ
+        </small>
+
+      </button>
+
+    </div>
+
+
+    <!-- キャラ欄 -->
+    <div class="unit-panel">
+
+      <div id="unit-page" class="unit-page">
+
+        <!-- 1 -->
+        <button
+          class="unit-card available"
+          data-unit="sena"
+          data-cost="150"
+        >
+
+          <span class="unit-icon">
+            🎸
+          </span>
+
+          <strong>
+            せな
+          </strong>
+
+          <small>
+            🚬150
+          </small>
+
+        </button>
+
+
+        <!-- 2 -->
+        <button class="unit-card locked">
+
+          <span class="unit-icon">
+            🔒
+          </span>
+
+          <strong>
+            未加入
+          </strong>
+
+          <small>
+            ---
+          </small>
+
+        </button>
+
+
+        <!-- 3 -->
+        <button class="unit-card locked">
+
+          <span class="unit-icon">
+            🔒
+          </span>
+
+          <strong>
+            未加入
+          </strong>
+
+          <small>
+            ---
+          </small>
+
+        </button>
+
+
+        <!-- 4 -->
+        <button class="unit-card locked">
+
+          <span class="unit-icon">
+            🔒
+          </span>
+
+          <strong>
+            未加入
+          </strong>
+
+          <small>
+            ---
+          </small>
+
+        </button>
+
+
+        <!-- 5 -->
+        <button class="unit-card locked">
+
+          <span class="unit-icon">
+            🔒
+          </span>
+
+          <strong>
+            未加入
+          </strong>
+
+          <small>
+            ---
+          </small>
+
+        </button>
+
+      </div>
+
+
+      <div class="page-indicator">
+        ● ○
+      </div>
+
+    </div>
+
+
+    <!-- モッシュ -->
+    <div class="mosh-panel">
+
+      <button id="mosh-button" disabled>
+
+        🔊
+
+        <strong>
+          モッシュ
+        </strong>
+
+        <small>
+          0%
+        </small>
+
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+  <!-- 縦画面警告 -->
+  <div id="rotate-message">
+    <div>
+      📱
+      <strong>スマホを横向きにしてください</strong>
+      <span>平成は横に長い。</span>
+    </div>
+  </div>
+
+
+  <script src="game.js"></script>
+
+</body>
+</html>
