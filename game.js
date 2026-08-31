@@ -2508,3 +2508,48 @@ window.addEventListener(
 
   }
 );
+/* =========================
+   iPhone Safari 高さ補正
+========================= */
+
+function updateViewportHeight() {
+
+  const height =
+    window.visualViewport
+      ? window.visualViewport.height
+      : window.innerHeight;
+
+  document.documentElement.style.setProperty(
+    "--app-height",
+    `${height}px`
+  );
+
+}
+
+updateViewportHeight();
+
+window.addEventListener(
+  "resize",
+  updateViewportHeight
+);
+
+window.addEventListener(
+  "orientationchange",
+  () => {
+
+    setTimeout(
+      updateViewportHeight,
+      500
+    );
+
+  }
+);
+
+if (window.visualViewport) {
+
+  window.visualViewport.addEventListener(
+    "resize",
+    updateViewportHeight
+  );
+
+}
