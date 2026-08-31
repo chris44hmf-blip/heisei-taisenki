@@ -2163,3 +2163,33 @@ h2 {
   }
 
 }
+/* =========================
+   MOBILE LANDSCAPE
+========================= */
+
+@media screen and (max-height: 500px) {
+
+  #prologue-screen {
+    justify-content: center;
+    padding: 10px 20px;
+    box-sizing: border-box;
+  }
+
+  .prologue-line {
+    font-size: 18px;
+    margin: 6px 0;
+    line-height: 1.35;
+  }
+
+  .prologue-final {
+    font-size: 30px;
+    margin: 12px 0;
+    line-height: 1.2;
+  }
+
+  #prologue-start {
+    font-size: 16px;
+    margin-top: 10px;
+  }
+
+}
