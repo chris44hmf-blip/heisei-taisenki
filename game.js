@@ -2553,3 +2553,40 @@ if (window.visualViewport) {
   );
 
 }
+/* =========================
+   ホーム画面起動時の回転対策
+========================= */
+
+const isStandalone =
+  window.matchMedia(
+    "(display-mode: standalone)"
+  ).matches ||
+  window.navigator.standalone === true;
+
+
+window.addEventListener(
+  "orientationchange",
+  () => {
+
+    if (!isStandalone) {
+      return;
+    }
+
+    setTimeout(
+      () => {
+
+        if (
+          window.innerWidth >
+          window.innerHeight
+        ) {
+
+          location.reload();
+
+        }
+
+      },
+      500
+    );
+
+  }
+);
