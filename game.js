@@ -2460,3 +2460,51 @@ battleBgm.loop = true;
 titleBgm.volume = 0.5;
 menuBgm.volume = 1.0;
 battleBgm.volume = 0.5;
+/* =========================
+   iPhone 画面回転対策
+========================= */
+
+function updateAppHeight() {
+
+  document.documentElement.style.setProperty(
+    "--app-height",
+    `${window.innerHeight}px`
+  );
+
+}
+
+
+/* 起動時 */
+
+updateAppHeight();
+
+
+/* 画面サイズ変更時 */
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    updateAppHeight();
+
+  }
+);
+
+
+/* 縦横を回転した時 */
+
+window.addEventListener(
+  "orientationchange",
+  () => {
+
+    setTimeout(
+      () => {
+
+        updateAppHeight();
+
+      },
+      300
+    );
+
+  }
+);
