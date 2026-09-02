@@ -2216,3 +2216,22 @@ h2 {
   }
 
 }
+#title-screen {
+  position: relative;
+  overflow: hidden;
+}
+
+#title-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  z-index: 0;
+}
+
+#title-screen .title-box {
+  position: relative;
+  z-index: 1;
+}
