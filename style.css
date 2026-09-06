@@ -2666,6 +2666,8 @@ h2 {
 
   color: #ece8e0;
 
+  line-height: 1.15;
+
   pointer-events: none;
 }
 
@@ -2675,12 +2677,22 @@ h2 {
   color: #ece8e0;
 }
 
-.formation-slot.filled {
+.formation-cover {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
   background: #151618;
 }
 
 .formation-owned-art,
 .formation-slot-art {
+  position: relative;
+
+  z-index: 2;
+
   flex: 1;
 
   min-height: 0;
@@ -2693,6 +2705,14 @@ h2 {
   justify-content: center;
 
   overflow: hidden;
+}
+
+.formation-slot-art {
+  position: absolute;
+
+  inset: 0;
+
+  flex: none;
 }
 
 .formation-owned-art img,
@@ -2710,30 +2730,93 @@ h2 {
   image-rendering: auto;
 }
 
-.formation-owned-card strong {
+.formation-card-meta {
+  position: relative;
+
+  z-index: 3;
+
   flex-shrink: 0;
 
   width: 100%;
 
-  padding: 2% 2% 4%;
+  display: flex;
 
-  background: rgba(8, 9, 11, 0.82);
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
+
+  padding: 4% 3% 6%;
+
+  color: #ece8e0;
 
   font-family: var(--formation-ui-font);
 
-  font-size: clamp(6px, 1.05cqw, 11px);
+  text-align: center;
+
+  pointer-events: none;
+}
+
+.formation-slot .formation-card-meta {
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  flex-shrink: unset;
+
+  padding: 2% 2% 4%;
+}
+
+.formation-card-meta strong {
+  display: block;
+
+  width: 100%;
+
+  font-size: clamp(7px, 1.15cqw, 12px);
 
   font-weight: 700;
 
   letter-spacing: 0.04em;
 
-  text-align: center;
+  line-height: 1.15;
 
   white-space: nowrap;
 
   overflow: hidden;
 
   text-overflow: ellipsis;
+}
+
+.formation-card-yani {
+  display: block;
+
+  width: 100%;
+
+  margin-top: 0.15em;
+
+  color: #d4d0c8;
+
+  font-size: clamp(6px, 0.95cqw, 10px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.03em;
+
+  line-height: 1.15;
+
+  white-space: nowrap;
+}
+
+.formation-slot .formation-card-meta strong {
+  font-size: clamp(5px, 0.85cqw, 9px);
+}
+
+.formation-slot .formation-card-yani {
+  font-size: clamp(4px, 0.72cqw, 8px);
 }
 /* HOME画面
 → sena_menu.webp

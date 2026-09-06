@@ -2048,6 +2048,20 @@ function applyFormationMenuScale(image, character) {
 }
 
 
+function createFormationCardMetaHtml(character) {
+
+  return `
+    <span class="formation-card-meta">
+      <strong>${character.name}</strong>
+      <span class="formation-card-yani">
+        🚬 ${character.stats.yaniCost}
+      </span>
+    </span>
+  `;
+
+}
+
+
 function createFormationOwnedCard(character, box) {
 
   const card =
@@ -2067,6 +2081,8 @@ function createFormationOwnedCard(character, box) {
 
   card.innerHTML = `
 
+    <span class="formation-cover"></span>
+
     <span class="formation-owned-art">
       <img
         src="${menuImage}"
@@ -2074,9 +2090,7 @@ function createFormationOwnedCard(character, box) {
       >
     </span>
 
-    <strong>
-      ${character.name}
-    </strong>
+    ${createFormationCardMetaHtml(character)}
 
   `;
 
@@ -2124,12 +2138,16 @@ function createFormationDeckSlot(
 
   slot.innerHTML = `
 
+    <span class="formation-cover"></span>
+
     <span class="formation-slot-art">
       <img
         src="${menuImage}"
         alt="${character.name}"
       >
     </span>
+
+    ${createFormationCardMetaHtml(character)}
 
   `;
 
