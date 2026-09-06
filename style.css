@@ -1353,6 +1353,23 @@ h2 {
 }
 
 
+#battle-unit-cards {
+  min-width: 0;
+
+  height: 100%;
+
+  display: flex;
+}
+
+#battle-unit-cards .unit-card {
+  flex: 1;
+
+  width: 100%;
+
+  min-width: 0;
+}
+
+
 .unit-card {
   position: relative;
 
@@ -1395,7 +1412,15 @@ h2 {
 
 
 .unit-card.not-enough {
-  opacity: 0.45;
+  opacity: 0.4;
+
+  filter: brightness(0.55);
+
+  cursor: not-allowed;
+}
+
+.unit-card.not-enough:disabled {
+  color: white;
 }
 
 

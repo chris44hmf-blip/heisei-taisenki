@@ -1110,30 +1110,7 @@ function updateBattleUI() {
     smokingCost;
 
 
-  document
-    .querySelectorAll(
-      ".unit-card.available"
-    )
-    .forEach((card) => {
-
-      const cost =
-        Number(card.dataset.cost);
-
-      if (yani < cost) {
-
-        card.classList.add(
-          "not-enough"
-        );
-
-      } else {
-
-        card.classList.remove(
-          "not-enough"
-        );
-
-      }
-
-    });
+  updateUnitCardAvailability();
 
 }
 
@@ -1216,55 +1193,6 @@ smokingButton.addEventListener(
 
   }
 );
-
-
-/* =========================
-   UNIT BUTTON
-========================= */
-
-document
-  .querySelectorAll(
-    ".unit-card.available"
-  )
-  .forEach((card) => {
-
-    card.addEventListener(
-      "click",
-      () => {
-
-        if (!battleRunning) {
-          return;
-        }
-
-
-        const unit =
-          card.dataset.unit;
-
-        const cost =
-          Number(card.dataset.cost);
-
-
-        if (yani < cost) {
-          return;
-        }
-
-
-        yani -= cost;
-
-
-        if (CHARACTERS[unit]) {
-
-          spawnCharacter(unit);
-
-        }
-
-
-        updateBattleUI();
-
-      }
-    );
-
-  });
 
 
 /* =========================
@@ -1351,6 +1279,217 @@ const CHARACTERS = {
   }
 
 };
+
+
+function createBattleUnitCard(character) {
+
+  const yaniCost =
+    character.stats.yaniCost;
+
+  const card =
+    document.createElement(
+      "button"
+    );
+
+
+  card.className =
+    "unit-card available";
+
+  card.type =
+    "button";
+
+  card.dataset.unit =
+    character.id;
+
+
+  card.innerHTML = `
+
+    <span class="unit-icon">
+      <img
+        class="unit-character-image"
+        src="${character.images.menu}"
+        alt="${character.name}"
+      >
+    </span>
+
+    <strong>
+      ${character.name}
+    </strong>
+
+    <small>
+      🚬 ${yaniCost}
+    </small>
+
+  `;
+
+
+  return card;
+
+}
+
+
+function renderBattleUnitCards() {
+
+  const container =
+    document.getElementById(
+      "battle-unit-cards"
+    );
+
+
+  if (!container) {
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    "";
+
+
+  Object
+    .values(CHARACTERS)
+    .forEach((character) => {
+
+      container.appendChild(
+        createBattleUnitCard(
+          character
+        )
+      );
+
+    });
+
+
+  updateUnitCardAvailability();
+
+}
+
+
+function updateUnitCardAvailability() {
+
+  const cards =
+    document.querySelectorAll(
+      "#battle-unit-cards .unit-card"
+    );
+
+
+  cards.forEach((card) => {
+
+    const character =
+      CHARACTERS[card.dataset.unit];
+
+
+    if (!character) {
+
+      return;
+
+    }
+
+
+    const yaniCost =
+      character.stats.yaniCost;
+
+    const canDeploy =
+      yani >= yaniCost;
+
+
+    card.classList.toggle(
+      "not-enough",
+      !canDeploy
+    );
+
+    card.disabled =
+      !canDeploy;
+
+  });
+
+}
+
+
+const battleUnitCards =
+  document.getElementById(
+    "battle-unit-cards"
+  );
+
+
+if (battleUnitCards) {
+
+  battleUnitCards.addEventListener(
+    "click",
+    (event) => {
+
+      const card =
+        event.target.closest(
+          ".unit-card"
+        );
+
+
+      if (
+        !card ||
+        !battleUnitCards.contains(card)
+      ) {
+
+        return;
+
+      }
+
+
+      if (!battleRunning) {
+
+        return;
+
+      }
+
+
+      if (
+        card.disabled ||
+        card.classList.contains(
+          "not-enough"
+        )
+      ) {
+
+        return;
+
+      }
+
+
+      const character =
+        CHARACTERS[card.dataset.unit];
+
+
+      if (!character) {
+
+        return;
+
+      }
+
+
+      const yaniCost =
+        character.stats.yaniCost;
+
+
+      if (yani < yaniCost) {
+
+        return;
+
+      }
+
+
+      yani -= yaniCost;
+
+      spawnCharacter(
+        character.id
+      );
+
+      updateBattleUI();
+
+    }
+  );
+
+}
+
+
+renderBattleUnitCards();
 
 
 function isAllyUnit(unit) {
