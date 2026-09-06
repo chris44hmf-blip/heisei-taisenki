@@ -2481,58 +2481,10 @@ titleBgm.volume = 0.5;
 menuBgm.volume = 1.0;
 battleBgm.volume = 0.5;
 /* =========================
-   iPhone 画面回転対策
+   画面高さ
 ========================= */
 
 function updateAppHeight() {
-
-  document.documentElement.style.setProperty(
-    "--app-height",
-    `${window.innerHeight}px`
-  );
-
-}
-
-
-/* 起動時 */
-
-updateAppHeight();
-
-
-/* 画面サイズ変更時 */
-
-window.addEventListener(
-  "resize",
-  () => {
-
-    updateAppHeight();
-
-  }
-);
-
-
-/* 縦横を回転した時 */
-
-window.addEventListener(
-  "orientationchange",
-  () => {
-
-    setTimeout(
-      () => {
-
-        updateAppHeight();
-
-      },
-      300
-    );
-
-  }
-);
-/* =========================
-   iPhone Safari 高さ補正
-========================= */
-
-function updateViewportHeight() {
 
   const height =
     window.visualViewport
@@ -2546,81 +2498,44 @@ function updateViewportHeight() {
 
 }
 
-updateViewportHeight();
+
+function scheduleAppHeightUpdate() {
+
+  updateAppHeight();
+
+  setTimeout(
+    updateAppHeight,
+    300
+  );
+
+  setTimeout(
+    updateAppHeight,
+    500
+  );
+
+}
+
+
+updateAppHeight();
+
 
 window.addEventListener(
   "resize",
-  updateViewportHeight
+  updateAppHeight
 );
+
 
 window.addEventListener(
   "orientationchange",
-  () => {
-
-    setTimeout(
-      updateViewportHeight,
-      500
-    );
-
-  }
+  scheduleAppHeightUpdate
 );
+
 
 if (window.visualViewport) {
 
   window.visualViewport.addEventListener(
     "resize",
-    updateViewportHeight
+    updateAppHeight
   );
 
 }
-
- /* =========================
-   ホーム画面起動時の回転対策
-========================= */
-
-const isStandalone =
-  window.matchMedia(
-    "(display-mode: standalone)"
-  ).matches ||
-  window.navigator.standalone === true;
-
-
-window.addEventListener(
-  "orientationchange",
-  () => {
-
-    if (!isStandalone) {
-      return;
-    }
-
-    setTimeout(
-      () => {
-
-        const activeScreen =
-          document.querySelector(
-            ".screen.active"
-          );
-
-        /*
-          プロローグ中だけ
-          横向きになったら再読み込み
-        */
-
-        if (
-          activeScreen &&
-          activeScreen.id ===
-            "prologue-screen" &&
-          window.innerWidth >
-            window.innerHeight
-        ) {
-
-          location.reload();
-
-        }
-
-      },
-      500
-    );
-
-  }
-);
