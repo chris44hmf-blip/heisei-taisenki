@@ -1724,7 +1724,7 @@ const CHARACTERS = {
 
     battle: {
 
-      spriteSize: 100,
+      spriteSize: 90,
 
       attackSpriteMs: 180,
 
