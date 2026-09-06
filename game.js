@@ -1984,6 +1984,49 @@ function getCharacterMenuScale(character) {
 }
 
 
+const FORMATION_OWNED_SLOT_LAYOUT = [
+  { left: 13.22, top: 31.03, width: 7.24, height: 34.43 },
+  { left: 22.31, top: 31.03, width: 7.36, height: 34.43 },
+  { left: 31.40, top: 31.03, width: 7.36, height: 34.43 },
+  { left: 40.49, top: 31.03, width: 7.36, height: 34.43 }
+];
+
+const FORMATION_FRONT_SLOT_LAYOUT = [
+  { left: 52.45, top: 35.92, width: 5.68, height: 11.16 },
+  { left: 59.87, top: 35.92, width: 5.68, height: 11.16 },
+  { left: 67.28, top: 35.92, width: 5.62, height: 11.16 },
+  { left: 74.64, top: 35.92, width: 5.62, height: 11.16 },
+  { left: 82.00, top: 35.92, width: 5.68, height: 11.16 }
+];
+
+const FORMATION_BACK_SLOT_LAYOUT = [
+  { left: 52.45, top: 59.94, width: 5.68, height: 11.26 },
+  { left: 59.87, top: 59.94, width: 5.68, height: 11.26 },
+  { left: 67.28, top: 59.94, width: 5.62, height: 11.26 },
+  { left: 74.64, top: 59.94, width: 5.62, height: 11.26 },
+  { left: 82.00, top: 59.94, width: 5.68, height: 11.26 }
+];
+
+
+function applyFormationPercentBox(element, box) {
+
+  if (!element || !box) {
+
+    return;
+
+  }
+
+  element.style.left = box.left + "%";
+
+  element.style.top = box.top + "%";
+
+  element.style.width = box.width + "%";
+
+  element.style.height = box.height + "%";
+
+}
+
+
 function applyFormationMenuScale(image, character) {
 
   if (!image) {
@@ -2005,7 +2048,7 @@ function applyFormationMenuScale(image, character) {
 }
 
 
-function createFormationOwnedCard(character) {
+function createFormationOwnedCard(character, box) {
 
   const card =
     document.createElement("button");
@@ -2017,11 +2060,16 @@ function createFormationOwnedCard(character) {
 
   card.disabled = true;
 
+  const menuImage =
+    getCharacterImages(
+      character.id
+    ).menu;
+
   card.innerHTML = `
 
     <span class="formation-owned-art">
       <img
-        src="${character.images.menu}"
+        src="${menuImage}"
         alt="${character.name}"
       >
     </span>
@@ -2031,6 +2079,8 @@ function createFormationOwnedCard(character) {
     </strong>
 
   `;
+
+  applyFormationPercentBox(card, box);
 
   applyFormationMenuScale(
     card.querySelector("img"),
@@ -2044,20 +2094,9 @@ function createFormationOwnedCard(character) {
 
 function createFormationDeckSlot(
   slotIndex,
-  characterId
+  characterId,
+  box
 ) {
-
-  const slot =
-    document.createElement("div");
-
-  slot.className =
-    "formation-slot";
-
-  const slotNumber =
-    String(slotIndex + 1).padStart(
-      2,
-      "0"
-    );
 
   const character =
     characterId &&
@@ -2066,55 +2105,40 @@ function createFormationDeckSlot(
       ? CHARACTERS[characterId]
       : null;
 
-  if (character) {
+  if (!character) {
 
-    slot.classList.add("filled");
-
-    slot.innerHTML = `
-
-      <span class="formation-slot-num">
-        ${slotNumber}
-      </span>
-
-      <span class="formation-slot-art">
-        <img
-          src="${character.images.menu}"
-          alt="${character.name}"
-        >
-      </span>
-
-      <strong>
-        ${character.name}
-      </strong>
-
-    `;
-
-    applyFormationMenuScale(
-      slot.querySelector("img"),
-      character
-    );
-
-  } else {
-
-    slot.classList.add("empty");
-
-    slot.innerHTML = `
-
-      <span class="formation-slot-num">
-        ${slotNumber}
-      </span>
-
-      <span class="formation-slot-empty">
-        +
-      </span>
-
-      <strong>
-        EMPTY
-      </strong>
-
-    `;
+    return null;
 
   }
+
+  const slot =
+    document.createElement("div");
+
+  slot.className =
+    "formation-slot filled";
+
+  const menuImage =
+    getCharacterImages(
+      character.id
+    ).menu;
+
+  slot.innerHTML = `
+
+    <span class="formation-slot-art">
+      <img
+        src="${menuImage}"
+        alt="${character.name}"
+      >
+    </span>
+
+  `;
+
+  applyFormationPercentBox(slot, box);
+
+  applyFormationMenuScale(
+    slot.querySelector("img"),
+    character
+  );
 
   return slot;
 
@@ -2180,11 +2204,23 @@ function renderFormationScreen() {
     });
 
 
-  ownedRoster.forEach((character) => {
+  ownedRoster.forEach((character, index) => {
+
+    const box =
+      FORMATION_OWNED_SLOT_LAYOUT[
+        index
+      ];
+
+    if (!box) {
+
+      return;
+
+    }
 
     ownedList.appendChild(
       createFormationOwnedCard(
-        character
+        character,
+        box
       )
     );
 
@@ -2216,16 +2252,37 @@ function renderFormationScreen() {
 
     }
 
+    const isFront =
+      slotIndex <
+      BATTLE_DECK_FRONT_SIZE;
+
+    const layout =
+      isFront
+        ? FORMATION_FRONT_SLOT_LAYOUT
+        : FORMATION_BACK_SLOT_LAYOUT;
+
+    const layoutIndex =
+      isFront
+        ? slotIndex
+        : slotIndex -
+          BATTLE_DECK_FRONT_SIZE;
+
     const slot =
       createFormationDeckSlot(
         slotIndex,
-        characterId
+        characterId,
+        layout[layoutIndex]
       );
 
-    if (
-      slotIndex <
-      BATTLE_DECK_FRONT_SIZE
-    ) {
+    if (!slot) {
+
+      slotIndex += 1;
+
+      continue;
+
+    }
+
+    if (isFront) {
 
       frontSlots.appendChild(slot);
 

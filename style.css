@@ -2378,6 +2378,8 @@ h2 {
   margin-top: 6px;
   padding: 10px 24px;
 }
+
+}
 @media screen and (max-height: 500px) {
 
   #game {
@@ -2432,350 +2434,258 @@ h2 {
 
 /* =========================
    BACKSTAGE / FORMATION
+   Base art: 1672 x 941
 ========================= */
 
 #formation-screen {
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
   overflow: hidden;
 
   min-height: 0;
 
-  color: #eee;
+  background: #050505;
 
-  background: #080808;
+  --formation-ui-font:
+    "Courier New",
+    Courier,
+    ui-monospace,
+    monospace;
 }
 
-.formation-bg {
+.formation-stage {
+  position: relative;
+
+  width: min(
+    100%,
+    calc(var(--app-height, 100dvh) * 1672 / 941)
+  );
+
+  aspect-ratio: 1672 / 941;
+
+  flex: 0 0 auto;
+
+  line-height: 0;
+
+  container-type: inline-size;
+}
+
+.formation-base-img {
+  display: block;
+
+  width: 100%;
+  height: auto;
+
+  pointer-events: none;
+
+  user-select: none;
+
+  image-rendering: pixelated;
+}
+
+.formation-overlay {
   position: absolute;
 
   inset: 0;
 
-  z-index: 0;
-
-  overflow: hidden;
-
-  pointer-events: none;
-}
-
-.formation-bg-wall {
-  position: absolute;
-
-  inset: 0 0 32% 0;
-
-  background:
-    repeating-linear-gradient(
-      90deg,
-      #1a1614 0 8px,
-      #151210 8px 16px
-    ),
-    linear-gradient(
-      #2a2420,
-      #12100e
-    );
-
-  background-blend-mode: multiply;
-}
-
-.formation-bg-floor {
-  position: absolute;
-
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  height: 34%;
-
-  background:
-    repeating-linear-gradient(
-      0deg,
-      #1c1c1c 0 6px,
-      #141414 6px 12px
-    );
-
-  border-top: 3px solid #333;
-}
-
-.formation-bg-lamp {
-  position: absolute;
-
-  left: 50%;
-  top: -8%;
-
-  width: 42%;
-  height: 46%;
-
-  transform: translateX(-50%);
-
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(180, 140, 70, 0.22),
-      transparent 70%
-    );
-}
-
-.formation-bg-case {
-  position: absolute;
-
-  left: 3%;
-  bottom: 8%;
-
-  width: 16%;
-  height: 22%;
-
-  background: #111;
-
-  border: 3px solid #3a3a3a;
-
-  box-shadow:
-    inset 0 0 0 2px #222,
-    6px 6px 0 #050505;
-}
-
-.formation-bg-sofa {
-  position: absolute;
-
-  left: 8%;
-  bottom: 18%;
-
-  width: 18%;
-  height: 12%;
-
-  background: #1a1a1a;
-
-  border: 3px solid #333;
-}
-
-.formation-bg-amp {
-  position: absolute;
-
-  right: 4%;
-  bottom: 10%;
-
-  width: 14%;
-  height: 26%;
-
-  background:
-    repeating-linear-gradient(
-      #1b1b1b 0 8px,
-      #101010 8px 10px
-    );
-
-  border: 3px solid #444;
-
-  box-shadow: 5px 5px 0 #050505;
-}
-
-.formation-bg-cable {
-  position: absolute;
-
-  left: 28%;
-  bottom: 6%;
-
-  width: 42%;
-  height: 8px;
-
-  background: #222;
-
-  transform: rotate(-4deg);
-
-  box-shadow:
-    0 10px 0 #191919,
-    12px 18px 0 #202020;
-}
-
-.formation-header,
-.formation-body {
-  position: relative;
-
   z-index: 1;
 }
 
-.formation-header {
-  flex-shrink: 0;
+.formation-hotspot {
+  position: absolute;
 
-  height: 16%;
+  margin: 0;
+  padding: 0;
 
-  min-height: 42px;
+  border: 0;
 
-  display: grid;
+  background: transparent;
 
-  grid-template-columns:
-    minmax(72px, 1fr)
-    auto
-    minmax(72px, 1fr);
+  color: transparent;
 
-  align-items: center;
+  font-size: 0;
 
-  padding: 0 2vw;
+  appearance: none;
 
-  background:
-    linear-gradient(
-      #161616,
-      #0a0a0a
-    );
-
-  border-bottom: 3px solid #555;
+  -webkit-appearance: none;
 }
 
-.formation-back {
-  justify-self: start;
+.formation-hotspot-back {
+  left: 5.5%;
+  top: 7.4%;
 
-  padding: 6px 10px;
-
-  border: 3px solid #888;
-
-  background: #111;
-
-  color: #fff;
-
-  font-weight: 900;
-
-  font-size: clamp(10px, 1.6vw, 14px);
-
-  letter-spacing: 0.08em;
+  width: 11.1%;
+  height: 7.5%;
 
   cursor: pointer;
 }
 
-.formation-title {
-  text-align: center;
+.formation-hotspot-auto {
+  left: 79.1%;
+  top: 7.5%;
+
+  width: 14.2%;
+  height: 7.4%;
+
+  pointer-events: none;
 }
 
-.formation-title small {
-  display: block;
+.formation-hotspot-filter[data-filter="all"] {
+  left: 12.7%;
+  top: 69.9%;
 
-  color: #999;
+  width: 5.5%;
+  height: 4.7%;
 
-  font-size: clamp(8px, 1.2vw, 11px);
-
-  letter-spacing: 0.28em;
+  pointer-events: none;
 }
 
-.formation-title strong {
-  font-size: clamp(16px, 2.8vw, 26px);
+.formation-hotspot-filter[data-filter="ippanjin"] {
+  left: 19.5%;
+  top: 69.9%;
 
-  letter-spacing: 0.18em;
+  width: 5.9%;
+  height: 4.7%;
+
+  pointer-events: none;
 }
 
-.formation-body {
-  flex: 1;
+.formation-hotspot-filter[data-filter="bandman"] {
+  left: 26.7%;
+  top: 69.9%;
 
-  min-height: 0;
+  width: 5.9%;
+  height: 4.7%;
 
-  display: grid;
+  pointer-events: none;
+}
 
-  grid-template-columns:
-    minmax(0, 1.05fr)
-    minmax(0, 1.2fr);
+.formation-hotspot-filter[data-filter="headliner"] {
+  left: 33.9%;
+  top: 69.9%;
 
-  gap: 8px;
+  width: 6.8%;
+  height: 4.7%;
 
-  padding: 8px;
+  pointer-events: none;
+}
+
+.formation-hotspot-filter[data-filter="legend"] {
+  left: 42.0%;
+  top: 69.9%;
+
+  width: 6.0%;
+  height: 4.7%;
+
+  pointer-events: none;
+}
+
+.formation-hotspot-save {
+  left: 32.0%;
+  top: 84.8%;
+
+  width: 36.0%;
+  height: 8.0%;
+
+  pointer-events: none;
+}
+
+.formation-count {
+  position: absolute;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
 
   box-sizing: border-box;
+
+  padding: 0 0.3%;
+
+  background: #0d0e10;
+
+  color: #ece8e0;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(7px, 1.35cqw, 13px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+
+  white-space: nowrap;
+
+  pointer-events: none;
 }
 
-.formation-owned,
-.formation-deck {
-  min-height: 0;
+.formation-count-owned {
+  left: 43.7%;
+  top: 22.4%;
 
-  display: flex;
-
-  flex-direction: column;
-
-  padding: 8px;
-
-  background: rgba(8, 8, 8, 0.78);
-
-  border: 3px solid #777;
-
-  box-shadow:
-    inset 0 0 0 2px #2a2a2a,
-    4px 4px 0 #050505;
+  width: 4.4%;
+  height: 2.6%;
 }
 
-.formation-panel-head {
-  display: flex;
+.formation-count-deck {
+  left: 83.4%;
+  top: 22.4%;
 
-  justify-content: space-between;
-  align-items: baseline;
-
-  margin-bottom: 6px;
-
-  border-bottom: 2px solid #444;
-
-  padding-bottom: 4px;
+  width: 5.0%;
+  height: 2.6%;
 }
 
-.formation-panel-head h3 {
-  font-size: clamp(11px, 1.7vw, 15px);
+.formation-owned-list,
+.formation-slots {
+  position: absolute;
 
-  letter-spacing: 0.12em;
+  inset: 0;
+
+  pointer-events: none;
 }
 
-.formation-panel-head span {
-  color: #bbb;
-
-  font-size: 11px;
-}
-
-.formation-owned-list {
-  flex: 1;
-
-  min-height: 0;
-
-  overflow-x: hidden;
-
-  overflow-y: auto;
-
-  display: flex;
-
-  flex-wrap: wrap;
-
-  align-content: flex-start;
-
-  gap: 8px;
-
-  padding-right: 4px;
-}
-
-.formation-owned-card {
-  width:
-    calc(
-      33.33% - 6px
-    );
-
-  min-width: 72px;
+.formation-owned-card,
+.formation-slot {
+  position: absolute;
 
   display: flex;
 
   flex-direction: column;
 
   align-items: center;
+  justify-content: flex-end;
 
-  gap: 4px;
+  overflow: hidden;
 
-  padding: 6px 4px;
+  border: 0;
 
-  border: 3px solid #666;
+  padding: 0;
 
-  background: #141414;
+  background: transparent;
 
-  color: #fff;
+  color: #ece8e0;
+
+  pointer-events: none;
 }
 
 .formation-owned-card:disabled {
   opacity: 1;
 
-  color: #fff;
+  color: #ece8e0;
 }
 
-.formation-owned-art {
-  width: 100%;
+.formation-slot.filled {
+  background: #151618;
+}
 
-  height: 58px;
+.formation-owned-art,
+.formation-slot-art {
+  flex: 1;
+
+  min-height: 0;
+
+  width: 100%;
 
   display: flex;
 
@@ -2796,115 +2706,36 @@ h2 {
   height: auto;
 
   object-fit: contain;
+
+  image-rendering: auto;
 }
 
-.formation-owned-card strong,
-.formation-slot strong {
-  font-size: 10px;
-
-  font-weight: 800;
-}
-
-.formation-row {
-  flex: 1;
-
-  min-height: 0;
-
-  display: flex;
-
-  flex-direction: column;
-}
-
-.formation-row-label {
-  margin-bottom: 4px;
-
-  color: #aaa;
-
-  font-size: 10px;
-
-  letter-spacing: 0.14em;
-}
-
-.formation-slots {
-  flex: 1;
-
-  min-height: 0;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
-
-  gap: 6px;
-}
-
-.formation-slot {
-  min-width: 0;
-
-  min-height: 0;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-  justify-content: center;
-
-  gap: 2px;
-
-  padding: 4px 2px;
-
-  border: 3px solid #555;
-
-  background: #101010;
-
-  box-shadow: inset 0 0 0 2px #222;
-}
-
-.formation-slot.filled {
-  border-color: #cfcfcf;
-}
-
-.formation-slot-num {
-  font-size: 9px;
-
-  color: #888;
-
-  letter-spacing: 0.08em;
-}
-
-.formation-slot-art {
-  flex: 1;
-
-  min-height: 0;
+.formation-owned-card strong {
+  flex-shrink: 0;
 
   width: 100%;
 
-  display: flex;
+  padding: 2% 2% 4%;
 
-  align-items: center;
-  justify-content: center;
+  background: rgba(8, 9, 11, 0.82);
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(6px, 1.05cqw, 11px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.04em;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
-
-.formation-slot-empty {
-  flex: 1;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  color: #444;
-
-  font-size: clamp(18px, 3vw, 28px);
-
-  font-weight: 1000;
-}
-
-.formation-slot.empty strong {
-  color: #555;
-}
-HOME画面
+/* HOME画面
 → sena_menu.webp
 
 バトルの出撃ボタン
@@ -2921,3 +2752,4 @@ HOME画面
 
 死亡
 → sena_hurt.webp → 消滅
+*/

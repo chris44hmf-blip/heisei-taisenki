@@ -524,79 +524,100 @@
 
 <section id="formation-screen" class="screen">
 
-  <div class="formation-bg" aria-hidden="true">
-    <div class="formation-bg-wall"></div>
-    <div class="formation-bg-floor"></div>
-    <div class="formation-bg-lamp"></div>
-    <div class="formation-bg-case"></div>
-    <div class="formation-bg-sofa"></div>
-    <div class="formation-bg-amp"></div>
-    <div class="formation-bg-cable"></div>
-  </div>
+  <div class="formation-stage">
 
-  <header class="formation-header">
-
-    <button
-      id="formation-back"
-      class="formation-back"
-      type="button"
+    <img
+      class="formation-base-img"
+      src="images/ui/formation_base.png"
+      alt=""
+      draggable="false"
     >
-      ← BACK
-    </button>
 
-    <div class="formation-title">
-      <small>BACKSTAGE</small>
-      <strong>編成</strong>
-    </div>
+    <div class="formation-overlay">
 
-    <div class="formation-header-spacer"></div>
+      <button
+        id="formation-back"
+        class="formation-hotspot formation-hotspot-back"
+        type="button"
+        aria-label="BACK"
+      ></button>
 
-  </header>
+      <button
+        class="formation-hotspot formation-hotspot-auto"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+      ></button>
 
-  <div class="formation-body">
+      <button
+        class="formation-hotspot formation-hotspot-filter"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-filter="all"
+      ></button>
+      <button
+        class="formation-hotspot formation-hotspot-filter"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-filter="ippanjin"
+      ></button>
+      <button
+        class="formation-hotspot formation-hotspot-filter"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-filter="bandman"
+      ></button>
+      <button
+        class="formation-hotspot formation-hotspot-filter"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-filter="headliner"
+      ></button>
+      <button
+        class="formation-hotspot formation-hotspot-filter"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+        data-filter="legend"
+      ></button>
 
-    <section class="formation-owned">
+      <button
+        class="formation-hotspot formation-hotspot-save"
+        type="button"
+        tabindex="-1"
+        aria-hidden="true"
+      ></button>
 
-      <div class="formation-panel-head">
-        <h3>所持メンバー</h3>
-        <span id="formation-owned-count">0</span>
-      </div>
+      <div
+        id="formation-owned-count"
+        class="formation-count formation-count-owned"
+      >0 / 0</div>
+
+      <div
+        id="formation-deck-count"
+        class="formation-count formation-count-deck"
+      >0 / 10</div>
 
       <div
         id="formation-owned-list"
         class="formation-owned-list"
       ></div>
 
-    </section>
+      <div
+        id="formation-front-slots"
+        class="formation-slots"
+      ></div>
 
-    <section class="formation-deck">
+      <div
+        id="formation-back-slots"
+        class="formation-slots"
+      ></div>
 
-      <div class="formation-panel-head">
-        <h3>BATTLE MEMBER</h3>
-        <span id="formation-deck-count">0 / 10</span>
-      </div>
-
-      <div class="formation-row">
-        <div class="formation-row-label">
-          FRONT / 表 1-5
-        </div>
-        <div
-          id="formation-front-slots"
-          class="formation-slots"
-        ></div>
-      </div>
-
-      <div class="formation-row">
-        <div class="formation-row-label">
-          BACK / 裏 6-10
-        </div>
-        <div
-          id="formation-back-slots"
-          class="formation-slots"
-        ></div>
-      </div>
-
-    </section>
+    </div>
 
   </div>
 
