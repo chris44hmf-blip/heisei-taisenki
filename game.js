@@ -1316,7 +1316,7 @@ function createBattleUnitCard(character) {
       ${character.name}
     </strong>
 
-    <small>
+    <small class="unit-card-cost">
       🚬 ${yaniCost}
     </small>
 

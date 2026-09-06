@@ -1420,15 +1420,32 @@ h2 {
 
 
 .unit-card.not-enough {
-  opacity: 0.4;
-
-  filter: brightness(0.55);
-
   cursor: not-allowed;
+
+  opacity: 1;
+
+  filter: none;
 }
 
 .unit-card.not-enough:disabled {
+  opacity: 1;
+
   color: white;
+}
+
+.unit-card.not-enough .unit-icon,
+.unit-card.not-enough strong {
+  opacity: 0.4;
+
+  filter: brightness(0.55);
+}
+
+.unit-card-cost {
+  color: #f2f2f2;
+
+  opacity: 1;
+
+  filter: none;
 }
 
 
