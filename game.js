@@ -207,6 +207,28 @@ if (formationSave) {
 }
 
 
+const formationFilterButtons =
+  document.querySelectorAll(
+    ".formation-hotspot-filter"
+  );
+
+
+formationFilterButtons.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      setFormationRarityFilter(
+        button.dataset.filter
+      );
+
+    }
+  );
+
+});
+
+
 const yearNodes =
   document.querySelectorAll(
     ".year-node.unlocked"
@@ -1310,6 +1332,68 @@ function getCharacterImages(id) {
 }
 
 
+const CHARACTER_RARITY = {
+
+  IPPANJIN: "IPPANJIN",
+
+  BANDMAN: "BANDMAN",
+
+  HEADLINER: "HEADLINER",
+
+  LEGEND: "LEGEND"
+
+};
+
+
+const FORMATION_RARITY_FILTER_ALL =
+  "ALL";
+
+
+const FORMATION_RARITY_FILTERS = [
+  FORMATION_RARITY_FILTER_ALL,
+  CHARACTER_RARITY.IPPANJIN,
+  CHARACTER_RARITY.BANDMAN,
+  CHARACTER_RARITY.HEADLINER,
+  CHARACTER_RARITY.LEGEND
+];
+
+
+function getCharacterRarity(character) {
+
+  if (!character || !character.rarity) {
+
+    return null;
+
+  }
+
+  return character.rarity;
+
+}
+
+
+function characterMatchesRarityFilter(
+  character,
+  filter
+) {
+
+  if (
+    !filter ||
+    filter ===
+      FORMATION_RARITY_FILTER_ALL
+  ) {
+
+    return true;
+
+  }
+
+  return (
+    getCharacterRarity(character) ===
+    filter
+  );
+
+}
+
+
 const CHARACTERS = {
 
   sena: {
@@ -1318,7 +1402,7 @@ const CHARACTERS = {
 
     name: "せな",
 
-    rarity: "sr",
+    rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
       getCharacterImages("sena"),
@@ -1377,7 +1461,7 @@ const CHARACTERS = {
 
     name: "楓",
 
-    rarity: "sr",
+    rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
       getCharacterImages("kaede"),
@@ -2074,6 +2158,9 @@ let formationDraftDeck = null;
 let selectedFormationCharacterId =
   null;
 
+let formationRarityFilter =
+  FORMATION_RARITY_FILTER_ALL;
+
 let formationNoticeTimer = null;
 
 
@@ -2173,6 +2260,59 @@ function showFormationNotice(message) {
 }
 
 
+function updateFormationRarityFilterButtons() {
+
+  const buttons =
+    document.querySelectorAll(
+      ".formation-hotspot-filter"
+    );
+
+  buttons.forEach((button) => {
+
+    if (
+      button.dataset.filter ===
+      formationRarityFilter
+    ) {
+
+      button.classList.add(
+        "is-selected"
+      );
+
+    } else {
+
+      button.classList.remove(
+        "is-selected"
+      );
+
+    }
+
+  });
+
+}
+
+
+function setFormationRarityFilter(filter) {
+
+  if (
+    FORMATION_RARITY_FILTERS.indexOf(
+      filter
+    ) === -1
+  ) {
+
+    return;
+
+  }
+
+  formationRarityFilter = filter;
+
+  selectedFormationCharacterId =
+    null;
+
+  renderFormationScreen();
+
+}
+
+
 function startFormationEditing() {
 
   formationDraftDeck =
@@ -2180,6 +2320,9 @@ function startFormationEditing() {
 
   selectedFormationCharacterId =
     null;
+
+  formationRarityFilter =
+    FORMATION_RARITY_FILTER_ALL;
 
   renderFormationScreen();
 
@@ -2281,6 +2424,9 @@ function resetFormationEditing() {
 
   selectedFormationCharacterId =
     null;
+
+  formationRarityFilter =
+    FORMATION_RARITY_FILTER_ALL;
 
   if (formationNoticeTimer) {
 
@@ -2726,7 +2872,18 @@ function renderFormationScreen() {
     });
 
 
-  ownedRoster.forEach((character, index) => {
+  const visibleOwnedRoster =
+    ownedRoster.filter((character) => {
+
+      return characterMatchesRarityFilter(
+        character,
+        formationRarityFilter
+      );
+
+    });
+
+
+  visibleOwnedRoster.forEach((character, index) => {
 
     const box =
       FORMATION_OWNED_SLOT_LAYOUT[
@@ -2821,6 +2978,9 @@ function renderFormationScreen() {
       filled + " / " + BATTLE_DECK_SIZE;
 
   }
+
+
+  updateFormationRarityFilterButtons();
 
 }
 
