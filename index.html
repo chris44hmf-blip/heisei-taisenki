@@ -350,12 +350,14 @@
       <strong>バブルの狂騒</strong>
     </div>
 
-    <div class="battle-center">
-      BATTLE
-    </div>
+    <div class="battle-center"></div>
 
-    <button id="battle-quit" class="battle-quit">
-      撤退
+    <button
+      id="battle-pause-button"
+      class="battle-pause-button"
+      type="button"
+    >
+      ポーズ
     </button>
 
   </header>
@@ -529,10 +531,39 @@
 
   </div>
 
+  <div
+    id="battle-pause-overlay"
+    class="battle-pause-overlay"
+    hidden
+  >
+
+    <div class="battle-pause-panel">
+
+      <strong class="battle-pause-title">
+        PAUSE
+      </strong>
+
+      <button
+        id="battle-pause-resume"
+        class="battle-pause-resume"
+        type="button"
+      >
+        バトルに戻る
+      </button>
+
+      <button
+        id="battle-quit"
+        class="battle-pause-quit"
+        type="button"
+      >
+        撤退
+      </button>
+
+    </div>
+
+  </div>
+
 </section>
-<!-- =========================
-     BACKSTAGE / 編成
-========================= -->
 
 <section id="formation-screen" class="screen">
 

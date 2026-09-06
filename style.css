@@ -854,6 +854,8 @@ h2 {
 ========================= */
 
 #battle-screen {
+  position: relative;
+
   flex-direction: column;
 
   background: #111;
@@ -865,6 +867,14 @@ h2 {
 ========================= */
 
 .battle-header {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 20;
+
   height: 11%;
   min-height: 48px;
 
@@ -879,20 +889,28 @@ h2 {
 
   padding: 0 2vw;
 
-  background: #070707;
+  background: transparent;
 
-  border-bottom: 2px solid #555;
+  border-bottom: none;
+
+  pointer-events: none;
 }
 
 
 .battle-stage-name {
   display: flex;
   flex-direction: column;
+
+  pointer-events: none;
+
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 10px rgba(0, 0, 0, 0.7);
 }
 
 
 .battle-stage-name small {
-  color: #999;
+  color: #eee;
 
   font-size: 10px;
 }
@@ -910,30 +928,110 @@ h2 {
 
 .battle-center {
   text-align: center;
-
-  font-weight: 1000;
-
-  letter-spacing: 0.2em;
-
-  color: #aaa;
 }
 
 
-.battle-quit {
+.battle-pause-button {
   justify-self: end;
+
+  pointer-events: auto;
+
+  min-height: 36px;
 
   padding: 6px 13px;
 
-  border: 1px solid #777;
+  border: 1px solid #bbb;
   border-radius: 5px;
 
-  background: #161616;
+  background:
+    rgba(0, 0, 0, 0.45);
 
   color: white;
 
   font-weight: bold;
 
   cursor: pointer;
+}
+
+.battle-pause-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 40;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background:
+    rgba(0, 0, 0, 0.45);
+
+  pointer-events: auto;
+}
+
+.battle-pause-overlay[hidden] {
+  display: none;
+}
+
+.battle-pause-panel {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: stretch;
+
+  gap: 10px;
+
+  min-width: 220px;
+
+  padding: 18px 22px;
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  border-radius: 8px;
+
+  background:
+    rgba(12, 12, 12, 0.82);
+}
+
+.battle-pause-title {
+  text-align: center;
+
+  letter-spacing: 0.28em;
+
+  font-size:
+    clamp(
+      16px,
+      2.4vw,
+      22px
+    );
+}
+
+.battle-pause-resume,
+.battle-pause-quit {
+  min-height: 44px;
+
+  padding: 8px 16px;
+
+  border: 1px solid #888;
+  border-radius: 5px;
+
+  color: white;
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.battle-pause-resume {
+  background: #2a2a2a;
+}
+
+.battle-pause-quit {
+  background: #161616;
 }
 
 

@@ -33,6 +33,21 @@ const timelineBack =
 const stageStartButton =
   document.getElementById("stage-start-button");
 
+const battlePauseButton =
+  document.getElementById(
+    "battle-pause-button"
+  );
+
+const battlePauseOverlay =
+  document.getElementById(
+    "battle-pause-overlay"
+  );
+
+const battlePauseResume =
+  document.getElementById(
+    "battle-pause-resume"
+  );
+
 const battleQuit =
   document.getElementById("battle-quit");
 
@@ -928,6 +943,13 @@ function panCameraFromClientX(clientX) {
 
 function beginCameraPan(clientX, event) {
 
+  if (isBattlePaused) {
+
+    return;
+
+  }
+
+
   event.preventDefault();
 
   cameraDrag = {
@@ -969,6 +991,13 @@ function clampZoom(nextZoom) {
 
 
 function beginCameraPinch(touchA, touchB, event) {
+
+  if (isBattlePaused) {
+
+    return;
+
+  }
+
 
   event.preventDefault();
 
@@ -1316,7 +1345,210 @@ let smokingCost = 200;
 
 let battleRunning = false;
 
+let isBattlePaused = false;
+
+let battlePausedAt = 0;
+
 let deployCooldownUntil = {};
+
+
+function isBattleActive() {
+
+  return (
+    battleRunning &&
+    !isBattlePaused
+  );
+
+}
+
+
+function showBattlePauseMenu() {
+
+  if (!battlePauseOverlay) {
+
+    return;
+
+  }
+
+  battlePauseOverlay.hidden =
+    false;
+
+}
+
+
+function hideBattlePauseMenu() {
+
+  if (!battlePauseOverlay) {
+
+    return;
+
+  }
+
+  battlePauseOverlay.hidden =
+    true;
+
+}
+
+
+function shiftUnitClocks(unit, pausedMs) {
+
+  if (!unit || pausedMs <= 0) {
+
+    return;
+
+  }
+
+  if (unit.attackCooldown) {
+
+    unit.attackCooldown +=
+      pausedMs;
+
+  }
+
+  if (unit.knockbackStartedAt) {
+
+    unit.knockbackStartedAt +=
+      pausedMs;
+
+  }
+
+}
+
+
+function shiftBattleClocks(pausedMs) {
+
+  if (pausedMs <= 0) {
+
+    return;
+
+  }
+
+  if (lastProjectileUpdateAt) {
+
+    lastProjectileUpdateAt +=
+      pausedMs;
+
+  }
+
+  enemySpawnQueue.forEach(
+    (item) => {
+
+      item.at += pausedMs;
+
+    }
+  );
+
+  pendingProjectiles.forEach(
+    (pending) => {
+
+      pending.launchAt +=
+        pausedMs;
+
+    }
+  );
+
+  attackKnockbackEffects.forEach(
+    (effect) => {
+
+      effect.expiresAt +=
+        pausedMs;
+
+    }
+  );
+
+  playerUnits.forEach(
+    (unit) => {
+
+      shiftUnitClocks(
+        unit,
+        pausedMs
+      );
+
+    }
+  );
+
+  enemyUnits.forEach(
+    (enemy) => {
+
+      shiftUnitClocks(
+        enemy,
+        pausedMs
+      );
+
+    }
+  );
+
+  Object.keys(
+    deployCooldownUntil
+  ).forEach(
+    (characterId) => {
+
+      deployCooldownUntil[characterId] +=
+        pausedMs;
+
+    }
+  );
+
+}
+
+
+function pauseBattle() {
+
+  if (
+    !battleRunning ||
+    isBattlePaused
+  ) {
+
+    return;
+
+  }
+
+  isBattlePaused = true;
+
+  battlePausedAt =
+    Date.now();
+
+  endCameraPan();
+
+  endCameraPinch();
+
+  showBattlePauseMenu();
+
+  battleBgm.pause();
+
+}
+
+
+function resumeBattle() {
+
+  if (
+    !battleRunning ||
+    !isBattlePaused
+  ) {
+
+    return;
+
+  }
+
+  const pausedMs =
+    Date.now() -
+    battlePausedAt;
+
+  isBattlePaused = false;
+
+  battlePausedAt = 0;
+
+  shiftBattleClocks(pausedMs);
+
+  hideBattlePauseMenu();
+
+  battleBgm
+    .play()
+    .catch(
+      () => {}
+    );
+
+}
 
 /* =========================
    MOSH DATA
@@ -1342,6 +1574,8 @@ let yaniTimer = null;
 let battleTimer = null;
 
 let enemySpawnTimers = [];
+
+let enemySpawnQueue = [];
 
 
 /* 全キャラ */
@@ -1403,6 +1637,12 @@ function startBattle() {
 
   battleRunning = true;
 
+  isBattlePaused = false;
+
+  battlePausedAt = 0;
+
+  hideBattlePauseMenu();
+
   deployCooldownUntil = {};
 
   battleCardPage = 0;
@@ -1459,7 +1699,7 @@ enemyBaseHp = 2000;
     setInterval(
       () => {
 
-        if (!battleRunning) {
+        if (!isBattleActive()) {
           return;
         }
 
@@ -1485,7 +1725,7 @@ moshTimer =
   setInterval(
     () => {
 
-      if (!battleRunning) {
+      if (!isBattleActive()) {
         return;
       }
 
@@ -1518,9 +1758,11 @@ moshTimer =
     setInterval(
       () => {
 
-        if (!battleRunning) {
+        if (!isBattleActive()) {
           return;
         }
+
+        updateEnemySpawns();
 
         updateUnits();
 
@@ -1620,6 +1862,12 @@ function updateBaseUI() {
 smokingButton.addEventListener(
   "click",
   () => {
+
+    if (!isBattleActive()) {
+
+      return;
+
+    }
 
     if (yani < smokingCost) {
 
@@ -3971,7 +4219,7 @@ if (battleUnitCards) {
       }
 
 
-      if (!battleRunning) {
+      if (!isBattleActive()) {
 
         return;
 
@@ -6437,6 +6685,12 @@ function stopBattle() {
 
   battleRunning = false;
 
+  isBattlePaused = false;
+
+  battlePausedAt = 0;
+
+  hideBattlePauseMenu();
+
   deployCooldownUntil = {};
 
   clearInterval(yaniTimer);
@@ -6566,6 +6820,34 @@ battleQuit.addEventListener(
 
   }
 );
+
+
+if (battlePauseButton) {
+
+  battlePauseButton.addEventListener(
+    "click",
+    () => {
+
+      pauseBattle();
+
+    }
+  );
+
+}
+
+
+if (battlePauseResume) {
+
+  battlePauseResume.addEventListener(
+    "click",
+    () => {
+
+      resumeBattle();
+
+    }
+  );
+
+}
 /* =========================
    平成元年 WAVE
 ========================= */
@@ -6646,6 +6928,40 @@ function clearEnemySpawnTimers() {
 
   enemySpawnTimers = [];
 
+  enemySpawnQueue = [];
+
+}
+
+
+function spawnScheduledEnemy(type) {
+
+  if (type === "salaryman") {
+
+    spawnSalaryman();
+
+  }
+
+
+  if (type === "juriana") {
+
+    spawnJuriana();
+
+  }
+
+
+  if (type === "bubble") {
+
+    spawnBubbleMan();
+
+  }
+
+
+  if (type === "boss") {
+
+    spawnThreePercent();
+
+  }
+
 }
 
 
@@ -6654,49 +6970,51 @@ function scheduleEnemy(
   type
 ) {
 
-  const timerId =
-    setTimeout(
-      () => {
+  enemySpawnQueue.push({
 
-        if (!battleRunning) {
-          return;
-        }
+    at:
+      Date.now() +
+      delay,
 
+    type: type
 
-        if (type === "salaryman") {
+  });
 
-          spawnSalaryman();
-
-        }
+}
 
 
-        if (type === "juriana") {
+function updateEnemySpawns() {
 
-          spawnJuriana();
+  if (!isBattleActive()) {
 
-        }
+    return;
 
+  }
 
-        if (type === "bubble") {
+  const now =
+    Date.now();
 
-          spawnBubbleMan();
+  const remaining = [];
 
-        }
+  enemySpawnQueue.forEach(
+    (item) => {
 
+      if (now >= item.at) {
 
-        if (type === "boss") {
+        spawnScheduledEnemy(
+          item.type
+        );
 
-          spawnThreePercent();
+        return;
 
-        }
+      }
 
-      },
-      delay
-    );
+      remaining.push(item);
 
-  enemySpawnTimers.push(
-    timerId
+    }
   );
+
+  enemySpawnQueue = remaining;
 
 }
 /* =========================
@@ -7094,7 +7412,7 @@ moshButton.addEventListener(
   "click",
   () => {
 
-    if (!battleRunning) {
+    if (!isBattleActive()) {
       return;
     }
 
@@ -7202,6 +7520,16 @@ function hitAllEnemiesWithMosh() {
       !crowd.isConnected
     ) {
       return;
+    }
+
+    if (isBattlePaused) {
+
+      requestAnimationFrame(
+        checkCollision
+      );
+
+      return;
+
     }
 
 
