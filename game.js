@@ -320,6 +320,11 @@ const unitLayer =
     "unit-layer"
   );
 
+const projectileLayer =
+  document.getElementById(
+    "projectile-layer"
+  );
+
 const playerBaseHpBar =
   document.getElementById(
     "player-base-hp-bar"
@@ -1023,6 +1028,12 @@ let playerUnits = [];
 
 let enemyUnits = [];
 
+let projectiles = [];
+
+let pendingProjectiles = [];
+
+let lastProjectileUpdateAt = 0;
+
 
 /* 拠点 */
 
@@ -1090,6 +1101,8 @@ updateMoshUI();
   playerUnits = [];
 
   enemyUnits = [];
+
+  clearProjectiles();
 
 
   playerBaseHp = 2000;
@@ -1184,6 +1197,8 @@ moshTimer =
         updateUnits();
 
         updateEnemies();
+
+        updateProjectiles();
 
         updateUnitCardAvailability();
 
@@ -1394,6 +1409,40 @@ function characterMatchesRarityFilter(
 }
 
 
+const ATTACK_TYPE = {
+
+  MELEE_SINGLE: "meleeSingle",
+
+  MELEE_AOE: "meleeAoE",
+
+  PROJECTILE_SINGLE: "projectileSingle",
+
+  PROJECTILE_AOE: "projectileAoE"
+
+};
+
+
+function getAttackBehavior(character) {
+
+  if (
+    character &&
+    character.attackBehavior &&
+    character.attackBehavior.type
+  ) {
+
+    return character.attackBehavior;
+
+  }
+
+  return {
+
+    type: ATTACK_TYPE.MELEE_SINGLE
+
+  };
+
+}
+
+
 const CHARACTERS = {
 
   sena: {
@@ -1444,6 +1493,12 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
 
     },
 
@@ -1506,6 +1561,12 @@ const CHARACTERS = {
 
     },
 
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
     unlock: {
 
       type: "story",
@@ -1564,6 +1625,27 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 0.92
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_AOE,
+
+      projectileSpeed: 200,
+
+      aoeRadius: 70,
+
+      launchOffsetX: 36,
+
+      launchDelayMs: 90,
+
+      hitRadius: 28,
+
+      effectImage:
+        "images/characters/kairi/kairi_effect.webp",
+
+      effectWidth: 96
 
     },
 
@@ -3841,6 +3923,9 @@ function spawnCharacter(characterId) {
     attackInterval:
       data.stats.attackInterval,
 
+    attackBehavior:
+      getAttackBehavior(data),
+
     dead: false
 
   };
@@ -4427,11 +4512,477 @@ function tryAttack(
   );
 
 
+  if (!playerAttack) {
+
+    damageCharacter(
+      target,
+      attacker.attack,
+      false
+    );
+
+    return;
+
+  }
+
+
+  const behavior =
+    getAttackBehavior(attacker);
+
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.MELEE_AOE
+  ) {
+
+    applyMeleeAoeDamage(
+      attacker,
+      behavior
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
+      ATTACK_TYPE.PROJECTILE_SINGLE ||
+    behavior.type ===
+      ATTACK_TYPE.PROJECTILE_AOE
+  ) {
+
+    scheduleProjectile(
+      attacker,
+      behavior
+    );
+
+    return;
+
+  }
+
+
+  );
+
+
   damageCharacter(
     target,
     attacker.attack,
-    playerAttack
+    true
   );
+
+}
+
+
+function applyMeleeAoeDamage(
+  attacker,
+  behavior
+) {
+
+  const hitRange =
+    typeof behavior.hitRadius ===
+      "number"
+      ? behavior.hitRadius
+      : attacker.range;
+
+  enemyUnits.forEach((enemy) => {
+
+    if (enemy.dead) {
+
+      return;
+
+    }
+
+    const distance =
+      enemy.x -
+      attacker.x;
+
+    if (
+      distance >= 0 &&
+      distance <= hitRange
+    ) {
+
+      damageCharacter(
+        enemy,
+        attacker.attack,
+        true
+      );
+
+    }
+
+  });
+
+}
+
+
+function scheduleProjectile(
+  attacker,
+  behavior
+) {
+
+  pendingProjectiles.push({
+
+    unit: attacker,
+
+    behavior: behavior,
+
+    launchAt:
+      Date.now() +
+      (
+        typeof behavior.launchDelayMs ===
+          "number"
+          ? behavior.launchDelayMs
+          : 90
+      ),
+
+    originX: attacker.x,
+
+    range: attacker.range
+
+  });
+
+}
+
+
+function spawnProjectile(
+  attacker,
+  behavior,
+  originX,
+  range
+) {
+
+  if (
+    !projectileLayer ||
+    !behavior ||
+    !behavior.effectImage
+  ) {
+
+    return;
+
+  }
+
+  const offsetX =
+    typeof behavior.launchOffsetX ===
+      "number"
+      ? behavior.launchOffsetX
+      : 32;
+
+  const startX =
+    originX +
+    offsetX;
+
+  const maxX =
+    originX +
+    range;
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-projectile";
+
+  const image =
+    document.createElement("img");
+
+  image.src =
+    behavior.effectImage;
+
+  image.alt = "";
+
+  const effectWidth =
+    typeof behavior.effectWidth ===
+      "number"
+      ? behavior.effectWidth
+      : 80;
+
+  image.style.width =
+    effectWidth + "px";
+
+  element.appendChild(image);
+
+  element.style.left =
+    startX + "px";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  projectiles.push({
+
+    element: element,
+
+    x: startX,
+
+    maxX: maxX,
+
+    speed:
+      typeof behavior.projectileSpeed ===
+        "number"
+        ? behavior.projectileSpeed
+        : 180,
+
+    hitRadius:
+      typeof behavior.hitRadius ===
+        "number"
+        ? behavior.hitRadius
+        : 24,
+
+    aoeRadius:
+      typeof behavior.aoeRadius ===
+        "number"
+        ? behavior.aoeRadius
+        : 0,
+
+    attack: attacker.attack,
+
+    type: behavior.type
+
+  });
+
+}
+
+
+function removeProjectile(projectile) {
+
+  if (
+    projectile &&
+    projectile.element &&
+    projectile.element.parentNode
+  ) {
+
+    projectile.element.remove();
+
+  }
+
+}
+
+
+function clearProjectiles() {
+
+  projectiles.forEach(
+    removeProjectile
+  );
+
+  projectiles = [];
+
+  pendingProjectiles = [];
+
+  lastProjectileUpdateAt = 0;
+
+  if (projectileLayer) {
+
+    projectileLayer.innerHTML = "";
+
+  }
+
+}
+
+
+function findFirstProjectileHit(
+  projectile,
+  previousX
+) {
+
+  let hit = null;
+
+  let hitX = Infinity;
+
+  const minX =
+    Math.min(
+      previousX,
+      projectile.x
+    ) -
+    projectile.hitRadius;
+
+  const maxX =
+    Math.max(
+      previousX,
+      projectile.x
+    ) +
+    projectile.hitRadius;
+
+  enemyUnits.forEach((enemy) => {
+
+    if (enemy.dead) {
+
+      return;
+
+    }
+
+    if (
+      enemy.x >= minX &&
+      enemy.x <= maxX &&
+      enemy.x < hitX
+    ) {
+
+      hit = enemy;
+
+      hitX = enemy.x;
+
+    }
+
+  });
+
+  return hit;
+
+}
+
+
+function applyProjectileImpact(
+  projectile,
+  impactX,
+  hitEnemy
+) {
+
+  if (
+    projectile.type ===
+    ATTACK_TYPE.PROJECTILE_SINGLE
+  ) {
+
+    if (hitEnemy) {
+
+      damageCharacter(
+        hitEnemy,
+        projectile.attack,
+        true
+      );
+
+    }
+
+    return;
+
+  }
+
+
+  enemyUnits.forEach((enemy) => {
+
+    if (enemy.dead) {
+
+      return;
+
+    }
+
+    if (
+      Math.abs(
+        enemy.x -
+        impactX
+      ) <=
+      projectile.aoeRadius
+    ) {
+
+      damageCharacter(
+        enemy,
+        projectile.attack,
+        true
+      );
+
+    }
+
+  });
+
+}
+
+
+function updateProjectiles() {
+
+  const now =
+    Date.now();
+
+  const waiting = [];
+
+  pendingProjectiles.forEach(
+    (pending) => {
+
+      if (
+        !pending.unit ||
+        pending.unit.dead
+      ) {
+
+        return;
+
+      }
+
+      if (now < pending.launchAt) {
+
+        waiting.push(pending);
+
+        return;
+
+      }
+
+      spawnProjectile(
+        pending.unit,
+        pending.behavior,
+        pending.originX,
+        pending.range
+      );
+
+    }
+  );
+
+  pendingProjectiles = waiting;
+
+
+  if (!lastProjectileUpdateAt) {
+
+    lastProjectileUpdateAt = now;
+
+  }
+
+  const elapsed =
+    Math.min(
+      now - lastProjectileUpdateAt,
+      50
+    );
+
+  lastProjectileUpdateAt = now;
+
+  const remaining = [];
+
+  projectiles.forEach((projectile) => {
+
+    const previousX =
+      projectile.x;
+
+    projectile.x +=
+      projectile.speed *
+      (elapsed / 1000);
+
+    projectile.element.style.left =
+      projectile.x + "px";
+
+    const hit =
+      findFirstProjectileHit(
+        projectile,
+        previousX
+      );
+
+    if (hit) {
+
+      applyProjectileImpact(
+        projectile,
+        projectile.x,
+        hit
+      );
+
+      removeProjectile(projectile);
+
+      return;
+
+    }
+
+    if (projectile.x >= projectile.maxX) {
+
+      removeProjectile(projectile);
+
+      return;
+
+    }
+
+    remaining.push(projectile);
+
+  });
+
+  projectiles = remaining;
 
 }
 
@@ -4740,6 +5291,8 @@ function stopBattle() {
   clearInterval(battleTimer);
   clearEnemySpawnTimers();
   clearInterval(moshTimer);
+
+  clearProjectiles();
 
 
   /* 戦闘BGM停止 */

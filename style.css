@@ -1153,6 +1153,30 @@ h2 {
   z-index: 3;
 }
 
+#projectile-layer {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 4;
+
+  pointer-events: none;
+}
+
+.battle-projectile {
+  position: absolute;
+
+  bottom: 22%;
+
+  pointer-events: none;
+}
+
+.battle-projectile img {
+  display: block;
+
+  height: auto;
+}
+
 
 /* せな */
 
