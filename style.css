@@ -360,6 +360,13 @@ h2 {
     0 10px 30px #000;
 }
 
+.home-character-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
 .character-name {
   margin-top: 5px;
 
