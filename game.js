@@ -1541,9 +1541,9 @@ const CHARACTERS = {
 
       hp: 220,
 
-      attack: 28,
+      attack: 16,
 
-      attackInterval: 450,
+      attackInterval: 225,
 
       speed: 2.4,
 
@@ -1580,6 +1580,20 @@ const CHARACTERS = {
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    traits: {
+
+      healthKnockback: {
+
+        thresholds: [0.75, 0.50, 0.25],
+
+        distance: 70,
+
+        durationMs: 180
+
+      }
 
     },
 
@@ -3942,6 +3956,19 @@ function spawnCharacter(characterId) {
     attackBehavior:
       getAttackBehavior(data),
 
+    traits: data.traits || {},
+
+    triggeredHealthKnockbacks:
+      new Set(),
+
+    knockbackStartX: 0,
+
+    knockbackTargetX: 0,
+
+    knockbackStartedAt: 0,
+
+    knockbackDurationMs: 0,
+
     dead: false
 
   };
@@ -3955,6 +3982,300 @@ function spawnCharacter(characterId) {
 function spawnSena() {
 
   spawnCharacter("sena");
+
+}
+
+
+function getHealthKnockbackTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.healthKnockback
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.healthKnockback;
+
+}
+
+
+function isHealthKnockbackActive(unit) {
+
+  return Boolean(
+    unit &&
+    !unit.dead &&
+    unit.knockbackDurationMs > 0 &&
+    unit.knockbackStartedAt &&
+    Date.now() <
+      unit.knockbackStartedAt +
+      unit.knockbackDurationMs
+  );
+
+}
+
+
+function clearHealthKnockback(unit) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  unit.knockbackStartX = 0;
+
+  unit.knockbackTargetX = 0;
+
+  unit.knockbackStartedAt = 0;
+
+  unit.knockbackDurationMs = 0;
+
+}
+
+
+function clampHealthKnockbackX(
+  unit,
+  worldX
+) {
+
+  if (
+    playerUnits.indexOf(unit) !==
+    -1
+  ) {
+
+    return Math.max(
+      PLAYER_BASE_X,
+      worldX
+    );
+
+  }
+
+  return Math.min(
+    ENEMY_BASE_X,
+    worldX
+  );
+
+}
+
+
+function startHealthKnockback(
+  unit,
+  trait
+) {
+
+  const distance =
+    typeof trait.distance ===
+      "number"
+      ? trait.distance
+      : 70;
+
+  const durationMs =
+    typeof trait.durationMs ===
+      "number"
+      ? trait.durationMs
+      : 180;
+
+  const isPlayer =
+    playerUnits.indexOf(unit) !==
+    -1;
+
+  const startX =
+    unit.x;
+
+  const rawTargetX =
+    isPlayer
+      ? startX - distance
+      : startX + distance;
+
+  unit.knockbackStartX =
+    startX;
+
+  unit.knockbackTargetX =
+    clampHealthKnockbackX(
+      unit,
+      rawTargetX
+    );
+
+  unit.knockbackStartedAt =
+    Date.now();
+
+  unit.knockbackDurationMs =
+    durationMs;
+
+  if (unit.element) {
+
+    unit.element.classList.remove(
+      "attacking"
+    );
+
+  }
+
+  clearUnitSpriteTimer(unit);
+
+  setUnitSprite(
+    unit,
+    "hurt"
+  );
+
+}
+
+
+function applyHealthKnockbackAfterDamage(
+  unit
+) {
+
+  const trait =
+    getHealthKnockbackTrait(unit);
+
+  if (
+    !trait ||
+    unit.dead ||
+    unit.hp <= 0
+  ) {
+
+    return;
+
+  }
+
+  if (
+    !(
+      unit.triggeredHealthKnockbacks instanceof
+      Set
+    )
+  ) {
+
+    unit.triggeredHealthKnockbacks =
+      new Set();
+
+  }
+
+  const ratio =
+    unit.hp /
+    unit.maxHp;
+
+  const thresholds =
+    Array.isArray(trait.thresholds)
+      ? trait.thresholds
+      : [];
+
+  let crossedAny = false;
+
+  thresholds.forEach(
+    (threshold) => {
+
+      if (
+        ratio <= threshold &&
+        !unit.triggeredHealthKnockbacks.has(
+          threshold
+        )
+      ) {
+
+        unit.triggeredHealthKnockbacks.add(
+          threshold
+        );
+
+        crossedAny = true;
+
+      }
+
+    }
+  );
+
+  if (!crossedAny) {
+
+    return;
+
+  }
+
+  if (
+    isHealthKnockbackActive(unit)
+  ) {
+
+    return;
+
+  }
+
+  startHealthKnockback(
+    unit,
+    trait
+  );
+
+}
+
+
+function finishHealthKnockback(unit) {
+
+  clearHealthKnockback(unit);
+
+  if (
+    unit &&
+    !unit.dead
+  ) {
+
+    setUnitSprite(
+      unit,
+      "idle"
+    );
+
+  }
+
+}
+
+
+function updateHealthKnockbackMotion(
+  unit
+) {
+
+  if (
+    !unit ||
+    !unit.knockbackDurationMs ||
+    !unit.knockbackStartedAt
+  ) {
+
+    return false;
+
+  }
+
+  if (unit.dead) {
+
+    clearHealthKnockback(unit);
+
+    return false;
+
+  }
+
+  const elapsed =
+    Date.now() -
+    unit.knockbackStartedAt;
+
+  const t =
+    Math.min(
+      1,
+      elapsed /
+        unit.knockbackDurationMs
+    );
+
+  unit.x =
+    unit.knockbackStartX +
+    (
+      unit.knockbackTargetX -
+      unit.knockbackStartX
+    ) *
+    t;
+
+  if (t >= 1) {
+
+    finishHealthKnockback(unit);
+
+    return false;
+
+  }
+
+  return true;
 
 }
 
@@ -3999,7 +4320,8 @@ function showUnitAttack(unit) {
 
   if (
     !isAllyUnit(unit) ||
-    unit.dead
+    unit.dead ||
+    isHealthKnockbackActive(unit)
   ) {
 
     return;
@@ -4225,6 +4547,20 @@ function updateUnits() {
       }
 
 
+      if (
+        updateHealthKnockbackMotion(
+          unit
+        )
+      ) {
+
+        unit.element.style.left =
+          unit.x + "px";
+
+        return;
+
+      }
+
+
       const target =
         findNearestEnemy(unit);
 
@@ -4309,6 +4645,20 @@ function updateEnemies() {
 
       if (enemy.dead) {
         return;
+      }
+
+
+      if (
+        updateHealthKnockbackMotion(
+          enemy
+        )
+      ) {
+
+        enemy.element.style.left =
+          enemy.x + "px";
+
+        return;
+
       }
 
 
@@ -4484,6 +4834,17 @@ function tryAttack(
   target,
   playerAttack
 ) {
+
+  if (
+    isHealthKnockbackActive(
+      attacker
+    )
+  ) {
+
+    return;
+
+  }
+
 
   const now =
     Date.now();
@@ -5070,6 +5431,15 @@ function updateProjectiles() {
 
 function attackEnemyBase(unit) {
 
+  if (
+    isHealthKnockbackActive(unit)
+  ) {
+
+    return;
+
+  }
+
+
   const now =
     Date.now();
 
@@ -5155,6 +5525,15 @@ function attackEnemyBase(unit) {
 
 
 function attackPlayerBase(enemy) {
+
+  if (
+    isHealthKnockbackActive(enemy)
+  ) {
+
+    return;
+
+  }
+
 
   const now =
     Date.now();
@@ -5269,12 +5648,23 @@ function damageCharacter(
     target.hp <= 0
   ) {
 
+    clearHealthKnockback(
+      target
+    );
+
     defeatCharacter(
       target,
       playerAttack
     );
 
+    return;
+
   }
+
+
+  applyHealthKnockbackAfterDamage(
+    target
+  );
 
 }
 
@@ -5289,6 +5679,10 @@ function defeatCharacter(
 ) {
 
   target.dead = true;
+
+  clearHealthKnockback(
+    target
+  );
 
   clearUnitSpriteTimer(
     target
