@@ -1475,6 +1475,260 @@ function initCharacterOwnership() {
 initCharacterOwnership();
 
 
+const BATTLE_DECK_KEY =
+  "battleDeck";
+
+const BATTLE_DECK_SIZE =
+  10;
+
+const BATTLE_DECK_FRONT_SIZE =
+  5;
+
+let battleDeck = [];
+
+
+function createEmptyBattleDeck() {
+
+  const deck = [];
+
+  let index = 0;
+
+  while (index < BATTLE_DECK_SIZE) {
+
+    deck.push(null);
+
+    index += 1;
+
+  }
+
+  return deck;
+
+}
+
+
+function createDefaultBattleDeck() {
+
+  const deck =
+    createEmptyBattleDeck();
+
+  if (isCharacterOwned("sena")) {
+
+    deck[0] = "sena";
+
+  }
+
+  return deck;
+
+}
+
+
+function sanitizeBattleDeck(rawDeck) {
+
+  const deck =
+    createEmptyBattleDeck();
+
+  const usedIds = {};
+
+  if (!Array.isArray(rawDeck)) {
+
+    return deck;
+
+  }
+
+  let index = 0;
+
+  while (
+    index < BATTLE_DECK_SIZE &&
+    index < rawDeck.length
+  ) {
+
+    const characterId =
+      rawDeck[index];
+
+    if (
+      typeof characterId ===
+        "string" &&
+      CHARACTERS[characterId] &&
+      isCharacterOwned(characterId) &&
+      !usedIds[characterId]
+    ) {
+
+      deck[index] =
+        characterId;
+
+      usedIds[characterId] =
+        true;
+
+    }
+
+    index += 1;
+
+  }
+
+  return deck;
+
+}
+
+
+function saveBattleDeck() {
+
+  localStorage.setItem(
+    BATTLE_DECK_KEY,
+    JSON.stringify(battleDeck)
+  );
+
+}
+
+
+function loadBattleDeck() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        BATTLE_DECK_KEY
+      );
+
+    if (!raw) {
+
+      return createDefaultBattleDeck();
+
+    }
+
+    return sanitizeBattleDeck(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+    return createDefaultBattleDeck();
+
+  }
+
+}
+
+
+function getBattleDeckCharacters() {
+
+  const characters = [];
+
+  battleDeck.forEach((characterId) => {
+
+    if (
+      characterId &&
+      CHARACTERS[characterId]
+    ) {
+
+      characters.push(
+        CHARACTERS[characterId]
+      );
+
+    }
+
+  });
+
+  return characters;
+
+}
+
+
+function setBattleDeckSlot(
+  slotIndex,
+  characterId
+) {
+
+  if (
+    slotIndex < 0 ||
+    slotIndex >= BATTLE_DECK_SIZE
+  ) {
+
+    return;
+
+  }
+
+  if (characterId === null) {
+
+    battleDeck[slotIndex] = null;
+
+    saveBattleDeck();
+
+    return;
+
+  }
+
+  if (
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  const alreadyUsed =
+    battleDeck.some(
+      (id, index) =>
+        id === characterId &&
+        index !== slotIndex
+    );
+
+  if (alreadyUsed) {
+
+    return;
+
+  }
+
+  battleDeck[slotIndex] =
+    characterId;
+
+  saveBattleDeck();
+
+}
+
+
+function initBattleDeck() {
+
+  const hasSave =
+    localStorage.getItem(
+      BATTLE_DECK_KEY
+    );
+
+  if (!hasSave) {
+
+    battleDeck =
+      createDefaultBattleDeck();
+
+    saveBattleDeck();
+
+    return;
+
+  }
+
+  const loaded =
+    loadBattleDeck();
+
+  const loadedText =
+    JSON.stringify(loaded);
+
+  const rawText =
+    localStorage.getItem(
+      BATTLE_DECK_KEY
+    );
+
+  battleDeck = loaded;
+
+  if (loadedText !== rawText) {
+
+    saveBattleDeck();
+
+  }
+
+}
+
+
+initBattleDeck();
+
+
 function getDeployCooldownMs(character) {
 
   const cooldownMs =
@@ -1655,27 +1909,34 @@ function renderBattleUnitCards() {
     "";
 
 
-  Object
-    .values(CHARACTERS)
-    .forEach((character) => {
+  let slotIndex = 0;
 
-      if (
-        !isCharacterOwned(
-          character.id
-        )
-      ) {
+  while (
+    slotIndex < BATTLE_DECK_FRONT_SIZE
+  ) {
 
-        return;
+    const characterId =
+      battleDeck[slotIndex];
 
-      }
+    slotIndex += 1;
 
-      container.appendChild(
-        createBattleUnitCard(
-          character
-        )
-      );
+    if (
+      !characterId ||
+      !CHARACTERS[characterId] ||
+      !isCharacterOwned(characterId)
+    ) {
 
-    });
+      continue;
+
+    }
+
+    container.appendChild(
+      createBattleUnitCard(
+        CHARACTERS[characterId]
+      )
+    );
+
+  }
 
 
   updateUnitCardAvailability();
