@@ -1443,6 +1443,22 @@ function getAttackBehavior(character) {
 }
 
 
+function isProjectileAttackType(behavior) {
+
+  const type =
+    behavior &&
+    behavior.type;
+
+  return (
+    type ===
+      ATTACK_TYPE.PROJECTILE_SINGLE ||
+    type ===
+      ATTACK_TYPE.PROJECTILE_AOE
+  );
+
+}
+
+
 const CHARACTERS = {
 
   sena: {
@@ -4613,8 +4629,13 @@ function applyMeleeAoeDamage(
 
 function scheduleProjectile(
   attacker,
-  behavior
+  behavior,
+  options
 ) {
+
+  const settings =
+    options ||
+    {};
 
   pendingProjectiles.push({
 
@@ -4633,7 +4654,12 @@ function scheduleProjectile(
 
     originX: attacker.x,
 
-    range: attacker.range
+    range: attacker.range,
+
+    towardEnemyBase:
+      Boolean(
+        settings.towardEnemyBase
+      )
 
   });
 
@@ -4644,7 +4670,8 @@ function spawnProjectile(
   attacker,
   behavior,
   originX,
-  range
+  range,
+  towardEnemyBase
 ) {
 
   if (
@@ -4668,8 +4695,10 @@ function spawnProjectile(
     offsetX;
 
   const maxX =
-    originX +
-    range;
+    towardEnemyBase
+      ? ENEMY_BASE_X
+      : originX +
+        range;
 
   const element =
     document.createElement("div");
@@ -4731,7 +4760,12 @@ function spawnProjectile(
 
     attack: attacker.attack,
 
-    type: behavior.type
+    type: behavior.type,
+
+    hitsEnemyBase:
+      Boolean(towardEnemyBase),
+
+    baseDamaged: false
 
   });
 
@@ -4879,6 +4913,35 @@ function applyProjectileImpact(
 }
 
 
+function applyProjectileEnemyBaseDamage(
+  projectile
+) {
+
+  if (
+    !projectile ||
+    projectile.baseDamaged
+  ) {
+
+    return;
+
+  }
+
+  projectile.baseDamaged = true;
+
+  enemyBaseHp -=
+    projectile.attack;
+
+  updateBaseUI();
+
+  if (enemyBaseHp <= 0) {
+
+    winBattle();
+
+  }
+
+}
+
+
 function updateProjectiles() {
 
   const now =
@@ -4910,7 +4973,8 @@ function updateProjectiles() {
         pending.unit,
         pending.behavior,
         pending.originX,
-        pending.range
+        pending.range,
+        pending.towardEnemyBase
       );
 
     }
@@ -4959,6 +5023,22 @@ function updateProjectiles() {
         projectile,
         projectile.x,
         hit
+      );
+
+      removeProjectile(projectile);
+
+      return;
+
+    }
+
+    if (
+      projectile.hitsEnemyBase &&
+      previousX < ENEMY_BASE_X &&
+      projectile.x >= ENEMY_BASE_X
+    ) {
+
+      applyProjectileEnemyBaseDamage(
+        projectile
       );
 
       removeProjectile(projectile);
@@ -5031,6 +5111,29 @@ function attackEnemyBase(unit) {
   showUnitAttack(
     unit
   );
+
+
+  const behavior =
+    getAttackBehavior(unit);
+
+
+  if (
+    isProjectileAttackType(
+      behavior
+    )
+  ) {
+
+    scheduleProjectile(
+      unit,
+      behavior,
+      {
+        towardEnemyBase: true
+      }
+    );
+
+    return;
+
+  }
 
 
   enemyBaseHp -=
