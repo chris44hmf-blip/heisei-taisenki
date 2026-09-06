@@ -112,7 +112,7 @@ menuButtons.forEach((button) => {
 
       if (menu === "formation") {
 
-        renderFormationScreen();
+        startFormationEditing();
 
         showScreen(formationScreen);
 
@@ -156,6 +156,8 @@ if (formationBack) {
   formationBack.addEventListener(
     "click",
     () => {
+
+      resetFormationEditing();
 
       showScreen(homeScreen);
 
@@ -2027,6 +2029,326 @@ function applyFormationPercentBox(element, box) {
 }
 
 
+let formationDraftDeck = null;
+
+let selectedFormationCharacterId =
+  null;
+
+let formationNoticeTimer = null;
+
+
+function copyBattleDeck(sourceDeck) {
+
+  const deck =
+    createEmptyBattleDeck();
+
+  if (!Array.isArray(sourceDeck)) {
+
+    return deck;
+
+  }
+
+  let index = 0;
+
+  while (index < BATTLE_DECK_SIZE) {
+
+    deck[index] =
+      sourceDeck[index] ||
+      null;
+
+    index += 1;
+
+  }
+
+  return deck;
+
+}
+
+
+function countFormationDraftFilled() {
+
+  if (!formationDraftDeck) {
+
+    return 0;
+
+  }
+
+  let filled = 0;
+
+  let index = 0;
+
+  while (index < BATTLE_DECK_SIZE) {
+
+    if (formationDraftDeck[index]) {
+
+      filled += 1;
+
+    }
+
+    index += 1;
+
+  }
+
+  return filled;
+
+}
+
+
+function showFormationNotice(message) {
+
+  const notice =
+    document.getElementById(
+      "formation-notice"
+    );
+
+  if (!notice) {
+
+    return;
+
+  }
+
+  notice.textContent = message;
+
+  notice.classList.add("is-visible");
+
+  if (formationNoticeTimer) {
+
+    clearTimeout(
+      formationNoticeTimer
+    );
+
+  }
+
+  formationNoticeTimer =
+    setTimeout(() => {
+
+      notice.classList.remove(
+        "is-visible"
+      );
+
+      formationNoticeTimer = null;
+
+    }, 1200);
+
+}
+
+
+function startFormationEditing() {
+
+  formationDraftDeck =
+    copyBattleDeck(battleDeck);
+
+  selectedFormationCharacterId =
+    null;
+
+  renderFormationScreen();
+
+}
+
+
+function resetFormationEditing() {
+
+  formationDraftDeck = null;
+
+  selectedFormationCharacterId =
+    null;
+
+  if (formationNoticeTimer) {
+
+    clearTimeout(
+      formationNoticeTimer
+    );
+
+    formationNoticeTimer = null;
+
+  }
+
+  const notice =
+    document.getElementById(
+      "formation-notice"
+    );
+
+  if (notice) {
+
+    notice.textContent = "";
+
+    notice.classList.remove(
+      "is-visible"
+    );
+
+  }
+
+}
+
+
+function setSelectedFormationCharacter(
+  characterId
+) {
+
+  if (
+    selectedFormationCharacterId ===
+    characterId
+  ) {
+
+    selectedFormationCharacterId =
+      null;
+
+  } else {
+
+    selectedFormationCharacterId =
+      characterId;
+
+  }
+
+  renderFormationScreen();
+
+}
+
+
+function placeFormationDraftCharacter(
+  characterId,
+  slotIndex
+) {
+
+  if (
+    !formationDraftDeck ||
+    slotIndex < 0 ||
+    slotIndex >= BATTLE_DECK_SIZE ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  const fromIndex =
+    formationDraftDeck.indexOf(
+      characterId
+    );
+
+  const occupant =
+    formationDraftDeck[slotIndex];
+
+  if (fromIndex === slotIndex) {
+
+    return;
+
+  }
+
+  if (fromIndex === -1) {
+
+    formationDraftDeck[slotIndex] =
+      characterId;
+
+    return;
+
+  }
+
+  formationDraftDeck[slotIndex] =
+    characterId;
+
+  formationDraftDeck[fromIndex] =
+    occupant ||
+    null;
+
+}
+
+
+function unequipFormationDraftSlot(
+  slotIndex
+) {
+
+  if (
+    !formationDraftDeck ||
+    slotIndex < 0 ||
+    slotIndex >= BATTLE_DECK_SIZE
+  ) {
+
+    return false;
+
+  }
+
+  if (!formationDraftDeck[slotIndex]) {
+
+    return false;
+
+  }
+
+  if (countFormationDraftFilled() <= 1) {
+
+    showFormationNotice(
+      "最低1人は編成してください"
+    );
+
+    return false;
+
+  }
+
+  formationDraftDeck[slotIndex] =
+    null;
+
+  selectedFormationCharacterId =
+    null;
+
+  return true;
+
+}
+
+
+function handleFormationSlotTap(
+  slotIndex
+) {
+
+  if (!formationDraftDeck) {
+
+    return;
+
+  }
+
+  const occupant =
+    formationDraftDeck[slotIndex];
+
+  if (!selectedFormationCharacterId) {
+
+    if (occupant) {
+
+      selectedFormationCharacterId =
+        occupant;
+
+      renderFormationScreen();
+
+    }
+
+    return;
+
+  }
+
+  if (
+    occupant ===
+    selectedFormationCharacterId
+  ) {
+
+    unequipFormationDraftSlot(
+      slotIndex
+    );
+
+    renderFormationScreen();
+
+    return;
+
+  }
+
+  placeFormationDraftCharacter(
+    selectedFormationCharacterId,
+    slotIndex
+  );
+
+  renderFormationScreen();
+
+}
+
+
 function applyFormationMenuScale(image, character) {
 
   if (!image) {
@@ -2072,7 +2394,17 @@ function createFormationOwnedCard(character, box) {
   card.className =
     "formation-owned-card";
 
-  card.disabled = true;
+  card.dataset.characterId =
+    character.id;
+
+  if (
+    selectedFormationCharacterId ===
+    character.id
+  ) {
+
+    card.classList.add("is-selected");
+
+  }
 
   const menuImage =
     getCharacterImages(
@@ -2101,6 +2433,17 @@ function createFormationOwnedCard(character, box) {
     character
   );
 
+  card.addEventListener(
+    "click",
+    () => {
+
+      setSelectedFormationCharacter(
+        character.id
+      );
+
+    }
+  );
+
   return card;
 
 }
@@ -2119,43 +2462,75 @@ function createFormationDeckSlot(
       ? CHARACTERS[characterId]
       : null;
 
-  if (!character) {
+  const slot =
+    document.createElement("button");
 
-    return null;
+  slot.type = "button";
+
+  slot.className =
+    "formation-slot";
+
+  slot.dataset.slotIndex =
+    String(slotIndex);
+
+  if (character) {
+
+    slot.classList.add("filled");
+
+    slot.dataset.characterId =
+      character.id;
+
+    const menuImage =
+      getCharacterImages(
+        character.id
+      ).menu;
+
+    slot.innerHTML = `
+
+      <span class="formation-cover"></span>
+
+      <span class="formation-slot-art">
+        <img
+          src="${menuImage}"
+          alt="${character.name}"
+        >
+      </span>
+
+      ${createFormationCardMetaHtml(character)}
+
+    `;
+
+    applyFormationMenuScale(
+      slot.querySelector("img"),
+      character
+    );
+
+    if (
+      selectedFormationCharacterId ===
+      character.id
+    ) {
+
+      slot.classList.add("is-selected");
+
+    }
+
+  } else {
+
+    slot.classList.add("empty");
 
   }
 
-  const slot =
-    document.createElement("div");
-
-  slot.className =
-    "formation-slot filled";
-
-  const menuImage =
-    getCharacterImages(
-      character.id
-    ).menu;
-
-  slot.innerHTML = `
-
-    <span class="formation-cover"></span>
-
-    <span class="formation-slot-art">
-      <img
-        src="${menuImage}"
-        alt="${character.name}"
-      >
-    </span>
-
-    ${createFormationCardMetaHtml(character)}
-
-  `;
-
   applyFormationPercentBox(slot, box);
 
-  applyFormationMenuScale(
-    slot.querySelector("img"),
-    character
+  slot.addEventListener(
+    "click",
+    () => {
+
+      handleFormationSlotTap(
+        slotIndex
+      );
+
+    }
   );
 
   return slot;
@@ -2259,10 +2634,14 @@ function renderFormationScreen() {
 
   let slotIndex = 0;
 
+  const visibleDeck =
+    formationDraftDeck ||
+    battleDeck;
+
   while (slotIndex < BATTLE_DECK_SIZE) {
 
     const characterId =
-      battleDeck[slotIndex];
+      visibleDeck[slotIndex];
 
     if (characterId) {
 
@@ -2291,14 +2670,6 @@ function renderFormationScreen() {
         characterId,
         layout[layoutIndex]
       );
-
-    if (!slot) {
-
-      slotIndex += 1;
-
-      continue;
-
-    }
 
     if (isFront) {
 

@@ -2668,13 +2668,79 @@ h2 {
 
   line-height: 1.15;
 
+  pointer-events: auto;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+}
+
+.formation-owned-card.is-selected::after,
+.formation-slot.is-selected::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 6;
+
+  box-shadow:
+    inset 0 0 0 2px #eaf4ff,
+    inset 0 0 10px rgba(150, 205, 255, 0.4);
+
   pointer-events: none;
+}
+
+.formation-slot.empty {
+  background: transparent;
 }
 
 .formation-owned-card:disabled {
   opacity: 1;
 
   color: #ece8e0;
+}
+
+.formation-notice {
+  position: absolute;
+
+  left: 50%;
+  bottom: 18%;
+
+  z-index: 8;
+
+  transform: translateX(-50%);
+
+  padding: 0.6% 1.6%;
+
+  background: rgba(8, 10, 14, 0.88);
+
+  box-shadow: inset 0 0 0 1px #9aa7b8;
+
+  color: #ece8e0;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(8px, 1.2cqw, 13px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.06em;
+
+  white-space: nowrap;
+
+  line-height: 1.3;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.formation-notice.is-visible {
+  opacity: 1;
 }
 
 .formation-cover {
