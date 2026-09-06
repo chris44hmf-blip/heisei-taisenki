@@ -1025,19 +1025,19 @@ h2 {
 }
 
 .battle-env-background {
-  top: 0;
+  top: auto;
 
-  height: 100%;
+  bottom: 18%;
 
-  overflow: hidden;
+  overflow: visible;
 
   z-index: 0;
 
   background-repeat: no-repeat;
 
-  background-position: center center;
+  background-position: center bottom;
 
-  background-size: contain;
+  background-size: 100% auto;
 }
 
 .battle-env-ground {

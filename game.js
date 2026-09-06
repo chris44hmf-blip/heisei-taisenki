@@ -373,6 +373,10 @@ const MOSH_CROWD_OFFSCREEN_PX = 450;
 
 const STAGE_ENV_OVERSCAN = 400;
 
+const CAMERA_BACKGROUND_OVERSCAN_X = 250;
+
+const DEFAULT_BACKGROUND_ASPECT = 2;
+
 const STAGE_ENVIRONMENTS = {
 
   A: {
@@ -381,7 +385,9 @@ const STAGE_ENVIRONMENTS = {
       "images/stages/set_a/stage_a1.webp",
 
     ground:
-      "images/stages/set_a/stage_a2.webp"
+      "images/stages/set_a/stage_a2.webp",
+
+    backgroundOverscanX: 250
 
   }
 
@@ -496,6 +502,41 @@ function getStageEnvironment(environmentId) {
 }
 
 
+function getBackgroundOverscanX(environment) {
+
+  if (
+    environment &&
+    typeof environment.backgroundOverscanX ===
+      "number"
+  ) {
+
+    return environment.backgroundOverscanX;
+
+  }
+
+  return CAMERA_BACKGROUND_OVERSCAN_X;
+
+}
+
+
+function getBackgroundAspect(environment) {
+
+  if (
+    environment &&
+    typeof environment.backgroundAspect ===
+      "number" &&
+    environment.backgroundAspect > 0
+  ) {
+
+    return environment.backgroundAspect;
+
+  }
+
+  return DEFAULT_BACKGROUND_ASPECT;
+
+}
+
+
 function applyStageEnvironment(environmentId) {
 
   const world =
@@ -552,6 +593,9 @@ function applyStageEnvironment(environmentId) {
     backgroundLayer.style.backgroundImage =
       "";
 
+    backgroundLayer.style.height =
+      "";
+
     groundLayer.style.backgroundImage =
       "";
 
@@ -560,26 +604,30 @@ function applyStageEnvironment(environmentId) {
   }
 
 
-  const layerLeft =
-    -STAGE_ENV_OVERSCAN;
+  const overscanX =
+    getBackgroundOverscanX(
+      environment
+    );
 
-  const layerWidth =
+  const backgroundWidth =
     WORLD_WIDTH +
-    CAMERA_EDGE_PADDING +
-    STAGE_ENV_OVERSCAN * 2;
+    overscanX * 2;
 
-  const layerLeftPx =
-    layerLeft + "px";
-
-  const layerWidthPx =
-    layerWidth + "px";
+  const backgroundHeight =
+    backgroundWidth /
+    getBackgroundAspect(
+      environment
+    );
 
 
   backgroundLayer.style.left =
-    layerLeftPx;
+    -overscanX + "px";
 
   backgroundLayer.style.width =
-    layerWidthPx;
+    backgroundWidth + "px";
+
+  backgroundLayer.style.height =
+    backgroundHeight + "px";
 
   backgroundLayer.style.backgroundImage =
     'url("' +
@@ -587,11 +635,20 @@ function applyStageEnvironment(environmentId) {
     '")';
 
 
+  const groundLeft =
+    -STAGE_ENV_OVERSCAN;
+
+  const groundWidth =
+    WORLD_WIDTH +
+    CAMERA_EDGE_PADDING +
+    STAGE_ENV_OVERSCAN * 2;
+
+
   groundLayer.style.left =
-    layerLeftPx;
+    groundLeft + "px";
 
   groundLayer.style.width =
-    layerWidthPx;
+    groundWidth + "px";
 
   groundLayer.style.backgroundImage =
     'url("' +
