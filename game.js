@@ -4561,9 +4561,6 @@ function tryAttack(
   }
 
 
-  );
-
-
   damageCharacter(
     target,
     attacker.attack,
