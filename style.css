@@ -1434,10 +1434,26 @@ h2 {
 }
 
 .unit-card.not-enough .unit-icon,
-.unit-card.not-enough strong {
+.unit-card.not-enough strong,
+.unit-card.on-cooldown .unit-icon,
+.unit-card.on-cooldown strong {
   opacity: 0.4;
 
   filter: brightness(0.55);
+}
+
+.unit-card.on-cooldown {
+  cursor: not-allowed;
+
+  opacity: 1;
+
+  filter: none;
+}
+
+.unit-card.on-cooldown:disabled {
+  opacity: 1;
+
+  color: white;
 }
 
 .unit-card-cost {
@@ -1448,6 +1464,41 @@ h2 {
   opacity: 1;
 
   filter: none;
+}
+
+
+.unit-card-cooldown {
+  display: block;
+
+  flex-shrink: 0;
+
+  width: 100%;
+
+  height: 3px;
+
+  overflow: hidden;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.18
+    );
+}
+
+.unit-card-cooldown[hidden] {
+  display: none;
+}
+
+.unit-card-cooldown-fill {
+  display: block;
+
+  width: 0;
+
+  height: 100%;
+
+  background: #f2f2f2;
 }
 
 

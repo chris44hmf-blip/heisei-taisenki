@@ -890,6 +890,8 @@ let smokingCost = 200;
 
 let battleRunning = false;
 
+let deployCooldownUntil = {};
+
 /* =========================
    MOSH DATA
 ========================= */
@@ -966,6 +968,8 @@ function startBattle() {
   smokingCost = 200;
 
   battleRunning = true;
+
+  deployCooldownUntil = {};
 
   cameraX = 0;
 
@@ -1077,6 +1081,8 @@ moshTimer =
         updateUnits();
 
         updateEnemies();
+
+        updateUnitCardAvailability();
 
       },
       30
@@ -1250,7 +1256,7 @@ const CHARACTERS = {
 
       yaniCost: 150,
 
-      deployCooldownMs: 0
+      deployCooldownMs: 1500
 
     },
 
@@ -1279,6 +1285,116 @@ const CHARACTERS = {
   }
 
 };
+
+
+function getDeployCooldownMs(character) {
+
+  const cooldownMs =
+    character &&
+    character.stats
+      ? Number(
+          character.stats.deployCooldownMs
+        )
+      : 0;
+
+  if (cooldownMs > 0) {
+
+    return cooldownMs;
+
+  }
+
+  return 0;
+
+}
+
+
+function isCharacterOnCooldown(characterId) {
+
+  const until =
+    deployCooldownUntil[characterId];
+
+  if (!until) {
+
+    return false;
+
+  }
+
+  if (Date.now() >= until) {
+
+    delete deployCooldownUntil[characterId];
+
+    return false;
+
+  }
+
+  return true;
+
+}
+
+
+function getDeployCooldownProgress(characterId) {
+
+  const character =
+    CHARACTERS[characterId];
+
+  const duration =
+    getDeployCooldownMs(character);
+
+  if (duration <= 0) {
+
+    return 1;
+
+  }
+
+  const until =
+    deployCooldownUntil[characterId];
+
+  if (!until) {
+
+    return 1;
+
+  }
+
+  const remaining =
+    until - Date.now();
+
+  if (remaining <= 0) {
+
+    return 1;
+
+  }
+
+  const progress =
+    1 - (remaining / duration);
+
+  return Math.min(
+    1,
+    Math.max(0, progress)
+  );
+
+}
+
+
+function beginDeployCooldown(characterId) {
+
+  const character =
+    CHARACTERS[characterId];
+
+  const duration =
+    getDeployCooldownMs(character);
+
+  if (duration <= 0) {
+
+    delete deployCooldownUntil[characterId];
+
+    return;
+
+  }
+
+  deployCooldownUntil[characterId] =
+    Date.now() + duration;
+
+}
 
 
 function createBattleUnitCard(character) {
@@ -1319,6 +1435,10 @@ function createBattleUnitCard(character) {
     <small class="unit-card-cost">
       🚬 ${yaniCost}
     </small>
+
+    <span class="unit-card-cooldown" hidden>
+      <span class="unit-card-cooldown-fill"></span>
+    </span>
 
   `;
 
@@ -1389,17 +1509,72 @@ function updateUnitCardAvailability() {
     const yaniCost =
       character.stats.yaniCost;
 
+    const notEnough =
+      yani < yaniCost;
+
+    const onCooldown =
+      isCharacterOnCooldown(
+        character.id
+      );
+
     const canDeploy =
-      yani >= yaniCost;
+      !notEnough &&
+      !onCooldown;
 
 
     card.classList.toggle(
       "not-enough",
-      !canDeploy
+      notEnough
+    );
+
+    card.classList.toggle(
+      "on-cooldown",
+      onCooldown
     );
 
     card.disabled =
       !canDeploy;
+
+
+    const cooldownBar =
+      card.querySelector(
+        ".unit-card-cooldown"
+      );
+
+    const cooldownFill =
+      card.querySelector(
+        ".unit-card-cooldown-fill"
+      );
+
+
+    if (
+      cooldownBar &&
+      cooldownFill
+    ) {
+
+      if (onCooldown) {
+
+        cooldownBar.hidden =
+          false;
+
+        cooldownFill.style.width =
+          (
+            getDeployCooldownProgress(
+              character.id
+            ) * 100
+          ) + "%";
+
+      } else {
+
+        cooldownBar.hidden =
+          true;
+
+        cooldownFill.style.width =
+          "0%";
+
+      }
+
+    }
 
   });
 
@@ -1445,6 +1620,9 @@ if (battleUnitCards) {
         card.disabled ||
         card.classList.contains(
           "not-enough"
+        ) ||
+        card.classList.contains(
+          "on-cooldown"
         )
       ) {
 
@@ -1475,9 +1653,24 @@ if (battleUnitCards) {
       }
 
 
+      if (
+        isCharacterOnCooldown(
+          character.id
+        )
+      ) {
+
+        return;
+
+      }
+
+
       yani -= yaniCost;
 
       spawnCharacter(
+        character.id
+      );
+
+      beginDeployCooldown(
         character.id
       );
 
@@ -2502,6 +2695,8 @@ updateMoshUI();
 function stopBattle() {
 
   battleRunning = false;
+
+  deployCooldownUntil = {};
 
   clearInterval(yaniTimer);
   clearInterval(battleTimer);
