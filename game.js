@@ -461,6 +461,8 @@ let cameraX = 0;
 
 let zoom = 1;
 
+let currentStageEnvironmentId = null;
+
 
 function applyCamera() {
 
@@ -599,6 +601,9 @@ function applyStageEnvironment(environmentId) {
     groundLayer.style.backgroundImage =
       "";
 
+    currentStageEnvironmentId =
+      null;
+
     return;
 
   }
@@ -660,6 +665,9 @@ function applyStageEnvironment(environmentId) {
     "has-stage-environment"
   );
 
+  currentStageEnvironmentId =
+    environmentId;
+
   if (viewport) {
 
     viewport.classList.add(
@@ -707,6 +715,77 @@ function getViewportWidth() {
 }
 
 
+function getBackgroundLayerLeft() {
+
+  const environment =
+    getStageEnvironment(
+      currentStageEnvironmentId
+    );
+
+  if (!environment) {
+
+    return 0;
+
+  }
+
+  return (
+    -getBackgroundOverscanX(
+      environment
+    )
+  );
+
+}
+
+
+function getBackgroundLayerWidth() {
+
+  const environment =
+    getStageEnvironment(
+      currentStageEnvironmentId
+    );
+
+  if (!environment) {
+
+    return getWorldSpanX();
+
+  }
+
+  return (
+    WORLD_WIDTH +
+    getBackgroundOverscanX(
+      environment
+    ) * 2
+  );
+
+}
+
+
+function getMinZoom() {
+
+  const viewportWidth =
+    getViewportWidth();
+
+  const backgroundWidth =
+    getBackgroundLayerWidth();
+
+  if (
+    viewportWidth <= 0 ||
+    backgroundWidth <= 0
+  ) {
+
+    return MIN_ZOOM;
+
+  }
+
+  return Math.min(
+    1,
+    viewportWidth /
+      backgroundWidth
+  );
+
+}
+
+
 function getWorldSpanX() {
 
   return (
@@ -732,11 +811,24 @@ function getCameraMinX() {
   const worldSpanX =
     getWorldSpanX();
 
+  const backgroundLeft =
+    getBackgroundLayerLeft();
 
-  if (visibleWorldWidth >= worldSpanX) {
+  const backgroundWidth =
+    getBackgroundLayerWidth();
+
+
+  if (
+    visibleWorldWidth >=
+    worldSpanX
+  ) {
 
     return (
-      (worldSpanX - visibleWorldWidth) /
+      backgroundLeft +
+      (
+        backgroundWidth -
+        visibleWorldWidth
+      ) /
       2
     );
 
@@ -756,11 +848,24 @@ function getCameraMaxX() {
   const worldSpanX =
     getWorldSpanX();
 
+  const backgroundLeft =
+    getBackgroundLayerLeft();
 
-  if (visibleWorldWidth >= worldSpanX) {
+  const backgroundWidth =
+    getBackgroundLayerWidth();
+
+
+  if (
+    visibleWorldWidth >=
+    worldSpanX
+  ) {
 
     return (
-      (worldSpanX - visibleWorldWidth) /
+      backgroundLeft +
+      (
+        backgroundWidth -
+        visibleWorldWidth
+      ) /
       2
     );
 
@@ -857,7 +962,7 @@ function clampZoom(nextZoom) {
 
   return Math.min(
     MAX_ZOOM,
-    Math.max(MIN_ZOOM, nextZoom)
+    Math.max(getMinZoom(), nextZoom)
   );
 
 }
