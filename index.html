@@ -518,6 +518,89 @@
   </div>
 
 </section>
+<!-- =========================
+     BACKSTAGE / 編成
+========================= -->
+
+<section id="formation-screen" class="screen">
+
+  <div class="formation-bg" aria-hidden="true">
+    <div class="formation-bg-wall"></div>
+    <div class="formation-bg-floor"></div>
+    <div class="formation-bg-lamp"></div>
+    <div class="formation-bg-case"></div>
+    <div class="formation-bg-sofa"></div>
+    <div class="formation-bg-amp"></div>
+    <div class="formation-bg-cable"></div>
+  </div>
+
+  <header class="formation-header">
+
+    <button
+      id="formation-back"
+      class="formation-back"
+      type="button"
+    >
+      ← BACK
+    </button>
+
+    <div class="formation-title">
+      <small>BACKSTAGE</small>
+      <strong>編成</strong>
+    </div>
+
+    <div class="formation-header-spacer"></div>
+
+  </header>
+
+  <div class="formation-body">
+
+    <section class="formation-owned">
+
+      <div class="formation-panel-head">
+        <h3>所持メンバー</h3>
+        <span id="formation-owned-count">0</span>
+      </div>
+
+      <div
+        id="formation-owned-list"
+        class="formation-owned-list"
+      ></div>
+
+    </section>
+
+    <section class="formation-deck">
+
+      <div class="formation-panel-head">
+        <h3>BATTLE MEMBER</h3>
+        <span id="formation-deck-count">0 / 10</span>
+      </div>
+
+      <div class="formation-row">
+        <div class="formation-row-label">
+          FRONT / 表 1-5
+        </div>
+        <div
+          id="formation-front-slots"
+          class="formation-slots"
+        ></div>
+      </div>
+
+      <div class="formation-row">
+        <div class="formation-row-label">
+          BACK / 裏 6-10
+        </div>
+        <div
+          id="formation-back-slots"
+          class="formation-slots"
+        ></div>
+      </div>
+
+    </section>
+
+  </div>
+
+</section>
   <!-- 縦画面警告 -->
   <div id="rotate-message">
     <div>

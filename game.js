@@ -14,6 +14,11 @@ const timelineScreen =
 const battleScreen =
   document.getElementById("battle-screen");
 
+const formationScreen =
+  document.getElementById(
+    "formation-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -105,6 +110,16 @@ menuButtons.forEach((button) => {
 
       }
 
+      if (menu === "formation") {
+
+        renderFormationScreen();
+
+        showScreen(formationScreen);
+
+        return;
+
+      }
+
       console.log(
         "選択されたメニュー:",
         menu
@@ -128,6 +143,26 @@ timelineBack.addEventListener(
 
   }
 );
+
+
+const formationBack =
+  document.getElementById(
+    "formation-back"
+  );
+
+
+if (formationBack) {
+
+  formationBack.addEventListener(
+    "click",
+    () => {
+
+      showScreen(homeScreen);
+
+    }
+  );
+
+}
 
 
 const yearNodes =
@@ -1945,6 +1980,272 @@ function getCharacterMenuScale(character) {
   }
 
   return 1;
+
+}
+
+
+function applyFormationMenuScale(image, character) {
+
+  if (!image) {
+
+    return;
+
+  }
+
+  image.style.transform =
+    "scale(" +
+    getCharacterMenuScale(
+      character
+    ) +
+    ")";
+
+  image.style.transformOrigin =
+    "center center";
+
+}
+
+
+function createFormationOwnedCard(character) {
+
+  const card =
+    document.createElement("button");
+
+  card.type = "button";
+
+  card.className =
+    "formation-owned-card";
+
+  card.disabled = true;
+
+  card.innerHTML = `
+
+    <span class="formation-owned-art">
+      <img
+        src="${character.images.menu}"
+        alt="${character.name}"
+      >
+    </span>
+
+    <strong>
+      ${character.name}
+    </strong>
+
+  `;
+
+  applyFormationMenuScale(
+    card.querySelector("img"),
+    character
+  );
+
+  return card;
+
+}
+
+
+function createFormationDeckSlot(
+  slotIndex,
+  characterId
+) {
+
+  const slot =
+    document.createElement("div");
+
+  slot.className =
+    "formation-slot";
+
+  const slotNumber =
+    String(slotIndex + 1).padStart(
+      2,
+      "0"
+    );
+
+  const character =
+    characterId &&
+    CHARACTERS[characterId] &&
+    isCharacterOwned(characterId)
+      ? CHARACTERS[characterId]
+      : null;
+
+  if (character) {
+
+    slot.classList.add("filled");
+
+    slot.innerHTML = `
+
+      <span class="formation-slot-num">
+        ${slotNumber}
+      </span>
+
+      <span class="formation-slot-art">
+        <img
+          src="${character.images.menu}"
+          alt="${character.name}"
+        >
+      </span>
+
+      <strong>
+        ${character.name}
+      </strong>
+
+    `;
+
+    applyFormationMenuScale(
+      slot.querySelector("img"),
+      character
+    );
+
+  } else {
+
+    slot.classList.add("empty");
+
+    slot.innerHTML = `
+
+      <span class="formation-slot-num">
+        ${slotNumber}
+      </span>
+
+      <span class="formation-slot-empty">
+        +
+      </span>
+
+      <strong>
+        EMPTY
+      </strong>
+
+    `;
+
+  }
+
+  return slot;
+
+}
+
+
+function renderFormationScreen() {
+
+  const ownedList =
+    document.getElementById(
+      "formation-owned-list"
+    );
+
+  const frontSlots =
+    document.getElementById(
+      "formation-front-slots"
+    );
+
+  const backSlots =
+    document.getElementById(
+      "formation-back-slots"
+    );
+
+  const ownedCount =
+    document.getElementById(
+      "formation-owned-count"
+    );
+
+  const deckCount =
+    document.getElementById(
+      "formation-deck-count"
+    );
+
+
+  if (
+    !ownedList ||
+    !frontSlots ||
+    !backSlots
+  ) {
+
+    return;
+
+  }
+
+
+  ownedList.innerHTML = "";
+
+  frontSlots.innerHTML = "";
+
+  backSlots.innerHTML = "";
+
+
+  const roster =
+    Object.values(CHARACTERS);
+
+  const ownedRoster =
+    roster.filter((character) => {
+
+      return isCharacterOwned(
+        character.id
+      );
+
+    });
+
+
+  ownedRoster.forEach((character) => {
+
+    ownedList.appendChild(
+      createFormationOwnedCard(
+        character
+      )
+    );
+
+  });
+
+
+  if (ownedCount) {
+
+    ownedCount.textContent =
+      ownedRoster.length +
+      " / " +
+      roster.length;
+
+  }
+
+
+  let filled = 0;
+
+  let slotIndex = 0;
+
+  while (slotIndex < BATTLE_DECK_SIZE) {
+
+    const characterId =
+      battleDeck[slotIndex];
+
+    if (characterId) {
+
+      filled += 1;
+
+    }
+
+    const slot =
+      createFormationDeckSlot(
+        slotIndex,
+        characterId
+      );
+
+    if (
+      slotIndex <
+      BATTLE_DECK_FRONT_SIZE
+    ) {
+
+      frontSlots.appendChild(slot);
+
+    } else {
+
+      backSlots.appendChild(slot);
+
+    }
+
+    slotIndex += 1;
+
+  }
+
+
+  if (deckCount) {
+
+    deckCount.textContent =
+      filled + " / " + BATTLE_DECK_SIZE;
+
+  }
 
 }
 
