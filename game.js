@@ -264,6 +264,35 @@ const ALLY_SPAWN_X = 110;
 const ENEMY_SPAWN_X = 840;
 
 
+let cameraX = 0;
+
+let zoom = 1;
+
+
+function applyCamera() {
+
+  const world =
+    document.getElementById(
+      "battle-world"
+    );
+
+
+  if (!world) {
+
+    return;
+
+  }
+
+
+  world.style.transformOrigin =
+    "0 0";
+
+  world.style.transform =
+    `translate(${-cameraX * zoom}px, 0) scale(${zoom})`;
+
+}
+
+
 let yani = 0;
 
 let yaniMax = 1000;
@@ -352,6 +381,12 @@ function startBattle() {
   smokingCost = 200;
 
   battleRunning = true;
+
+  cameraX = 0;
+
+  zoom = 1;
+
+  applyCamera();
 
 moshGauge = 0;
 

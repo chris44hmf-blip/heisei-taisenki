@@ -963,6 +963,8 @@ h2 {
   position: absolute;
 
   inset: 0;
+
+  transform-origin: 0 0;
 }
 
 
