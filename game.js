@@ -259,9 +259,29 @@ const PLAYER_BASE_X = 80;
 
 const ENEMY_BASE_X = 920;
 
-const ALLY_SPAWN_X = 110;
+const ALLY_SPAWN_OFFSET = 30;
 
-const ENEMY_SPAWN_X = 840;
+const ENEMY_SPAWN_OFFSET = 80;
+
+
+function getAllySpawnX() {
+
+  return (
+    PLAYER_BASE_X +
+    ALLY_SPAWN_OFFSET
+  );
+
+}
+
+
+function getEnemySpawnX() {
+
+  return (
+    ENEMY_BASE_X -
+    ENEMY_SPAWN_OFFSET
+  );
+
+}
 
 
 function applySpawnPosition(element, worldX) {
@@ -835,7 +855,7 @@ function spawnCharacter(characterId) {
 
   applySpawnPosition(
     element,
-    ALLY_SPAWN_X
+    getAllySpawnX()
   );
 
 
@@ -877,7 +897,7 @@ function spawnCharacter(characterId) {
 
     speed: data.stats.speed,
 
-    x: ALLY_SPAWN_X,
+    x: getAllySpawnX(),
 
     attackCooldown: 0,
 
@@ -1105,7 +1125,7 @@ function spawnSalaryman() {
 
   applySpawnPosition(
     element,
-    ENEMY_SPAWN_X
+    getEnemySpawnX()
   );
 
 
@@ -1135,7 +1155,7 @@ function spawnSalaryman() {
 
     speed: 0.8,
 
-    x: ENEMY_SPAWN_X,
+    x: getEnemySpawnX(),
 
     attackCooldown: 0,
 
@@ -2068,7 +2088,7 @@ function spawnJuriana() {
 
   applySpawnPosition(
     element,
-    ENEMY_SPAWN_X
+    getEnemySpawnX()
   );
 
 
@@ -2100,7 +2120,7 @@ function spawnJuriana() {
     /* 普通の速度 */
     speed: 0.7,
 
-    x: ENEMY_SPAWN_X,
+    x: getEnemySpawnX(),
 
     attackCooldown: 0,
 
@@ -2149,7 +2169,7 @@ function spawnBubbleMan() {
 
   applySpawnPosition(
     element,
-    ENEMY_SPAWN_X
+    getEnemySpawnX()
   );
 
 
@@ -2179,7 +2199,7 @@ function spawnBubbleMan() {
     /* 鈍足 */
     speed: 0.38,
 
-    x: ENEMY_SPAWN_X,
+    x: getEnemySpawnX(),
 
     attackCooldown: 0,
 
@@ -2256,7 +2276,7 @@ function spawnThreePercent() {
 
   applySpawnPosition(
     element,
-    ENEMY_SPAWN_X
+    getEnemySpawnX()
   );
 
 
@@ -2284,7 +2304,7 @@ function spawnThreePercent() {
 
     speed: 0.32,
 
-    x: ENEMY_SPAWN_X,
+    x: getEnemySpawnX(),
 
     attackCooldown: 0,
 
