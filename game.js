@@ -265,6 +265,25 @@ const ALLY_SPAWN_OFFSET = 30;
 
 const ENEMY_SPAWN_OFFSET = 80;
 
+const MOSH_CROWD_OFFSCREEN_PX = 450;
+
+
+function getMoshCrowdEndX() {
+
+  return (
+    WORLD_WIDTH +
+    MOSH_CROWD_OFFSCREEN_PX
+  );
+
+}
+
+
+function getMoshKnockbackMaxX() {
+
+  return ENEMY_BASE_X;
+
+}
+
 
 function getAllySpawnX() {
 
@@ -2919,8 +2938,7 @@ function hitAllEnemiesWithMosh() {
 
 
         const maxX =
-          window.innerWidth -
-          150;
+          getMoshKnockbackMaxX();
 
 
         if (
@@ -3035,9 +3053,8 @@ function spawnMoshCrowd() {
   requestAnimationFrame(
     () => {
 
-      crowd.classList.add(
-        "mosh-crowd-run"
-      );
+      crowd.style.left =
+        getMoshCrowdEndX() + "px";
 
     }
   );
