@@ -1035,9 +1035,9 @@ h2 {
 
   background-repeat: no-repeat;
 
-  background-position: center bottom;
+  background-position: center center;
 
-  background-size: 100% auto;
+  background-size: contain;
 }
 
 .battle-env-ground {
