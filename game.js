@@ -253,6 +253,17 @@ const enemyBaseHpText =
    BATTLE DATA
 ========================= */
 
+const WORLD_WIDTH = 1000;
+
+const PLAYER_BASE_X = 80;
+
+const ENEMY_BASE_X = 920;
+
+const ALLY_SPAWN_X = 110;
+
+const ENEMY_SPAWN_X = 840;
+
+
 let yani = 0;
 
 let yaniMax = 1000;
@@ -814,7 +825,7 @@ function spawnCharacter(characterId) {
 
     speed: data.stats.speed,
 
-    x: 110,
+    x: ALLY_SPAWN_X,
 
     attackCooldown: 0,
 
@@ -1066,9 +1077,7 @@ function spawnSalaryman() {
 
     speed: 0.8,
 
-    x:
-      window.innerWidth -
-      160,
+    x: ENEMY_SPAWN_X,
 
     attackCooldown: 0,
 
@@ -1137,8 +1146,7 @@ function updateUnits() {
         */
 
         const enemyBaseX =
-          window.innerWidth -
-          150;
+          ENEMY_BASE_X;
 
 
         const distanceToBase =
@@ -1225,7 +1233,7 @@ function updateEnemies() {
         */
 
         const playerBaseX =
-          120;
+          PLAYER_BASE_X;
 
 
         const distanceToBase =
@@ -2028,8 +2036,7 @@ function spawnJuriana() {
     /* 普通の速度 */
     speed: 0.7,
 
-    x:
-      window.innerWidth - 160,
+    x: ENEMY_SPAWN_X,
 
     attackCooldown: 0,
 
@@ -2102,8 +2109,7 @@ function spawnBubbleMan() {
     /* 鈍足 */
     speed: 0.38,
 
-    x:
-      window.innerWidth - 160,
+    x: ENEMY_SPAWN_X,
 
     attackCooldown: 0,
 
@@ -2202,8 +2208,7 @@ function spawnThreePercent() {
 
     speed: 0.32,
 
-    x:
-      window.innerWidth - 170,
+    x: ENEMY_SPAWN_X,
 
     attackCooldown: 0,
 

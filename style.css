@@ -1004,12 +1004,12 @@ h2 {
 
 
 .player-base {
-  left: 2vw;
+  left: 80px;
 }
 
 
 .enemy-base {
-  right: 2vw;
+  left: 920px;
 }
 
 
