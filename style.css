@@ -1166,6 +1166,17 @@ h2 {
     );
 }
 
+.battle-unit .unit-sprite {
+  display: block;
+
+  width: 105px;
+  height: 105px;
+
+  object-fit: contain;
+
+  pointer-events: none;
+}
+
 
 .battle-unit .unit-label {
   padding: 1px 5px;

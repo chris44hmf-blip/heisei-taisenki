@@ -657,7 +657,11 @@ function spawnSena() {
     </div>
 
     <div class="unit-body">
-      🎸
+      <img
+        class="unit-sprite"
+        src="images/characters/sena/sena_idle.webp"
+        alt="せな"
+      >
     </div>
 
     <div class="unit-label">
@@ -677,6 +681,13 @@ function spawnSena() {
     type: "sena",
 
     element: element,
+
+    sprite:
+      element.querySelector(
+        ".unit-sprite"
+      ),
+
+    spriteTimer: null,
 
     hpBar:
       element.querySelector(
@@ -705,6 +716,199 @@ function spawnSena() {
 
 
   playerUnits.push(unit);
+
+}
+
+
+const SENA_SPRITE = {
+
+  idle:
+    "images/characters/sena/sena_idle.webp",
+
+  attack:
+    "images/characters/sena/sena_attack.webp",
+
+  hurt:
+    "images/characters/sena/sena_hurt.webp"
+
+};
+
+const SENA_ATTACK_SPRITE_MS = 180;
+
+const SENA_HURT_SPRITE_MS = 280;
+
+const SENA_DEATH_KNOCKBACK_PX = 15;
+
+const SENA_DEATH_SECOND_MS = 120;
+
+const SENA_DEATH_WAIT_MS = 380;
+
+const SENA_DEATH_REMOVE_MS =
+  SENA_DEATH_SECOND_MS +
+  SENA_DEATH_WAIT_MS;
+
+
+function clearSenaSpriteTimer(unit) {
+
+  if (
+    unit &&
+    unit.spriteTimer
+  ) {
+
+    clearTimeout(
+      unit.spriteTimer
+    );
+
+    unit.spriteTimer =
+      null;
+
+  }
+
+}
+
+
+function setSenaSprite(unit, pose) {
+
+  if (
+    !unit ||
+    unit.type !== "sena" ||
+    !unit.sprite
+  ) {
+
+    return;
+
+  }
+
+  unit.sprite.src =
+    SENA_SPRITE[pose];
+
+}
+
+
+function showSenaAttack(unit) {
+
+  if (
+    !unit ||
+    unit.type !== "sena" ||
+    unit.dead
+  ) {
+
+    return;
+
+  }
+
+  clearSenaSpriteTimer(unit);
+
+  setSenaSprite(
+    unit,
+    "attack"
+  );
+
+  unit.spriteTimer =
+    setTimeout(
+      () => {
+
+        unit.spriteTimer =
+          null;
+
+        if (!unit.dead) {
+
+          setSenaSprite(
+            unit,
+            "idle"
+          );
+
+        }
+
+      },
+      SENA_ATTACK_SPRITE_MS
+    );
+
+}
+
+
+function playSenaDeathKnockback(unit) {
+
+  const element =
+    unit.element;
+
+  element.style.transition =
+    "transform 80ms ease-out";
+
+  element.style.transform =
+    `translateX(-${SENA_DEATH_KNOCKBACK_PX}px)`;
+
+
+  setTimeout(
+    () => {
+
+      if (!element.isConnected) {
+        return;
+      }
+
+      element.style.transform =
+        `translateX(-${SENA_DEATH_KNOCKBACK_PX * 2}px)`;
+
+    },
+    SENA_DEATH_SECOND_MS
+  );
+
+
+  setTimeout(
+    () => {
+
+      element.remove();
+
+    },
+    SENA_DEATH_REMOVE_MS
+  );
+
+}
+
+
+function showSenaKnockbackHurt(unit) {
+
+  if (
+    !unit ||
+    unit.type !== "sena"
+  ) {
+
+    return;
+
+  }
+
+  clearSenaSpriteTimer(unit);
+
+  setSenaSprite(
+    unit,
+    "hurt"
+  );
+
+  if (unit.dead) {
+
+    return;
+
+  }
+
+  unit.spriteTimer =
+    setTimeout(
+      () => {
+
+        unit.spriteTimer =
+          null;
+
+        if (!unit.dead) {
+
+          setSenaSprite(
+            unit,
+            "idle"
+          );
+
+        }
+
+      },
+      SENA_HURT_SPRITE_MS
+    );
 
 }
 
@@ -1099,6 +1303,11 @@ function tryAttack(
   );
 
 
+  showSenaAttack(
+    attacker
+  );
+
+
   damageCharacter(
     target,
     attacker.attack,
@@ -1149,6 +1358,11 @@ function attackEnemyBase(unit) {
 
     },
     180
+  );
+
+
+  showSenaAttack(
+    unit
   );
 
 
@@ -1306,11 +1520,24 @@ function defeatCharacter(
 
   target.dead = true;
 
+  clearSenaSpriteTimer(
+    target
+  );
 
-  target.element
-    .classList.add(
-      "defeated"
-    );
+  setSenaSprite(
+    target,
+    "hurt"
+  );
+
+
+  if (target.type !== "sena") {
+
+    target.element
+      .classList.add(
+        "defeated"
+      );
+
+  }
 
 
   if (
@@ -1353,6 +1580,17 @@ updateMoshUI();
 
 
     updateBattleUI();
+
+  }
+
+
+  if (target.type === "sena") {
+
+    playSenaDeathKnockback(
+      target
+    );
+
+    return;
 
   }
 
