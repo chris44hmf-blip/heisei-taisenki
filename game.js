@@ -324,20 +324,46 @@ function applyCamera() {
 }
 
 
-function getCameraMaxX() {
+function getViewportWidth() {
 
   const viewport =
     document.getElementById(
       "battle-viewport"
     );
 
-  const viewportWidth =
-    viewport
-      ? viewport.clientWidth
-      : window.innerWidth;
+  if (!viewport) {
+
+    return window.innerWidth;
+
+  }
+
+  const layoutWidth =
+    viewport.clientWidth;
+
+  if (layoutWidth > 0) {
+
+    return layoutWidth;
+
+  }
+
+  const rectWidth =
+    viewport.getBoundingClientRect().width;
+
+  if (rectWidth > 0) {
+
+    return rectWidth;
+
+  }
+
+  return window.innerWidth;
+
+}
+
+
+function getCameraMaxX() {
 
   const visibleWorldWidth =
-    viewportWidth / zoom;
+    getViewportWidth() / zoom;
 
   return Math.max(
     0,
@@ -364,6 +390,53 @@ function clampCameraX(nextX) {
 let cameraDrag = null;
 
 
+function panCameraFromClientX(clientX) {
+
+  if (!cameraDrag) {
+
+    return;
+
+  }
+
+
+  const dx =
+    clientX - cameraDrag.startX;
+
+
+  cameraX =
+    clampCameraX(
+      cameraDrag.startCameraX -
+      dx / zoom
+    );
+
+
+  applyCamera();
+
+}
+
+
+function beginCameraPan(clientX, event) {
+
+  event.preventDefault();
+
+  cameraDrag = {
+
+    startX: clientX,
+
+    startCameraX: cameraX
+
+  };
+
+}
+
+
+function endCameraPan() {
+
+  cameraDrag = null;
+
+}
+
+
 function setupBattleCameraPan() {
 
   const viewport =
@@ -379,41 +452,132 @@ function setupBattleCameraPan() {
   }
 
 
+  const capturePassiveFalse = {
+    capture: true,
+    passive: false
+  };
+
+
+  const useTouch =
+    "ontouchstart" in window;
+
+
+  if (useTouch) {
+
+    viewport.addEventListener(
+      "touchstart",
+      (event) => {
+
+        if (event.touches.length !== 1) {
+
+          endCameraPan();
+
+          return;
+
+        }
+
+
+        beginCameraPan(
+          event.touches[0].clientX,
+          event
+        );
+
+      },
+      capturePassiveFalse
+    );
+
+
+    window.addEventListener(
+      "touchmove",
+      (event) => {
+
+        if (
+          !cameraDrag ||
+          event.touches.length !== 1
+        ) {
+
+          return;
+
+        }
+
+
+        event.preventDefault();
+
+        panCameraFromClientX(
+          event.touches[0].clientX
+        );
+
+      },
+      capturePassiveFalse
+    );
+
+
+    window.addEventListener(
+      "touchend",
+      (event) => {
+
+        if (event.touches.length === 0) {
+
+          endCameraPan();
+
+        }
+
+      },
+      capturePassiveFalse
+    );
+
+
+    window.addEventListener(
+      "touchcancel",
+      endCameraPan,
+      capturePassiveFalse
+    );
+
+
+    return;
+
+  }
+
+
   viewport.addEventListener(
-    "touchstart",
+    "pointerdown",
     (event) => {
 
-      if (event.touches.length !== 1) {
+      if (!event.isPrimary) {
 
-        cameraDrag = null;
+        return;
+
+      }
+
+      if (event.button !== 0) {
 
         return;
 
       }
 
 
-      cameraDrag = {
+      viewport.setPointerCapture(
+        event.pointerId
+      );
 
-        startX:
-          event.touches[0].clientX,
 
-        startCameraX:
-          cameraX
-
-      };
+      beginCameraPan(
+        event.clientX,
+        event
+      );
 
     },
-    { passive: true }
+    capturePassiveFalse
   );
 
 
   viewport.addEventListener(
-    "touchmove",
+    "pointermove",
     (event) => {
 
       if (
         !cameraDrag ||
-        event.touches.length !== 1
+        !event.isPrimary
       ) {
 
         return;
@@ -423,43 +587,26 @@ function setupBattleCameraPan() {
 
       event.preventDefault();
 
-
-      const dx =
-        event.touches[0].clientX -
-        cameraDrag.startX;
-
-
-      cameraX =
-        clampCameraX(
-          cameraDrag.startCameraX -
-          dx / zoom
-        );
-
-
-      applyCamera();
+      panCameraFromClientX(
+        event.clientX
+      );
 
     },
-    { passive: false }
+    capturePassiveFalse
   );
 
 
   viewport.addEventListener(
-    "touchend",
-    () => {
-
-      cameraDrag = null;
-
-    }
+    "pointerup",
+    endCameraPan,
+    capturePassiveFalse
   );
 
 
   viewport.addEventListener(
-    "touchcancel",
-    () => {
-
-      cameraDrag = null;
-
-    }
+    "pointercancel",
+    endCameraPan,
+    capturePassiveFalse
   );
 
 }

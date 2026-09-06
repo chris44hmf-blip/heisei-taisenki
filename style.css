@@ -941,6 +941,20 @@ h2 {
    FIELD
 ========================= */
 
+#battle-viewport,
+#battle-world,
+#unit-layer,
+#battle-world .base,
+.battle-unit,
+.battle-enemy,
+.mosh-crowd {
+  touch-action: none;
+
+  -webkit-user-select: none;
+
+  user-select: none;
+}
+
 #battle-viewport {
   position: relative;
 
@@ -948,7 +962,7 @@ h2 {
 
   overflow: hidden;
 
-  touch-action: none;
+  overscroll-behavior: none;
 
   background:
     linear-gradient(
