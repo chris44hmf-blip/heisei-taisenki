@@ -948,6 +948,8 @@ h2 {
 
   overflow: hidden;
 
+  touch-action: none;
+
   background:
     linear-gradient(
       to bottom,

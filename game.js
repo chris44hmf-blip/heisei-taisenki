@@ -324,6 +324,150 @@ function applyCamera() {
 }
 
 
+function getCameraMaxX() {
+
+  const viewport =
+    document.getElementById(
+      "battle-viewport"
+    );
+
+  const viewportWidth =
+    viewport
+      ? viewport.clientWidth
+      : window.innerWidth;
+
+  const visibleWorldWidth =
+    viewportWidth / zoom;
+
+  return Math.max(
+    0,
+    WORLD_WIDTH -
+    visibleWorldWidth
+  );
+
+}
+
+
+function clampCameraX(nextX) {
+
+  const maxX =
+    getCameraMaxX();
+
+  return Math.min(
+    maxX,
+    Math.max(0, nextX)
+  );
+
+}
+
+
+let cameraDrag = null;
+
+
+function setupBattleCameraPan() {
+
+  const viewport =
+    document.getElementById(
+      "battle-viewport"
+    );
+
+
+  if (!viewport) {
+
+    return;
+
+  }
+
+
+  viewport.addEventListener(
+    "touchstart",
+    (event) => {
+
+      if (event.touches.length !== 1) {
+
+        cameraDrag = null;
+
+        return;
+
+      }
+
+
+      cameraDrag = {
+
+        startX:
+          event.touches[0].clientX,
+
+        startCameraX:
+          cameraX
+
+      };
+
+    },
+    { passive: true }
+  );
+
+
+  viewport.addEventListener(
+    "touchmove",
+    (event) => {
+
+      if (
+        !cameraDrag ||
+        event.touches.length !== 1
+      ) {
+
+        return;
+
+      }
+
+
+      event.preventDefault();
+
+
+      const dx =
+        event.touches[0].clientX -
+        cameraDrag.startX;
+
+
+      cameraX =
+        clampCameraX(
+          cameraDrag.startCameraX -
+          dx / zoom
+        );
+
+
+      applyCamera();
+
+    },
+    { passive: false }
+  );
+
+
+  viewport.addEventListener(
+    "touchend",
+    () => {
+
+      cameraDrag = null;
+
+    }
+  );
+
+
+  viewport.addEventListener(
+    "touchcancel",
+    () => {
+
+      cameraDrag = null;
+
+    }
+  );
+
+}
+
+
+setupBattleCameraPan();
+
+
 let yani = 0;
 
 let yaniMax = 1000;
