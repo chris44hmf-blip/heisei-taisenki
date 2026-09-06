@@ -316,6 +316,11 @@ function applySpawnPosition(element, worldX) {
 }
 
 
+const MIN_ZOOM = 0.65;
+
+const MAX_ZOOM = 2.0;
+
+
 let cameraX = 0;
 
 let zoom = 1;
@@ -337,7 +342,7 @@ function applyCamera() {
 
 
   world.style.transformOrigin =
-    "0 0";
+    "0 100%";
 
   world.style.transform =
     `translate(${-cameraX * zoom}px, 0) scale(${zoom})`;
@@ -381,15 +386,68 @@ function getViewportWidth() {
 }
 
 
+function getWorldSpanX() {
+
+  return (
+    WORLD_WIDTH +
+    CAMERA_EDGE_PADDING
+  );
+
+}
+
+
+function getVisibleWorldWidth() {
+
+  return getViewportWidth() / zoom;
+
+}
+
+
+function getCameraMinX() {
+
+  const visibleWorldWidth =
+    getVisibleWorldWidth();
+
+  const worldSpanX =
+    getWorldSpanX();
+
+
+  if (visibleWorldWidth >= worldSpanX) {
+
+    return (
+      (worldSpanX - visibleWorldWidth) /
+      2
+    );
+
+  }
+
+
+  return 0;
+
+}
+
+
 function getCameraMaxX() {
 
   const visibleWorldWidth =
-    getViewportWidth() / zoom;
+    getVisibleWorldWidth();
 
-  return Math.max(
-    0,
-    WORLD_WIDTH +
-    CAMERA_EDGE_PADDING -
+  const worldSpanX =
+    getWorldSpanX();
+
+
+  if (visibleWorldWidth >= worldSpanX) {
+
+    return (
+      (worldSpanX - visibleWorldWidth) /
+      2
+    );
+
+  }
+
+
+  return (
+    worldSpanX -
     visibleWorldWidth
   );
 
@@ -398,18 +456,23 @@ function getCameraMaxX() {
 
 function clampCameraX(nextX) {
 
+  const minX =
+    getCameraMinX();
+
   const maxX =
     getCameraMaxX();
 
   return Math.min(
     maxX,
-    Math.max(0, nextX)
+    Math.max(minX, nextX)
   );
 
 }
 
 
 let cameraDrag = null;
+
+let cameraPinch = null;
 
 
 function panCameraFromClientX(clientX) {
@@ -459,6 +522,119 @@ function endCameraPan() {
 }
 
 
+function getTouchDistance(touchA, touchB) {
+
+  return Math.hypot(
+    touchA.clientX - touchB.clientX,
+    touchA.clientY - touchB.clientY
+  );
+
+}
+
+
+function clampZoom(nextZoom) {
+
+  return Math.min(
+    MAX_ZOOM,
+    Math.max(MIN_ZOOM, nextZoom)
+  );
+
+}
+
+
+function beginCameraPinch(touchA, touchB, event) {
+
+  event.preventDefault();
+
+  endCameraPan();
+
+
+  const viewport =
+    document.getElementById(
+      "battle-viewport"
+    );
+
+  const rect =
+    viewport.getBoundingClientRect();
+
+  const startMidX =
+    (touchA.clientX + touchB.clientX) / 2;
+
+  const startDistance =
+    getTouchDistance(touchA, touchB);
+
+
+  cameraPinch = {
+
+    startDistance:
+      startDistance,
+
+    startMidX:
+      startMidX,
+
+    startZoom:
+      zoom,
+
+    startCameraX:
+      cameraX,
+
+    focusWorldX:
+      cameraX +
+      (startMidX - rect.left) / zoom,
+
+    viewportLeft:
+      rect.left
+
+  };
+
+}
+
+
+function updateCameraPinch(touchA, touchB, event) {
+
+  if (
+    !cameraPinch ||
+    cameraPinch.startDistance <= 0
+  ) {
+
+    return;
+
+  }
+
+
+  event.preventDefault();
+
+
+  const scale =
+    getTouchDistance(touchA, touchB) /
+    cameraPinch.startDistance;
+
+  zoom =
+    clampZoom(
+      cameraPinch.startZoom * scale
+    );
+
+  cameraX =
+    clampCameraX(
+      cameraPinch.focusWorldX -
+      (cameraPinch.startMidX -
+        cameraPinch.viewportLeft) /
+      zoom
+    );
+
+
+  applyCamera();
+
+}
+
+
+function endCameraPinch() {
+
+  cameraPinch = null;
+
+}
+
+
 function setupBattleCameraPan() {
 
   const viewport =
@@ -490,6 +666,27 @@ function setupBattleCameraPan() {
       "touchstart",
       (event) => {
 
+        if (event.touches.length >= 2) {
+
+          if (cameraPinch) {
+
+            event.preventDefault();
+
+          } else {
+
+            beginCameraPinch(
+              event.touches[0],
+              event.touches[1],
+              event
+            );
+
+          }
+
+          return;
+
+        }
+
+
         if (event.touches.length !== 1) {
 
           endCameraPan();
@@ -512,6 +709,25 @@ function setupBattleCameraPan() {
     window.addEventListener(
       "touchmove",
       (event) => {
+
+        if (event.touches.length >= 2) {
+
+          event.preventDefault();
+
+          if (cameraPinch) {
+
+            updateCameraPinch(
+              event.touches[0],
+              event.touches[1],
+              event
+            );
+
+          }
+
+          return;
+
+        }
+
 
         if (
           !cameraDrag ||
@@ -538,11 +754,30 @@ function setupBattleCameraPan() {
       "touchend",
       (event) => {
 
-        if (event.touches.length === 0) {
+        if (event.touches.length >= 2) {
 
-          endCameraPan();
+          return;
 
         }
+
+
+        if (event.touches.length === 1) {
+
+          endCameraPinch();
+
+          beginCameraPan(
+            event.touches[0].clientX,
+            event
+          );
+
+          return;
+
+        }
+
+
+        endCameraPan();
+
+        endCameraPinch();
 
       },
       capturePassiveFalse
@@ -551,7 +786,13 @@ function setupBattleCameraPan() {
 
     window.addEventListener(
       "touchcancel",
-      endCameraPan,
+      () => {
+
+        endCameraPan();
+
+        endCameraPinch();
+
+      },
       capturePassiveFalse
     );
 
