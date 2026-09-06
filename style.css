@@ -854,8 +854,6 @@ h2 {
 ========================= */
 
 #battle-screen {
-  position: relative;
-
   flex-direction: column;
 
   background: #111;
@@ -973,7 +971,7 @@ h2 {
 }
 
 .battle-pause-overlay[hidden] {
-  display: none;
+  display: none !important;
 }
 
 .battle-pause-panel {
