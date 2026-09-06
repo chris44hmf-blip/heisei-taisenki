@@ -167,6 +167,46 @@ if (formationBack) {
 }
 
 
+const formationAuto =
+  document.getElementById(
+    "formation-auto"
+  );
+
+
+if (formationAuto) {
+
+  formationAuto.addEventListener(
+    "click",
+    () => {
+
+      applyAutoFormation();
+
+    }
+  );
+
+}
+
+
+const formationSave =
+  document.getElementById(
+    "formation-save"
+  );
+
+
+if (formationSave) {
+
+  formationSave.addEventListener(
+    "click",
+    () => {
+
+      saveFormationDraft();
+
+    }
+  );
+
+}
+
+
 const yearNodes =
   document.querySelectorAll(
     ".year-node.unlocked"
@@ -2128,7 +2168,7 @@ function showFormationNotice(message) {
 
       formationNoticeTimer = null;
 
-    }, 1200);
+    }, 1400);
 
 }
 
@@ -2142,6 +2182,95 @@ function startFormationEditing() {
     null;
 
   renderFormationScreen();
+
+}
+
+
+function autoBuildFormation() {
+
+  const deck =
+    createEmptyBattleDeck();
+
+  const ownedCharacters =
+    Object.values(CHARACTERS).filter(
+      (character) => {
+
+        return isCharacterOwned(
+          character.id
+        );
+
+      }
+    );
+
+  let index = 0;
+
+  while (
+    index < ownedCharacters.length &&
+    index < BATTLE_DECK_SIZE
+  ) {
+
+    deck[index] =
+      ownedCharacters[index].id;
+
+    index += 1;
+
+  }
+
+  return deck;
+
+}
+
+
+function applyAutoFormation() {
+
+  if (!formationDraftDeck) {
+
+    return;
+
+  }
+
+  formationDraftDeck =
+    autoBuildFormation();
+
+  selectedFormationCharacterId =
+    null;
+
+  renderFormationScreen();
+
+}
+
+
+function saveFormationDraft() {
+
+  if (!formationDraftDeck) {
+
+    return;
+
+  }
+
+  if (countFormationDraftFilled() < 1) {
+
+    showFormationNotice(
+      "最低1人は編成してください"
+    );
+
+    return;
+
+  }
+
+  battleDeck =
+    copyBattleDeck(formationDraftDeck);
+
+  saveBattleDeck();
+
+  formationDraftDeck =
+    copyBattleDeck(battleDeck);
+
+  renderFormationScreen();
+
+  showFormationNotice(
+    "編成を保存しました"
+  );
 
 }
 
