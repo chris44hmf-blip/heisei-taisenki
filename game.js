@@ -1034,6 +1034,8 @@ let pendingProjectiles = [];
 
 let lastProjectileUpdateAt = 0;
 
+let attackKnockbackEffects = [];
+
 
 /* 拠点 */
 
@@ -1199,6 +1201,8 @@ moshTimer =
         updateEnemies();
 
         updateProjectiles();
+
+        updateAttackKnockbackEffects();
 
         updateUnitCardAvailability();
 
@@ -1687,6 +1691,117 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  chris: {
+
+    id: "chris",
+
+    name: "Chris",
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages("chris"),
+
+    stats: {
+
+      hp: 280,
+
+      attack: 110,
+
+      attackInterval: 1500,
+
+      speed: 1.0,
+
+      range: 105,
+
+      yaniCost: 180,
+
+      deployCooldownMs: 4000
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 200,
+
+      launchOffsetX: 36,
+
+      launchDelayMs: 90,
+
+      hitRadius: 28,
+
+      effectImage:
+        "images/characters/chris/chris_effect.webp",
+
+      effectWidth: 100
+
+    },
+
+    traits: {
+
+      attackKnockback: {
+
+        chance: 0.10,
+
+        distance: 80,
+
+        durationMs: 200,
+
+        effect:
+          "images/characters/chris/chris_knockback_effect.webp",
+
+        effectWidth: 120,
+
+        effectDurationMs: 280
+
+      },
+
+      healthKnockback: {
+
+        thresholds: [0.50],
+
+        distance: 70,
+
+        durationMs: 180
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "story",
+
+      stage: 7
+
+    }
+
   }
 
 };
@@ -2158,6 +2273,11 @@ if (battleDeck[1] === null) {
 // TEMP KAIRI TEST
 unlockCharacter("kairi");
 // TEMP KAIRI TEST
+
+
+// TEMP CHRIS TEST
+unlockCharacter("chris");
+// TEMP CHRIS TEST
 
 
 function getDeployCooldownMs(character) {
@@ -4207,6 +4327,203 @@ function applyHealthKnockbackAfterDamage(
 }
 
 
+function getAttackKnockbackTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.attackKnockback
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.attackKnockback;
+
+}
+
+
+function tryApplyAttackKnockback(
+  source,
+  target
+) {
+
+  const trait =
+    getAttackKnockbackTrait(source);
+
+  if (
+    !trait ||
+    !target ||
+    target.dead ||
+    target.hp <= 0
+  ) {
+
+    return;
+
+  }
+
+  if (
+    isHealthKnockbackActive(target)
+  ) {
+
+    return;
+
+  }
+
+  const chance =
+    typeof trait.chance ===
+      "number"
+      ? trait.chance
+      : 0;
+
+  if (Math.random() >= chance) {
+
+    return;
+
+  }
+
+  startHealthKnockback(
+    target,
+    trait
+  );
+
+  spawnAttackKnockbackEffect(
+    trait,
+    target.x
+  );
+
+}
+
+
+function spawnAttackKnockbackEffect(
+  trait,
+  worldX
+) {
+
+  if (
+    !projectileLayer ||
+    !trait ||
+    !trait.effect
+  ) {
+
+    return;
+
+  }
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-knockback-effect";
+
+  const image =
+    document.createElement("img");
+
+  image.src =
+    trait.effect;
+
+  image.alt = "";
+
+  const effectWidth =
+    typeof trait.effectWidth ===
+      "number"
+      ? trait.effectWidth
+      : 120;
+
+  image.style.width =
+    effectWidth + "px";
+
+  element.appendChild(image);
+
+  element.style.left =
+    worldX + "px";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  const durationMs =
+    typeof trait.effectDurationMs ===
+      "number"
+      ? trait.effectDurationMs
+      : 280;
+
+  attackKnockbackEffects.push({
+
+    element: element,
+
+    expiresAt:
+      Date.now() +
+      durationMs
+
+  });
+
+}
+
+
+function updateAttackKnockbackEffects() {
+
+  const now =
+    Date.now();
+
+  const remaining = [];
+
+  attackKnockbackEffects.forEach(
+    (effect) => {
+
+      if (
+        now >=
+        effect.expiresAt
+      ) {
+
+        if (
+          effect.element &&
+          effect.element.parentNode
+        ) {
+
+          effect.element.remove();
+
+        }
+
+        return;
+
+      }
+
+      remaining.push(effect);
+
+    }
+  );
+
+  attackKnockbackEffects =
+    remaining;
+
+}
+
+
+function clearAttackKnockbackEffects() {
+
+  attackKnockbackEffects.forEach(
+    (effect) => {
+
+      if (
+        effect &&
+        effect.element &&
+        effect.element.parentNode
+      ) {
+
+        effect.element.remove();
+
+      }
+
+    }
+  );
+
+  attackKnockbackEffects = [];
+
+}
+
+
 function finishHealthKnockback(unit) {
 
   clearHealthKnockback(unit);
@@ -4894,7 +5211,8 @@ function tryAttack(
     damageCharacter(
       target,
       attacker.attack,
-      false
+      false,
+      attacker
     );
 
     return;
@@ -4941,7 +5259,8 @@ function tryAttack(
   damageCharacter(
     target,
     attacker.attack,
-    true
+    true,
+    attacker
   );
 
 }
@@ -4978,7 +5297,8 @@ function applyMeleeAoeDamage(
       damageCharacter(
         enemy,
         attacker.attack,
-        true
+        true,
+        attacker
       );
 
     }
@@ -5126,7 +5446,9 @@ function spawnProjectile(
     hitsEnemyBase:
       Boolean(towardEnemyBase),
 
-    baseDamaged: false
+    baseDamaged: false,
+
+    source: attacker
 
   });
 
@@ -5165,6 +5487,8 @@ function clearProjectiles() {
     projectileLayer.innerHTML = "";
 
   }
+
+  clearAttackKnockbackEffects();
 
 }
 
@@ -5235,7 +5559,8 @@ function applyProjectileImpact(
       damageCharacter(
         hitEnemy,
         projectile.attack,
-        true
+        true,
+        projectile.source
       );
 
     }
@@ -5264,7 +5589,8 @@ function applyProjectileImpact(
       damageCharacter(
         enemy,
         projectile.attack,
-        true
+        true,
+        projectile.source
       );
 
     }
@@ -5598,7 +5924,8 @@ function attackPlayerBase(enemy) {
 function damageCharacter(
   target,
   damage,
-  playerAttack
+  playerAttack,
+  source
 ) {
 
   if (target.dead) {
@@ -5663,6 +5990,11 @@ function damageCharacter(
 
 
   applyHealthKnockbackAfterDamage(
+    target
+  );
+
+  tryApplyAttackKnockback(
+    source,
     target
   );
 

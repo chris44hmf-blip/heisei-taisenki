@@ -1177,6 +1177,22 @@ h2 {
   height: auto;
 }
 
+.battle-knockback-effect {
+  position: absolute;
+
+  bottom: 18%;
+
+  pointer-events: none;
+
+  transform: translateX(-50%);
+}
+
+.battle-knockback-effect img {
+  display: block;
+
+  height: auto;
+}
+
 
 /* せな */
 
