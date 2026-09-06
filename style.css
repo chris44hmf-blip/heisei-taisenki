@@ -1443,6 +1443,8 @@ h2 {
 .unit-card-cost {
   color: #f2f2f2;
 
+  font-weight: 700;
+
   opacity: 1;
 
   filter: none;
