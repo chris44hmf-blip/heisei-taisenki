@@ -371,6 +371,32 @@ const ENEMY_SPAWN_OFFSET = 80;
 
 const MOSH_CROWD_OFFSCREEN_PX = 450;
 
+const STAGE_ENV_OVERSCAN = 400;
+
+const STAGE_ENVIRONMENTS = {
+
+  A: {
+
+    background:
+      "images/stages/set_a/stage_a1.webp",
+
+    ground:
+      "images/stages/set_a/stage_a2.webp"
+
+  }
+
+};
+
+const STAGES = {
+
+  heisei1: {
+
+    environment: "A"
+
+  }
+
+};
+
 
 function getMoshCrowdEndX() {
 
@@ -450,6 +476,140 @@ function applyCamera() {
 
   world.style.transform =
     `translate(${-cameraX * zoom}px, 0) scale(${zoom})`;
+
+}
+
+
+function getStageEnvironment(environmentId) {
+
+  if (
+    !environmentId ||
+    !STAGE_ENVIRONMENTS[environmentId]
+  ) {
+
+    return null;
+
+  }
+
+  return STAGE_ENVIRONMENTS[environmentId];
+
+}
+
+
+function applyStageEnvironment(environmentId) {
+
+  const world =
+    document.getElementById(
+      "battle-world"
+    );
+
+  const viewport =
+    document.getElementById(
+      "battle-viewport"
+    );
+
+  const backgroundLayer =
+    document.getElementById(
+      "battle-env-background"
+    );
+
+  const groundLayer =
+    document.getElementById(
+      "battle-env-ground"
+    );
+
+  const environment =
+    getStageEnvironment(
+      environmentId
+    );
+
+
+  if (
+    !world ||
+    !backgroundLayer ||
+    !groundLayer
+  ) {
+
+    return;
+
+  }
+
+
+  if (!environment) {
+
+    if (viewport) {
+
+      viewport.classList.remove(
+        "has-stage-environment"
+      );
+
+    }
+
+    world.classList.remove(
+      "has-stage-environment"
+    );
+
+    backgroundLayer.style.backgroundImage =
+      "";
+
+    groundLayer.style.backgroundImage =
+      "";
+
+    return;
+
+  }
+
+
+  const layerLeft =
+    -STAGE_ENV_OVERSCAN;
+
+  const layerWidth =
+    WORLD_WIDTH +
+    CAMERA_EDGE_PADDING +
+    STAGE_ENV_OVERSCAN * 2;
+
+  const layerLeftPx =
+    layerLeft + "px";
+
+  const layerWidthPx =
+    layerWidth + "px";
+
+
+  backgroundLayer.style.left =
+    layerLeftPx;
+
+  backgroundLayer.style.width =
+    layerWidthPx;
+
+  backgroundLayer.style.backgroundImage =
+    'url("' +
+    environment.background +
+    '")';
+
+
+  groundLayer.style.left =
+    layerLeftPx;
+
+  groundLayer.style.width =
+    layerWidthPx;
+
+  groundLayer.style.backgroundImage =
+    'url("' +
+    environment.ground +
+    '")';
+
+
+  world.classList.add(
+    "has-stage-environment"
+  );
+
+  if (viewport) {
+
+    viewport.classList.add(
+      "has-stage-environment"
+    );
+
+  }
 
 }
 
@@ -1092,6 +1252,10 @@ function startBattle() {
   zoom = 1;
 
   applyCamera();
+
+  applyStageEnvironment(
+    STAGES.heisei1.environment
+  );
 
 moshGauge = 0;
 

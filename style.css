@@ -945,6 +945,7 @@ h2 {
 #battle-world,
 #unit-layer,
 #battle-world .base,
+.battle-env-layer,
 .battle-unit,
 .battle-enemy,
 .mosh-crowd {
@@ -972,6 +973,10 @@ h2 {
       #131313 51%,
       #080808 100%
     );
+}
+
+#battle-viewport.has-stage-environment {
+  background: #080808;
 }
 
 
@@ -1006,6 +1011,47 @@ h2 {
   border-top: 2px solid #555;
 
   z-index: 0;
+}
+
+#battle-world.has-stage-environment::after {
+  content: none;
+}
+
+
+.battle-env-layer {
+  position: absolute;
+
+  pointer-events: none;
+}
+
+.battle-env-background {
+  top: 0;
+
+  height: 100%;
+
+  overflow: hidden;
+
+  z-index: 0;
+
+  background-repeat: no-repeat;
+
+  background-position: center bottom;
+
+  background-size: 100% auto;
+}
+
+.battle-env-ground {
+  bottom: 0;
+
+  height: 18%;
+
+  z-index: 1;
+
+  background-repeat: repeat-x;
+
+  background-position: left bottom;
+
+  background-size: auto 100%;
 }
 
 
