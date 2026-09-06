@@ -259,6 +259,8 @@ const PLAYER_BASE_X = 80;
 
 const ENEMY_BASE_X = 920;
 
+const CAMERA_EDGE_PADDING = 80;
+
 const ALLY_SPAWN_OFFSET = 30;
 
 const ENEMY_SPAWN_OFFSET = 80;
@@ -367,7 +369,8 @@ function getCameraMaxX() {
 
   return Math.max(
     0,
-    WORLD_WIDTH -
+    WORLD_WIDTH +
+    CAMERA_EDGE_PADDING -
     visibleWorldWidth
   );
 

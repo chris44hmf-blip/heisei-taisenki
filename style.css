@@ -2031,7 +2031,7 @@ h2 {
    SCREEN SHAKE
 ========================= */
 
-.mosh-shake #battle-world {
+.mosh-shake #battle-viewport {
   animation:
     moshScreenShake
     0.12s
