@@ -2486,6 +2486,12 @@ battleBgm.volume = 0.5;
 
 function updateAppHeight() {
 
+  window.scrollTo(0, 0);
+
+  document.documentElement.scrollTop = 0;
+
+  document.body.scrollTop = 0;
+
   const height =
     window.visualViewport
       ? window.visualViewport.height
