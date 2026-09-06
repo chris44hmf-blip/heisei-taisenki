@@ -264,6 +264,17 @@ const ALLY_SPAWN_X = 110;
 const ENEMY_SPAWN_X = 840;
 
 
+function applySpawnPosition(element, worldX) {
+
+  element.style.left =
+    worldX + "px";
+
+  element.style.right =
+    "auto";
+
+}
+
+
 let cameraX = 0;
 
 let zoom = 1;
@@ -822,6 +833,12 @@ function spawnCharacter(characterId) {
     data.battle.spriteSize + "px";
 
 
+  applySpawnPosition(
+    element,
+    ALLY_SPAWN_X
+  );
+
+
   unitLayer.appendChild(
     element
   );
@@ -1084,6 +1101,12 @@ function spawnSalaryman() {
     </div>
 
   `;
+
+
+  applySpawnPosition(
+    element,
+    ENEMY_SPAWN_X
+  );
 
 
   unitLayer.appendChild(
@@ -2043,6 +2066,12 @@ function spawnJuriana() {
   `;
 
 
+  applySpawnPosition(
+    element,
+    ENEMY_SPAWN_X
+  );
+
+
   unitLayer.appendChild(element);
 
 
@@ -2116,6 +2145,12 @@ function spawnBubbleMan() {
     </div>
 
   `;
+
+
+  applySpawnPosition(
+    element,
+    ENEMY_SPAWN_X
+  );
 
 
   unitLayer.appendChild(element);
@@ -2217,6 +2252,12 @@ function spawnThreePercent() {
     </div>
 
   `;
+
+
+  applySpawnPosition(
+    element,
+    ENEMY_SPAWN_X
+  );
 
 
   unitLayer.appendChild(element);

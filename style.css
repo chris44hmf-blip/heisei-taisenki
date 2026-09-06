@@ -1147,6 +1147,8 @@ h2 {
 
   left: 110px;
 
+  right: auto;
+
   display: flex;
 
   flex-direction: column;
@@ -1487,10 +1489,14 @@ h2 {
 
 .battle-unit {
   left: 110px;
+
+  right: auto;
 }
 
 .battle-enemy {
-  right: 110px;
+  left: 840px;
+
+  right: auto;
 }
 
 
