@@ -2214,8 +2214,7 @@ h2 {
   }
 
   #home-screen,
-  #timeline-screen,
-  #battle-screen {
+  #timeline-screen {
     transform: scale(0.88);
     transform-origin: top center;
     width: 113.6%;
