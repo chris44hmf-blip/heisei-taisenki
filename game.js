@@ -621,9 +621,9 @@ document
         yani -= cost;
 
 
-        if (unit === "sena") {
+        if (CHARACTERS[unit]) {
 
-          spawnSena();
+          spawnCharacter(unit);
 
         }
 
@@ -637,10 +637,102 @@ document
 
 
 /* =========================
-   SENA
+   CHARACTERS
 ========================= */
 
-function spawnSena() {
+const CHARACTERS = {
+
+  sena: {
+
+    id: "sena",
+
+    name: "せな",
+
+    rarity: "sr",
+
+    images: {
+
+      menu:
+        "images/characters/sena/sena_menu.webp",
+
+      idle:
+        "images/characters/sena/sena_idle.webp",
+
+      attack:
+        "images/characters/sena/sena_attack.webp",
+
+      hurt:
+        "images/characters/sena/sena_hurt.webp"
+
+    },
+
+    stats: {
+
+      hp: 300,
+
+      attack: 45,
+
+      range: 60,
+
+      speed: 1.2,
+
+      attackInterval: 900,
+
+      yaniCost: 150
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    unlock: {
+
+      type: "start"
+
+    }
+
+  }
+
+};
+
+
+function isAllyUnit(unit) {
+
+  return Boolean(
+    unit &&
+    unit.id &&
+    CHARACTERS[unit.id] &&
+    unit.sprite
+  );
+
+}
+
+
+function spawnCharacter(characterId) {
+
+  const data =
+    CHARACTERS[characterId];
+
+
+  if (!data) {
+
+    return;
+
+  }
+
 
   const element =
     document.createElement("div");
@@ -659,16 +751,29 @@ function spawnSena() {
     <div class="unit-body">
       <img
         class="unit-sprite"
-        src="images/characters/sena/sena_idle.webp"
-        alt="せな"
+        src="${data.images.idle}"
+        alt="${data.name}"
       >
     </div>
 
     <div class="unit-label">
-      せな
+      ${data.name}
     </div>
 
   `;
+
+
+  const sprite =
+    element.querySelector(
+      ".unit-sprite"
+    );
+
+
+  sprite.style.width =
+    data.battle.spriteSize + "px";
+
+  sprite.style.height =
+    data.battle.spriteSize + "px";
 
 
   unitLayer.appendChild(
@@ -678,14 +783,19 @@ function spawnSena() {
 
   const unit = {
 
-    type: "sena",
+    id: data.id,
+
+    type: data.id,
+
+    name: data.name,
+
+    images: data.images,
+
+    battle: data.battle,
 
     element: element,
 
-    sprite:
-      element.querySelector(
-        ".unit-sprite"
-      ),
+    sprite: sprite,
 
     spriteTimer: null,
 
@@ -694,21 +804,22 @@ function spawnSena() {
         ".character-hp-bar"
       ),
 
-    hp: 300,
+    hp: data.stats.hp,
 
-    maxHp: 300,
+    maxHp: data.stats.hp,
 
-    attack: 45,
+    attack: data.stats.attack,
 
-    range: 60,
+    range: data.stats.range,
 
-    speed: 1.2,
+    speed: data.stats.speed,
 
     x: 110,
 
     attackCooldown: 0,
 
-    attackInterval: 900,
+    attackInterval:
+      data.stats.attackInterval,
 
     dead: false
 
@@ -720,35 +831,14 @@ function spawnSena() {
 }
 
 
-const SENA_SPRITE = {
+function spawnSena() {
 
-  idle:
-    "images/characters/sena/sena_idle.webp",
+  spawnCharacter("sena");
 
-  attack:
-    "images/characters/sena/sena_attack.webp",
-
-  hurt:
-    "images/characters/sena/sena_hurt.webp"
-
-};
-
-const SENA_ATTACK_SPRITE_MS = 180;
-
-const SENA_HURT_SPRITE_MS = 280;
-
-const SENA_DEATH_KNOCKBACK_PX = 15;
-
-const SENA_DEATH_SECOND_MS = 120;
-
-const SENA_DEATH_WAIT_MS = 380;
-
-const SENA_DEATH_REMOVE_MS =
-  SENA_DEATH_SECOND_MS +
-  SENA_DEATH_WAIT_MS;
+}
 
 
-function clearSenaSpriteTimer(unit) {
+function clearUnitSpriteTimer(unit) {
 
   if (
     unit &&
@@ -767,12 +857,11 @@ function clearSenaSpriteTimer(unit) {
 }
 
 
-function setSenaSprite(unit, pose) {
+function setUnitSprite(unit, state) {
 
   if (
-    !unit ||
-    unit.type !== "sena" ||
-    !unit.sprite
+    !isAllyUnit(unit) ||
+    !unit.images[state]
   ) {
 
     return;
@@ -780,16 +869,15 @@ function setSenaSprite(unit, pose) {
   }
 
   unit.sprite.src =
-    SENA_SPRITE[pose];
+    unit.images[state];
 
 }
 
 
-function showSenaAttack(unit) {
+function showUnitAttack(unit) {
 
   if (
-    !unit ||
-    unit.type !== "sena" ||
+    !isAllyUnit(unit) ||
     unit.dead
   ) {
 
@@ -797,9 +885,9 @@ function showSenaAttack(unit) {
 
   }
 
-  clearSenaSpriteTimer(unit);
+  clearUnitSpriteTimer(unit);
 
-  setSenaSprite(
+  setUnitSprite(
     unit,
     "attack"
   );
@@ -813,7 +901,7 @@ function showSenaAttack(unit) {
 
         if (!unit.dead) {
 
-          setSenaSprite(
+          setUnitSprite(
             unit,
             "idle"
           );
@@ -821,22 +909,33 @@ function showSenaAttack(unit) {
         }
 
       },
-      SENA_ATTACK_SPRITE_MS
+      unit.battle.attackSpriteMs
     );
 
 }
 
 
-function playSenaDeathKnockback(unit) {
+function playAllyDeathKnockback(unit) {
 
   const element =
     unit.element;
+
+  const knockbackPx =
+    unit.battle.deathKnockbackPx;
+
+  const secondMs =
+    unit.battle.deathSecondMs;
+
+  const removeMs =
+    unit.battle.deathSecondMs +
+    unit.battle.deathWaitMs;
+
 
   element.style.transition =
     "transform 80ms ease-out";
 
   element.style.transform =
-    `translateX(-${SENA_DEATH_KNOCKBACK_PX}px)`;
+    `translateX(-${knockbackPx}px)`;
 
 
   setTimeout(
@@ -847,10 +946,10 @@ function playSenaDeathKnockback(unit) {
       }
 
       element.style.transform =
-        `translateX(-${SENA_DEATH_KNOCKBACK_PX * 2}px)`;
+        `translateX(-${knockbackPx * 2}px)`;
 
     },
-    SENA_DEATH_SECOND_MS
+    secondMs
   );
 
 
@@ -860,26 +959,23 @@ function playSenaDeathKnockback(unit) {
       element.remove();
 
     },
-    SENA_DEATH_REMOVE_MS
+    removeMs
   );
 
 }
 
 
-function showSenaKnockbackHurt(unit) {
+function showUnitKnockbackHurt(unit) {
 
-  if (
-    !unit ||
-    unit.type !== "sena"
-  ) {
+  if (!isAllyUnit(unit)) {
 
     return;
 
   }
 
-  clearSenaSpriteTimer(unit);
+  clearUnitSpriteTimer(unit);
 
-  setSenaSprite(
+  setUnitSprite(
     unit,
     "hurt"
   );
@@ -899,7 +995,7 @@ function showSenaKnockbackHurt(unit) {
 
         if (!unit.dead) {
 
-          setSenaSprite(
+          setUnitSprite(
             unit,
             "idle"
           );
@@ -907,7 +1003,7 @@ function showSenaKnockbackHurt(unit) {
         }
 
       },
-      SENA_HURT_SPRITE_MS
+      unit.battle.hurtSpriteMs
     );
 
 }
@@ -1303,7 +1399,7 @@ function tryAttack(
   );
 
 
-  showSenaAttack(
+  showUnitAttack(
     attacker
   );
 
@@ -1361,7 +1457,7 @@ function attackEnemyBase(unit) {
   );
 
 
-  showSenaAttack(
+  showUnitAttack(
     unit
   );
 
@@ -1520,17 +1616,17 @@ function defeatCharacter(
 
   target.dead = true;
 
-  clearSenaSpriteTimer(
+  clearUnitSpriteTimer(
     target
   );
 
-  setSenaSprite(
+  setUnitSprite(
     target,
     "hurt"
   );
 
 
-  if (target.type !== "sena") {
+  if (!isAllyUnit(target)) {
 
     target.element
       .classList.add(
@@ -1584,9 +1680,9 @@ updateMoshUI();
   }
 
 
-  if (target.type === "sena") {
+  if (isAllyUnit(target)) {
 
-    playSenaDeathKnockback(
+    playAllyDeathKnockback(
       target
     );
 
