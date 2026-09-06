@@ -1276,6 +1276,12 @@ const CHARACTERS = {
 
     },
 
+    ui: {
+
+      menuScale: 1
+
+    },
+
     unlock: {
 
       type: "initial"
@@ -1315,7 +1321,7 @@ const CHARACTERS = {
 
     battle: {
 
-      spriteSize: 105,
+      spriteSize: 85,
 
       attackSpriteMs: 180,
 
@@ -1326,6 +1332,12 @@ const CHARACTERS = {
       deathSecondMs: 120,
 
       deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 0.94
 
     },
 
@@ -1908,6 +1920,24 @@ function beginDeployCooldown(characterId) {
 }
 
 
+function getCharacterMenuScale(character) {
+
+  if (
+    character &&
+    character.ui &&
+    typeof character.ui.menuScale ===
+      "number"
+  ) {
+
+    return character.ui.menuScale;
+
+  }
+
+  return 1;
+
+}
+
+
 function createBattleUnitCard(character) {
 
   const yaniCost =
@@ -1952,6 +1982,27 @@ function createBattleUnitCard(character) {
     </span>
 
   `;
+
+
+  const menuImage =
+    card.querySelector(
+      ".unit-character-image"
+    );
+
+
+  if (menuImage) {
+
+    menuImage.style.transform =
+      "scale(" +
+      getCharacterMenuScale(
+        character
+      ) +
+      ")";
+
+    menuImage.style.transformOrigin =
+      "center center";
+
+  }
 
 
   return card;
