@@ -2630,7 +2630,7 @@ function spawnMoshCrowd() {
 
   document
     .getElementById(
-      "battle-field"
+      "battle-world"
     )
     .appendChild(
       crowd

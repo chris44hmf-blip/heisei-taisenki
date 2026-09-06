@@ -941,7 +941,7 @@ h2 {
    FIELD
 ========================= */
 
-#battle-field {
+#battle-viewport {
   position: relative;
 
   flex: 1;
@@ -959,9 +959,16 @@ h2 {
 }
 
 
+#battle-world {
+  position: absolute;
+
+  inset: 0;
+}
+
+
 /* 地面 */
 
-#battle-field::after {
+#battle-world::after {
   content: "";
 
   position: absolute;
@@ -2000,7 +2007,7 @@ h2 {
    SCREEN SHAKE
 ========================= */
 
-.mosh-shake #battle-field {
+.mosh-shake #battle-world {
   animation:
     moshScreenShake
     0.12s
