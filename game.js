@@ -971,6 +971,10 @@ function startBattle() {
 
   deployCooldownUntil = {};
 
+  battleCardPage = 0;
+
+  renderBattleUnitCards();
+
   cameraX = 0;
 
   zoom = 1;
@@ -1551,7 +1555,14 @@ const BATTLE_DECK_SIZE =
 const BATTLE_DECK_FRONT_SIZE =
   5;
 
+const BATTLE_CARD_SWIPE_PX =
+  50;
+
 let battleDeck = [];
+
+let battleCardPage = 0;
+
+let suppressBattleCardClick = false;
 
 
 function createEmptyBattleDeck() {
@@ -2076,7 +2087,11 @@ function renderBattleUnitCards() {
   ) {
 
     const characterId =
-      battleDeck[slotIndex];
+      battleDeck[
+        battleCardPage *
+        BATTLE_DECK_FRONT_SIZE +
+        slotIndex
+      ];
 
     slotIndex += 1;
 
@@ -2104,6 +2119,60 @@ function renderBattleUnitCards() {
 
 
   updateUnitCardAvailability();
+
+  updateBattleCardPageDots();
+
+}
+
+
+function getBattleCardPageMax() {
+
+  return Math.floor(
+    BATTLE_DECK_SIZE /
+    BATTLE_DECK_FRONT_SIZE
+  ) - 1;
+
+}
+
+
+function updateBattleCardPageDots() {
+
+  const dots =
+    document.querySelectorAll(
+      ".page-dot"
+    );
+
+
+  dots.forEach((dot) => {
+
+    const page =
+      Number(dot.dataset.cardPage);
+
+    dot.classList.toggle(
+      "active",
+      page === battleCardPage
+    );
+
+  });
+
+}
+
+
+function setBattleCardPage(page) {
+
+  const maxPage =
+    getBattleCardPageMax();
+
+  const nextPage =
+    Math.min(
+      maxPage,
+      Math.max(0, page)
+    );
+
+
+  battleCardPage = nextPage;
+
+  renderBattleUnitCards();
 
 }
 
@@ -2216,6 +2285,16 @@ if (battleUnitCards) {
     "click",
     (event) => {
 
+      if (suppressBattleCardClick) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        return;
+
+      }
+
       const card =
         event.target.closest(
           ".unit-card"
@@ -2309,6 +2388,229 @@ if (battleUnitCards) {
       );
 
       updateBattleUI();
+
+    }
+  );
+
+}
+
+
+let cardPageSwipe = null;
+
+
+function setupBattleCardPageSwipe() {
+
+  const cards =
+    document.getElementById(
+      "battle-unit-cards"
+    );
+
+
+  if (!cards) {
+
+    return;
+
+  }
+
+
+  const touchOptions = {
+    capture: true,
+    passive: false
+  };
+
+
+  cards.addEventListener(
+    "touchstart",
+    (event) => {
+
+      if (event.touches.length !== 1) {
+
+        cardPageSwipe = null;
+
+        return;
+
+      }
+
+
+      cardPageSwipe = {
+
+        startX:
+          event.touches[0].clientX,
+
+        startY:
+          event.touches[0].clientY,
+
+        swiped: false
+
+      };
+
+    },
+    touchOptions
+  );
+
+
+  cards.addEventListener(
+    "touchmove",
+    (event) => {
+
+      if (
+        !cardPageSwipe ||
+        event.touches.length !== 1
+      ) {
+
+        return;
+
+      }
+
+
+      const dx =
+        event.touches[0].clientX -
+        cardPageSwipe.startX;
+
+      const dy =
+        event.touches[0].clientY -
+        cardPageSwipe.startY;
+
+
+      if (
+        Math.abs(dx) >= 10 &&
+        Math.abs(dx) >= Math.abs(dy)
+      ) {
+
+        event.preventDefault();
+
+      }
+
+    },
+    touchOptions
+  );
+
+
+  cards.addEventListener(
+    "touchend",
+    (event) => {
+
+      if (!cardPageSwipe) {
+
+        return;
+
+      }
+
+
+      const touch =
+        event.changedTouches[0];
+
+      const dx =
+        touch.clientX -
+        cardPageSwipe.startX;
+
+      const dy =
+        touch.clientY -
+        cardPageSwipe.startY;
+
+
+      const isSwipe =
+        Math.abs(dx) >=
+          BATTLE_CARD_SWIPE_PX &&
+        Math.abs(dx) >
+          Math.abs(dy);
+
+
+      if (isSwipe) {
+
+        event.preventDefault();
+
+        suppressBattleCardClick =
+          true;
+
+        setTimeout(
+          () => {
+
+            suppressBattleCardClick =
+              false;
+
+          },
+          400
+        );
+
+
+        if (dx < 0) {
+
+          setBattleCardPage(
+            battleCardPage + 1
+          );
+
+        } else {
+
+          setBattleCardPage(
+            battleCardPage - 1
+          );
+
+        }
+
+      }
+
+
+      cardPageSwipe = null;
+
+    },
+    touchOptions
+  );
+
+
+  cards.addEventListener(
+    "touchcancel",
+    () => {
+
+      cardPageSwipe = null;
+
+    },
+    touchOptions
+  );
+
+}
+
+
+setupBattleCardPageSwipe();
+
+
+const pageIndicator =
+  document.querySelector(
+    ".page-indicator"
+  );
+
+
+if (pageIndicator) {
+
+  pageIndicator.addEventListener(
+    "click",
+    (event) => {
+
+      const dot =
+        event.target.closest(
+          ".page-dot"
+        );
+
+
+      if (!dot) {
+
+        return;
+
+      }
+
+
+      const page =
+        Number(dot.dataset.cardPage);
+
+
+      if (
+        page === 0 ||
+        page === 1
+      ) {
+
+        setBattleCardPage(page);
+
+      }
 
     }
   );
