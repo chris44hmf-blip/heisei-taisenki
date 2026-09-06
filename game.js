@@ -1287,6 +1287,194 @@ const CHARACTERS = {
 };
 
 
+const OWNED_CHARACTERS_KEY =
+  "ownedCharacters";
+
+let ownedCharacters = {};
+
+
+function saveOwnedCharacters() {
+
+  localStorage.setItem(
+    OWNED_CHARACTERS_KEY,
+    JSON.stringify(
+      ownedCharacters
+    )
+  );
+
+}
+
+
+function loadOwnedCharacters() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        OWNED_CHARACTERS_KEY
+      );
+
+    if (!raw) {
+
+      return {};
+
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    const owned = {};
+
+    if (Array.isArray(parsed)) {
+
+      parsed.forEach((characterId) => {
+
+        if (
+          typeof characterId ===
+          "string"
+        ) {
+
+          owned[characterId] =
+            true;
+
+        }
+
+      });
+
+      return owned;
+
+    }
+
+    if (
+      parsed &&
+      typeof parsed === "object"
+    ) {
+
+      Object.keys(parsed).forEach(
+        (characterId) => {
+
+          if (parsed[characterId]) {
+
+            owned[characterId] =
+              true;
+
+          }
+
+        }
+      );
+
+      return owned;
+
+    }
+
+  } catch (error) {
+
+  }
+
+  return {};
+
+}
+
+
+function ensureInitialCharactersOwned() {
+
+  let added = false;
+
+  Object.values(CHARACTERS).forEach(
+    (character) => {
+
+      if (
+        !character ||
+        !character.id
+      ) {
+
+        return;
+
+      }
+
+      if (
+        character.unlock &&
+        character.unlock.type ===
+          "initial" &&
+        !ownedCharacters[character.id]
+      ) {
+
+        ownedCharacters[character.id] =
+          true;
+
+        added = true;
+
+      }
+
+    }
+  );
+
+  return added;
+
+}
+
+
+function isCharacterOwned(characterId) {
+
+  return Boolean(
+    ownedCharacters[characterId]
+  );
+
+}
+
+
+function unlockCharacter(characterId) {
+
+  if (!CHARACTERS[characterId]) {
+
+    return;
+
+  }
+
+  if (
+    isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  ownedCharacters[characterId] =
+    true;
+
+  saveOwnedCharacters();
+
+}
+
+
+function initCharacterOwnership() {
+
+  ownedCharacters =
+    loadOwnedCharacters();
+
+  const addedInitial =
+    ensureInitialCharactersOwned();
+
+  const hasSave =
+    localStorage.getItem(
+      OWNED_CHARACTERS_KEY
+    );
+
+  if (
+    addedInitial ||
+    !hasSave
+  ) {
+
+    saveOwnedCharacters();
+
+  }
+
+}
+
+
+initCharacterOwnership();
+
+
 function getDeployCooldownMs(character) {
 
   const cooldownMs =
@@ -1471,6 +1659,16 @@ function renderBattleUnitCards() {
     .values(CHARACTERS)
     .forEach((character) => {
 
+      if (
+        !isCharacterOwned(
+          character.id
+        )
+      ) {
+
+        return;
+
+      }
+
       container.appendChild(
         createBattleUnitCard(
           character
@@ -1636,6 +1834,17 @@ if (battleUnitCards) {
 
 
       if (!character) {
+
+        return;
+
+      }
+
+
+      if (
+        !isCharacterOwned(
+          character.id
+        )
+      ) {
 
         return;
 
