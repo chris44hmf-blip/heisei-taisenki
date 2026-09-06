@@ -1282,6 +1282,61 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  kaede: {
+
+    id: "kaede",
+
+    name: "楓",
+
+    rarity: "sr",
+
+    images:
+      getCharacterImages("kaede"),
+
+    stats: {
+
+      hp: 220,
+
+      attack: 28,
+
+      attackInterval: 450,
+
+      speed: 2.4,
+
+      range: 45,
+
+      yaniCost: 100,
+
+      deployCooldownMs: 3000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    unlock: {
+
+      type: "story",
+
+      stage: 3
+
+    }
+
   }
 
 };
@@ -1727,6 +1782,20 @@ function initBattleDeck() {
 
 
 initBattleDeck();
+
+
+// TEMP STEP 2-7 KAEDE TEST
+unlockCharacter("kaede");
+
+if (battleDeck[1] === null) {
+
+  setBattleDeckSlot(
+    1,
+    "kaede"
+  );
+
+}
+// TEMP STEP 2-7 KAEDE TEST
 
 
 function getDeployCooldownMs(character) {
