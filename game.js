@@ -1303,13 +1303,15 @@ const CHARACTERS = {
 
       attack: 45,
 
-      range: 60,
+      attackInterval: 900,
 
       speed: 1.2,
 
-      attackInterval: 900,
+      range: 60,
 
-      yaniCost: 150
+      yaniCost: 150,
+
+      deployCooldownMs: 0
 
     },
 
@@ -1331,7 +1333,7 @@ const CHARACTERS = {
 
     unlock: {
 
-      type: "start"
+      type: "initial"
 
     }
 
