@@ -1514,6 +1514,67 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  kairi: {
+
+    id: "kairi",
+
+    name: "カイリ",
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages("kairi"),
+
+    stats: {
+
+      hp: 260,
+
+      attack: 90,
+
+      attackInterval: 2200,
+
+      speed: 0.9,
+
+      range: 150,
+
+      yaniCost: 200,
+
+      deployCooldownMs: 5000
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 0.92
+
+    },
+
+    unlock: {
+
+      type: "story",
+
+      stage: 5
+
+    }
+
   }
 
 };
@@ -1980,6 +2041,11 @@ if (battleDeck[1] === null) {
 
 }
 // TEMP STEP 2-7 KAEDE TEST
+
+
+// TEMP KAIRI TEST
+unlockCharacter("kairi");
+// TEMP KAIRI TEST
 
 
 function getDeployCooldownMs(character) {
