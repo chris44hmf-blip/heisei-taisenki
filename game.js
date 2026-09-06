@@ -1959,6 +1959,46 @@ function createBattleUnitCard(character) {
 }
 
 
+function createLockedBattleUnitCard() {
+
+  const card =
+    document.createElement(
+      "button"
+    );
+
+
+  card.className =
+    "unit-card locked";
+
+  card.type =
+    "button";
+
+  card.disabled =
+    true;
+
+
+  card.innerHTML = `
+
+    <span class="unit-icon">
+      🔒
+    </span>
+
+    <strong>
+      未加入
+    </strong>
+
+    <small>
+      ---
+    </small>
+
+  `;
+
+
+  return card;
+
+}
+
+
 function renderBattleUnitCards() {
 
   const container =
@@ -1990,19 +2030,23 @@ function renderBattleUnitCards() {
     slotIndex += 1;
 
     if (
-      !characterId ||
-      !CHARACTERS[characterId] ||
-      !isCharacterOwned(characterId)
+      characterId &&
+      CHARACTERS[characterId] &&
+      isCharacterOwned(characterId)
     ) {
+
+      container.appendChild(
+        createBattleUnitCard(
+          CHARACTERS[characterId]
+        )
+      );
 
       continue;
 
     }
 
     container.appendChild(
-      createBattleUnitCard(
-        CHARACTERS[characterId]
-      )
+      createLockedBattleUnitCard()
     );
 
   }
