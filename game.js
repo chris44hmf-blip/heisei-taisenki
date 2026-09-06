@@ -1271,6 +1271,30 @@ document
    CHARACTERS
 ========================= */
 
+function getCharacterImages(id) {
+
+  const folder =
+    "images/characters/" + id;
+
+  return {
+
+    menu:
+      folder + "/" + id + "_menu.webp",
+
+    idle:
+      folder + "/" + id + "_idle.webp",
+
+    attack:
+      folder + "/" + id + "_attack.webp",
+
+    hurt:
+      folder + "/" + id + "_hurt.webp"
+
+  };
+
+}
+
+
 const CHARACTERS = {
 
   sena: {
@@ -1281,21 +1305,8 @@ const CHARACTERS = {
 
     rarity: "sr",
 
-    images: {
-
-      menu:
-        "images/characters/sena/sena_menu.webp",
-
-      idle:
-        "images/characters/sena/sena_idle.webp",
-
-      attack:
-        "images/characters/sena/sena_attack.webp",
-
-      hurt:
-        "images/characters/sena/sena_hurt.webp"
-
-    },
+    images:
+      getCharacterImages("sena"),
 
     stats: {
 
