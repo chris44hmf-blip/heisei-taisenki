@@ -288,7 +288,7 @@ let yaniTimer = null;
 
 let battleTimer = null;
 
-let enemySpawnTimer = null;
+let enemySpawnTimers = [];
 
 
 /* 全キャラ */
@@ -364,7 +364,7 @@ enemyBaseHp = 2000;
 
   clearInterval(battleTimer);
 
-  clearInterval(enemySpawnTimer);
+  clearEnemySpawnTimers();
 
 
   updateBattleUI();
@@ -1379,7 +1379,7 @@ function stopBattle() {
 
   clearInterval(yaniTimer);
   clearInterval(battleTimer);
-  clearInterval(enemySpawnTimer);
+  clearEnemySpawnTimers();
   clearInterval(moshTimer);
 
 
@@ -1570,48 +1570,68 @@ function startHeisei1Wave() {
    ENEMY SCHEDULER
 ========================= */
 
+function clearEnemySpawnTimers() {
+
+  enemySpawnTimers.forEach(
+    (timerId) => {
+
+      clearTimeout(timerId);
+
+    }
+  );
+
+  enemySpawnTimers = [];
+
+}
+
+
 function scheduleEnemy(
   delay,
   type
 ) {
 
-  setTimeout(
-    () => {
+  const timerId =
+    setTimeout(
+      () => {
 
-      if (!battleRunning) {
-        return;
-      }
-
-
-      if (type === "salaryman") {
-
-        spawnSalaryman();
-
-      }
+        if (!battleRunning) {
+          return;
+        }
 
 
-      if (type === "juriana") {
+        if (type === "salaryman") {
 
-        spawnJuriana();
+          spawnSalaryman();
 
-      }
-
-
-      if (type === "bubble") {
-
-        spawnBubbleMan();
-
-      }
+        }
 
 
-      if (type === "boss") {
+        if (type === "juriana") {
 
-        spawnThreePercent();
+          spawnJuriana();
 
-      }
+        }
 
-    },
-    delay
+
+        if (type === "bubble") {
+
+          spawnBubbleMan();
+
+        }
+
+
+        if (type === "boss") {
+
+          spawnThreePercent();
+
+        }
+
+      },
+      delay
+    );
+
+  enemySpawnTimers.push(
+    timerId
   );
 
 }
