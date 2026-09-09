@@ -6580,6 +6580,575 @@ function initBeats() {
 initBeats();
 
 
+const DRINK_TICKETS_KEY =
+  "drinkTickets";
+
+const INITIAL_DRINK_TICKETS =
+  0;
+
+let drinkTickets =
+  INITIAL_DRINK_TICKETS;
+
+
+function sanitizeDrinkTickets(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+
+    return INITIAL_DRINK_TICKETS;
+
+  }
+
+  const integer =
+    Math.floor(number);
+
+  if (integer < 0) {
+
+    return 0;
+
+  }
+
+  return integer;
+
+}
+
+
+function saveDrinkTickets() {
+
+  localStorage.setItem(
+    DRINK_TICKETS_KEY,
+    JSON.stringify(drinkTickets)
+  );
+
+}
+
+
+function loadDrinkTickets() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        DRINK_TICKETS_KEY
+      );
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return null;
+
+    }
+
+    return sanitizeDrinkTickets(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+  return INITIAL_DRINK_TICKETS;
+
+}
+
+
+function getDrinkTickets() {
+
+  return drinkTickets;
+
+}
+
+
+function setDrinkTickets(value) {
+
+  drinkTickets =
+    sanitizeDrinkTickets(value);
+
+  saveDrinkTickets();
+
+  return drinkTickets;
+
+}
+
+
+function addDrinkTickets(amount) {
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isFinite(add) ||
+    add <= 0
+  ) {
+
+    return drinkTickets;
+
+  }
+
+  return setDrinkTickets(
+    drinkTickets + Math.floor(add)
+  );
+
+}
+
+
+function spendDrinkTickets(amount) {
+
+  const cost =
+    Number(amount);
+
+  if (
+    !Number.isFinite(cost) ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const spend =
+    Math.floor(cost);
+
+  if (drinkTickets < spend) {
+
+    return false;
+
+  }
+
+  setDrinkTickets(
+    drinkTickets - spend
+  );
+
+  return true;
+
+}
+
+
+function initDrinkTickets() {
+
+  const loaded =
+    loadDrinkTickets();
+
+  if (loaded === null) {
+
+    drinkTickets =
+      INITIAL_DRINK_TICKETS;
+
+    saveDrinkTickets();
+
+  } else {
+
+    drinkTickets =
+      loaded;
+
+    if (
+      localStorage.getItem(
+        DRINK_TICKETS_KEY
+      ) !==
+      JSON.stringify(drinkTickets)
+    ) {
+
+      saveDrinkTickets();
+
+    }
+
+  }
+
+}
+
+
+initDrinkTickets();
+
+
+const GYARA_KEY =
+  "gyara";
+
+const INITIAL_GYARA =
+  0;
+
+let gyara =
+  INITIAL_GYARA;
+
+
+function sanitizeGyara(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+
+    return INITIAL_GYARA;
+
+  }
+
+  const integer =
+    Math.floor(number);
+
+  if (integer < 0) {
+
+    return 0;
+
+  }
+
+  return integer;
+
+}
+
+
+function saveGyara() {
+
+  localStorage.setItem(
+    GYARA_KEY,
+    JSON.stringify(gyara)
+  );
+
+}
+
+
+function loadGyara() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        GYARA_KEY
+      );
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return null;
+
+    }
+
+    return sanitizeGyara(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+  return INITIAL_GYARA;
+
+}
+
+
+function getGyara() {
+
+  return gyara;
+
+}
+
+
+function setGyara(value) {
+
+  gyara =
+    sanitizeGyara(value);
+
+  saveGyara();
+
+  return gyara;
+
+}
+
+
+function addGyara(amount) {
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isFinite(add) ||
+    add <= 0
+  ) {
+
+    return gyara;
+
+  }
+
+  return setGyara(
+    gyara + Math.floor(add)
+  );
+
+}
+
+
+function spendGyara(amount) {
+
+  const cost =
+    Number(amount);
+
+  if (
+    !Number.isFinite(cost) ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const spend =
+    Math.floor(cost);
+
+  if (gyara < spend) {
+
+    return false;
+
+  }
+
+  setGyara(gyara - spend);
+
+  return true;
+
+}
+
+
+function initGyara() {
+
+  const loaded =
+    loadGyara();
+
+  if (loaded === null) {
+
+    gyara =
+      INITIAL_GYARA;
+
+    saveGyara();
+
+  } else {
+
+    gyara =
+      loaded;
+
+    if (
+      localStorage.getItem(
+        GYARA_KEY
+      ) !==
+      JSON.stringify(gyara)
+    ) {
+
+      saveGyara();
+
+    }
+
+  }
+
+}
+
+
+initGyara();
+
+
+const BS_PASS_KEY =
+  "bsPass";
+
+const INITIAL_BS_PASS =
+  300;
+
+let bsPass =
+  INITIAL_BS_PASS;
+
+
+function sanitizeBsPass(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+
+    return INITIAL_BS_PASS;
+
+  }
+
+  const integer =
+    Math.floor(number);
+
+  if (integer < 0) {
+
+    return 0;
+
+  }
+
+  return integer;
+
+}
+
+
+function saveBsPass() {
+
+  localStorage.setItem(
+    BS_PASS_KEY,
+    JSON.stringify(bsPass)
+  );
+
+}
+
+
+function loadBsPass() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        BS_PASS_KEY
+      );
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return null;
+
+    }
+
+    return sanitizeBsPass(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+  return INITIAL_BS_PASS;
+
+}
+
+
+function getBsPass() {
+
+  return bsPass;
+
+}
+
+
+function updateBsPassDisplay() {
+
+  const homeBsPass =
+    document.getElementById(
+      "bs-pass"
+    );
+
+  if (homeBsPass) {
+
+    homeBsPass.textContent =
+      String(bsPass);
+
+  }
+
+}
+
+
+function setBsPass(value) {
+
+  bsPass =
+    sanitizeBsPass(value);
+
+  saveBsPass();
+
+  updateBsPassDisplay();
+
+  return bsPass;
+
+}
+
+
+function addBsPass(amount) {
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isFinite(add) ||
+    add <= 0
+  ) {
+
+    return bsPass;
+
+  }
+
+  return setBsPass(
+    bsPass + Math.floor(add)
+  );
+
+}
+
+
+function spendBsPass(amount) {
+
+  const cost =
+    Number(amount);
+
+  if (
+    !Number.isFinite(cost) ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const spend =
+    Math.floor(cost);
+
+  if (bsPass < spend) {
+
+    return false;
+
+  }
+
+  setBsPass(bsPass - spend);
+
+  return true;
+
+}
+
+
+function initBsPass() {
+
+  const loaded =
+    loadBsPass();
+
+  if (loaded === null) {
+
+    bsPass =
+      INITIAL_BS_PASS;
+
+    saveBsPass();
+
+  } else {
+
+    bsPass =
+      loaded;
+
+    if (
+      localStorage.getItem(
+        BS_PASS_KEY
+      ) !==
+      JSON.stringify(bsPass)
+    ) {
+
+      saveBsPass();
+
+    }
+
+  }
+
+  updateBsPassDisplay();
+
+}
+
+
+initBsPass();
+
+
 const CHARACTER_FRAGMENTS_KEY =
   "characterFragments";
 
