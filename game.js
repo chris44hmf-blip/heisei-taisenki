@@ -9328,6 +9328,15 @@ const DEBUG_BEATS_TAP_WINDOW_MS =
 const DEBUG_BEATS_GRANT_AMOUNT =
   99999;
 
+const DEBUG_DRINK_TICKETS_GRANT_AMOUNT =
+  100;
+
+const DEBUG_GYARA_GRANT_AMOUNT =
+  10000;
+
+const DEBUG_BS_PASS_GRANT_AMOUNT =
+  100;
+
 let debugBeatsTapTimes = [];
 
 let debugConfirmOpen = false;
@@ -9441,6 +9450,33 @@ function applyDebugBeatsGrant() {
 }
 
 
+function applyDebugDrinkTicketsGrant() {
+
+  addDrinkTickets(
+    DEBUG_DRINK_TICKETS_GRANT_AMOUNT
+  );
+
+}
+
+
+function applyDebugGyaraGrant() {
+
+  addGyara(
+    DEBUG_GYARA_GRANT_AMOUNT
+  );
+
+}
+
+
+function applyDebugBsPassGrant() {
+
+  addBsPass(
+    DEBUG_BS_PASS_GRANT_AMOUNT
+  );
+
+}
+
+
 function applyDebugFragmentGrant(
   characterId
 ) {
@@ -9482,6 +9518,30 @@ function handleDebugMenuAction(
   if (action === "beats") {
 
     applyDebugBeatsGrant();
+
+    return;
+
+  }
+
+  if (action === "drinkTickets") {
+
+    applyDebugDrinkTicketsGrant();
+
+    return;
+
+  }
+
+  if (action === "gyara") {
+
+    applyDebugGyaraGrant();
+
+    return;
+
+  }
+
+  if (action === "bsPass") {
+
+    applyDebugBsPassGrant();
 
     return;
 

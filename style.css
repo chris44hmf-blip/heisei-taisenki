@@ -2627,7 +2627,7 @@ h2 {
 .debug-menu-panel {
   width: min(82vw, 360px);
 
-  max-height: min(86vh, 420px);
+  max-height: min(86vh, 480px);
 
   gap: 8px;
 
