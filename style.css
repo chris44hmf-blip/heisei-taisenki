@@ -782,9 +782,9 @@ h2 {
 }
 
 #evolve-detail-screen .training-header {
-  height: 12%;
+  height: 11%;
 
-  min-height: 48px;
+  min-height: 44px;
 }
 
 .evolve-detail-body {
@@ -804,7 +804,13 @@ h2 {
 
   overflow: hidden;
 
-  padding: 4px 2.5vw 6px;
+  padding:
+    4px
+    2.5vw
+    max(
+      22px,
+      calc(16px + env(safe-area-inset-bottom, 0px))
+    );
 }
 
 .evolve-detail-top {
@@ -969,6 +975,16 @@ h2 {
   pointer-events: none;
 }
 
+.evolve-detail-image-wrap.is-silhouette {
+  background:
+    linear-gradient(
+      #ffffff,
+      #ececec
+    );
+
+  border-color: #c8c8c8;
+}
+
 .evolve-detail-image-wrap.is-silhouette img {
   filter: brightness(0);
 }
@@ -979,6 +995,16 @@ h2 {
   border-color: #666;
 
   background: #141414;
+}
+
+.evolve-detail-image-wrap.is-silhouette.evolve-detail-locked {
+  background:
+    linear-gradient(
+      #ffffff,
+      #ececec
+    );
+
+  border-color: #c8c8c8;
 }
 
 .evolve-detail-locked-mark {
@@ -1105,9 +1131,11 @@ h2 {
 
   align-items: center;
 
-  gap: 4px;
+  gap: 5px;
 
   width: 100%;
+
+  margin-bottom: 0;
 }
 
 .evolve-detail-condition {
