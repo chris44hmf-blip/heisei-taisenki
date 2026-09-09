@@ -5,6 +5,29 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+:root {
+  --font-ui:
+    "DotGothic16",
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic UI",
+    "Yu Gothic",
+    Meiryo,
+    sans-serif;
+
+  --font-body:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN",
+    "Yu Gothic UI",
+    "Yu Gothic",
+    Meiryo,
+    Arial,
+    sans-serif;
+}
+
 html,
 body {
   width: 100%;
@@ -15,12 +38,7 @@ body {
 body {
   position: relative;
 
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: var(--font-body);
 
   background: #050505;
   color: white;
@@ -28,6 +46,42 @@ body {
 
 button {
   font: inherit;
+}
+
+
+/* =========================
+   GAME UI FONT
+========================= */
+
+.game-ui-font,
+h1,
+h2,
+h3,
+.title-small,
+.main-button,
+#prologue-start,
+.rank,
+.resource,
+.year-label,
+.home-message strong,
+.home-message p,
+.character-name,
+.menu-button,
+.back-button,
+.training-header h3,
+.training-choice,
+.enhance-filter,
+.enhance-card,
+.enhance-empty,
+.timeline-header h3,
+.timeline-resource,
+.year-node,
+#rotate-message {
+  font-family: var(--font-ui);
+
+  font-weight: 400;
+
+  font-synthesis: none;
 }
 
 
@@ -810,13 +864,13 @@ h2 {
 
   align-items: center;
 
-  gap: 8px;
+  gap: 6px;
 
   width: 100%;
 
   min-height: 84px;
 
-  padding: 8px;
+  padding: 7px;
 }
 
 .enhance-card-image {
@@ -889,15 +943,15 @@ h2 {
 
   max-width: 100%;
 
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .enhance-card-rarity {
   color: #ccc;
 
-  font-size: 10px;
+  font-size: 9px;
 
-  font-weight: bold;
+  font-weight: 400;
 
   min-width: 0;
 }
@@ -907,31 +961,33 @@ h2 {
 
   font-size: 9px;
 
-  font-weight: bold;
+  font-weight: 400;
 
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 
   white-space: nowrap;
 }
 
 .enhance-card-name {
-  font-size: 14px;
+  font-size: 13px;
 
-  font-weight: 900;
+  font-weight: 400;
 }
 
 .enhance-card-group {
   color: #aaa;
 
-  font-size: 11px;
+  font-size: 10px;
 
-  font-weight: bold;
+  font-weight: 400;
 }
 
 .enhance-card-progress {
   color: #bbb;
 
-  font-size: 11px;
+  font-size: 10px;
+
+  font-weight: 400;
 }
 
 .timeline-resource {
@@ -2980,11 +3036,7 @@ h2 {
 
   background: #050505;
 
-  --formation-ui-font:
-    "Courier New",
-    Courier,
-    ui-monospace,
-    monospace;
+  --formation-ui-font: var(--font-ui);
 }
 
 .formation-stage {
@@ -3437,6 +3489,52 @@ h2 {
 .formation-slot .formation-card-yani {
   font-size: clamp(4px, 0.72cqw, 8px);
 }
+
+
+/* =========================
+   GAME UI FONT (cascade lock)
+   DotGothic16 is Regular-only.
+   Keep this after component rules so
+   later font-weight: 900/1000 do not
+   force faux-bold on game UI text.
+========================= */
+
+.game-ui-font,
+h1,
+h2,
+h3,
+.title-small,
+.main-button,
+#prologue-start,
+.rank,
+.resource,
+.year-label,
+.home-message strong,
+.home-message p,
+.character-name,
+.menu-button,
+.back-button,
+.training-header h3,
+.training-choice,
+.enhance-filter,
+.enhance-card,
+.enhance-empty,
+.enhance-card-rarity,
+.enhance-card-number,
+.enhance-card-name,
+.enhance-card-group,
+.enhance-card-progress,
+.timeline-header h3,
+.timeline-resource,
+.year-node,
+#rotate-message {
+  font-family: var(--font-ui);
+
+  font-weight: 400;
+
+  font-synthesis: none;
+}
+
 /* HOME画面
 → sena_menu.webp
 
