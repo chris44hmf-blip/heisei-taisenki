@@ -534,15 +534,26 @@
 
   <div class="evolve-detail-body">
 
-    <div class="evolve-detail-forms">
+    <div class="evolve-detail-top">
 
-      <div class="evolve-detail-form">
+      <div class="evolve-detail-forms">
 
-        <div class="evolve-detail-form-label">
+        <div class="evolve-detail-form-label evolve-detail-label-current">
           FORM-1
         </div>
 
-        <div class="evolve-detail-image-wrap">
+        <div
+          class="evolve-detail-arrow"
+          aria-hidden="true"
+        >
+          →
+        </div>
+
+        <div class="evolve-detail-form-label evolve-detail-label-next">
+          FORM-2
+        </div>
+
+        <div class="evolve-detail-image-wrap evolve-detail-image-current">
           <img
             id="evolve-detail-image"
             alt=""
@@ -550,7 +561,23 @@
           >
         </div>
 
-        <div class="evolve-detail-meta">
+        <div
+          id="evolve-detail-next-wrap"
+          class="evolve-detail-image-wrap evolve-detail-locked evolve-detail-image-next"
+        >
+          <img
+            id="evolve-detail-next-image"
+            alt=""
+            draggable="false"
+            hidden
+          >
+          <span
+            id="evolve-detail-next-mark"
+            class="evolve-detail-locked-mark"
+          >❓</span>
+        </div>
+
+        <div class="evolve-detail-meta evolve-detail-meta-current">
 
           <div
             id="evolve-detail-number"
@@ -579,38 +606,7 @@
 
         </div>
 
-      </div>
-
-      <div
-        class="evolve-detail-arrow"
-        aria-hidden="true"
-      >
-        →
-      </div>
-
-      <div class="evolve-detail-form">
-
-        <div class="evolve-detail-form-label">
-          FORM-2
-        </div>
-
-        <div
-          id="evolve-detail-next-wrap"
-          class="evolve-detail-image-wrap evolve-detail-locked"
-        >
-          <img
-            id="evolve-detail-next-image"
-            alt=""
-            draggable="false"
-            hidden
-          >
-          <span
-            id="evolve-detail-next-mark"
-            class="evolve-detail-locked-mark"
-          >❓</span>
-        </div>
-
-        <div class="evolve-detail-meta">
+        <div class="evolve-detail-meta evolve-detail-meta-next">
 
           <div
             id="evolve-detail-next-name"
@@ -661,30 +657,34 @@
 
     </div>
 
-    <div class="evolve-detail-condition">
+    <div class="evolve-detail-bottom">
 
-      <div class="evolve-detail-condition-title">
-        進化条件
+      <div class="evolve-detail-condition">
+
+        <div class="evolve-detail-condition-title">
+          進化条件
+        </div>
+
+        <div class="evolve-detail-condition-rule">
+          Lv.10
+        </div>
+
+        <div
+          id="evolve-detail-condition-status"
+          class="evolve-detail-condition-status"
+        ></div>
+
       </div>
 
-      <div class="evolve-detail-condition-rule">
-        Lv.10
-      </div>
-
-      <div
-        id="evolve-detail-condition-status"
-        class="evolve-detail-condition-status"
-      ></div>
+      <button
+        id="evolve-detail-confirm"
+        class="evolve-detail-confirm"
+        type="button"
+      >
+        進化する
+      </button>
 
     </div>
-
-    <button
-      id="evolve-detail-confirm"
-      class="evolve-detail-confirm"
-      type="button"
-    >
-      進化する
-    </button>
 
   </div>
 
