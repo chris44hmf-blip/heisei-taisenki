@@ -5305,6 +5305,9 @@ function registerSenaForm2() {
 
   };
 
+  sena.forms[2].battle.spriteSize =
+    90;
+
 }
 
 
