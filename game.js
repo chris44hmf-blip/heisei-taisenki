@@ -2538,6 +2538,323 @@ function unlockCharacter(characterId) {
 
   saveOwnedCharacters();
 
+  if (
+    ensureCharacterProgressEntry(
+      characterId
+    )
+  ) {
+
+    saveCharacterProgress();
+
+  }
+
+}
+
+
+const CHARACTER_PROGRESS_KEY =
+  "characterProgress";
+
+let characterProgress = {};
+
+
+function createDefaultCharacterProgress() {
+
+  return {
+
+    level: 1,
+
+    plus: 0,
+
+    unlockedForms: [1],
+
+    activeForm: 1
+
+  };
+
+}
+
+
+function toPositiveInt(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isInteger(number)) {
+
+    return null;
+
+  }
+
+  return number;
+
+}
+
+
+function sanitizeCharacterProgressEntry(
+  raw
+) {
+
+  const defaults =
+    createDefaultCharacterProgress();
+
+  const entry =
+    raw &&
+    typeof raw === "object" &&
+    !Array.isArray(raw)
+      ? raw
+      : {};
+
+  const sanitized = {};
+
+  Object.keys(entry).forEach(
+    (key) => {
+
+      sanitized[key] =
+        entry[key];
+
+    }
+  );
+
+  const level =
+    toPositiveInt(entry.level);
+
+  sanitized.level =
+    level !== null &&
+    level >= 1
+      ? level
+      : defaults.level;
+
+  const plus =
+    toPositiveInt(entry.plus);
+
+  sanitized.plus =
+    plus !== null &&
+    plus >= 0
+      ? plus
+      : defaults.plus;
+
+  const unlockedForms = [];
+
+  if (Array.isArray(entry.unlockedForms)) {
+
+    entry.unlockedForms.forEach(
+      (form) => {
+
+        const formId =
+          toPositiveInt(form);
+
+        if (
+          formId !== null &&
+          formId >= 1 &&
+          unlockedForms.indexOf(
+            formId
+          ) === -1
+        ) {
+
+          unlockedForms.push(
+            formId
+          );
+
+        }
+
+      }
+    );
+
+  }
+
+  if (unlockedForms.indexOf(1) === -1) {
+
+    unlockedForms.unshift(1);
+
+  }
+
+  sanitized.unlockedForms =
+    unlockedForms;
+
+  const activeForm =
+    toPositiveInt(entry.activeForm);
+
+  sanitized.activeForm =
+    activeForm !== null &&
+    unlockedForms.indexOf(
+      activeForm
+    ) !== -1
+      ? activeForm
+      : defaults.activeForm;
+
+  return sanitized;
+
+}
+
+
+function saveCharacterProgress() {
+
+  localStorage.setItem(
+    CHARACTER_PROGRESS_KEY,
+    JSON.stringify(
+      characterProgress
+    )
+  );
+
+}
+
+
+function loadCharacterProgress() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        CHARACTER_PROGRESS_KEY
+      );
+
+    if (!raw) {
+
+      return {};
+
+    }
+
+    const parsed =
+      JSON.parse(raw);
+
+    if (
+      !parsed ||
+      typeof parsed !== "object" ||
+      Array.isArray(parsed)
+    ) {
+
+      return {};
+
+    }
+
+    const loaded = {};
+
+    Object.keys(parsed).forEach(
+      (characterId) => {
+
+        loaded[characterId] =
+          sanitizeCharacterProgressEntry(
+            parsed[characterId]
+          );
+
+      }
+    );
+
+    return loaded;
+
+  } catch (error) {
+
+  }
+
+  return {};
+
+}
+
+
+function getCharacterProgress(characterId) {
+
+  if (
+    !characterId ||
+    !characterProgress[characterId]
+  ) {
+
+    return null;
+
+  }
+
+  return characterProgress[characterId];
+
+}
+
+
+function ensureCharacterProgressEntry(
+  characterId
+) {
+
+  if (
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return false;
+
+  }
+
+  const sanitized =
+    sanitizeCharacterProgressEntry(
+      characterProgress[characterId]
+    );
+
+  const previous =
+    JSON.stringify(
+      characterProgress[characterId] ||
+      null
+    );
+
+  const next =
+    JSON.stringify(sanitized);
+
+  if (previous === next) {
+
+    return false;
+
+  }
+
+  characterProgress[characterId] =
+    sanitized;
+
+  return true;
+
+}
+
+
+function ensureOwnedCharacterProgress() {
+
+  let changed = false;
+
+  Object.keys(ownedCharacters).forEach(
+    (characterId) => {
+
+      if (
+        ensureCharacterProgressEntry(
+          characterId
+        )
+      ) {
+
+        changed = true;
+
+      }
+
+    }
+  );
+
+  return changed;
+
+}
+
+
+function initCharacterProgress() {
+
+  characterProgress =
+    loadCharacterProgress();
+
+  const filled =
+    ensureOwnedCharacterProgress();
+
+  const hasSave =
+    localStorage.getItem(
+      CHARACTER_PROGRESS_KEY
+    );
+
+  if (
+    filled ||
+    !hasSave
+  ) {
+
+    saveCharacterProgress();
+
+  }
+
 }
 
 
@@ -2567,6 +2884,8 @@ function initCharacterOwnership() {
 
 
 initCharacterOwnership();
+
+initCharacterProgress();
 
 
 const BATTLE_DECK_KEY =
