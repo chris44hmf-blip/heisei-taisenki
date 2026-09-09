@@ -2571,6 +2571,12 @@ evolveFilterButtons.forEach((button) => {
 let selectedEvolveCharacterId =
   null;
 
+let isFormUnlockRevealPlaying =
+  false;
+
+let formUnlockRevealTimer =
+  null;
+
 
 function openEvolveDetail(characterId) {
 
@@ -2595,6 +2601,12 @@ function openEvolveDetail(characterId) {
 
 
 function closeEvolveDetail() {
+
+  if (isFormUnlockRevealPlaying) {
+
+    return;
+
+  }
 
   selectedEvolveCharacterId =
     null;
@@ -2640,9 +2652,6 @@ function renderEvolveDetail() {
       progress.plus
     );
 
-  const canEvolve =
-    level >= CHARACTER_LEVEL_MAX;
-
   const unlockedForms =
     Array.isArray(
       progress.unlockedForms
@@ -2665,6 +2674,21 @@ function renderEvolveDetail() {
       character,
       2
     );
+
+  const canEvolveLevel =
+    level >= CHARACTER_LEVEL_MAX;
+
+  const form2Ready =
+    !!(
+      form2 &&
+      form2.images &&
+      form2.images.menu
+    );
+
+  const canEvolve =
+    form2Ready &&
+    canEvolveLevel &&
+    !hasForm2UnlockFlag;
 
 
   const image =
@@ -2999,27 +3023,48 @@ function renderEvolveDetail() {
 
   if (statusEl) {
 
-    statusEl.textContent =
-      "Lv." +
-      level +
-      " / " +
-      CHARACTER_LEVEL_MAX +
-      "  " +
-      (
-        canEvolve
-          ? "達成"
-          : "未達成"
+    if (hasForm2UnlockFlag) {
+
+      statusEl.textContent =
+        "Lv." +
+        level +
+        " / " +
+        CHARACTER_LEVEL_MAX +
+        "  解放済み";
+
+      statusEl.classList.add(
+        "is-met"
       );
 
-    statusEl.classList.toggle(
-      "is-met",
-      canEvolve
-    );
+      statusEl.classList.remove(
+        "is-unmet"
+      );
 
-    statusEl.classList.toggle(
-      "is-unmet",
-      !canEvolve
-    );
+    } else {
+
+      statusEl.textContent =
+        "Lv." +
+        level +
+        " / " +
+        CHARACTER_LEVEL_MAX +
+        "  " +
+        (
+          canEvolveLevel
+            ? "達成"
+            : "未達成"
+        );
+
+      statusEl.classList.toggle(
+        "is-met",
+        canEvolveLevel
+      );
+
+      statusEl.classList.toggle(
+        "is-unmet",
+        !canEvolveLevel
+      );
+
+    }
 
   }
 
@@ -3030,7 +3075,23 @@ function renderEvolveDetail() {
 
   if (confirmButton) {
 
-    if (canEvolve) {
+    if (hasForm2UnlockFlag) {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "解放済み";
+
+    } else if (!form2Ready) {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "未実装";
+
+    } else if (canEvolve) {
 
       confirmButton.disabled =
         false;
@@ -3079,39 +3140,353 @@ const evolveDetailConfirm =
   );
 
 
+function canUnlockCharacterForm2(
+  characterId
+) {
+
+  const character =
+    characterId
+      ? CHARACTERS[characterId]
+      : null;
+
+  if (!character) {
+
+    return false;
+
+  }
+
+  const form2 =
+    getCharacterForm(
+      character,
+      2
+    );
+
+  if (
+    !form2 ||
+    !form2.images ||
+    !form2.images.menu
+  ) {
+
+    return false;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  if (
+    clampCharacterLevel(
+      progress.level
+    ) < CHARACTER_LEVEL_MAX
+  ) {
+
+    return false;
+
+  }
+
+  const unlockedForms =
+    Array.isArray(
+      progress.unlockedForms
+    )
+      ? progress.unlockedForms
+      : [1];
+
+  if (
+    unlockedForms.indexOf(2) !==
+    -1
+  ) {
+
+    return false;
+
+  }
+
+  return true;
+
+}
+
+
+function unlockCharacterForm2(
+  characterId
+) {
+
+  if (
+    !canUnlockCharacterForm2(
+      characterId
+    )
+  ) {
+
+    return null;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  if (
+    !Array.isArray(
+      progress.unlockedForms
+    )
+  ) {
+
+    progress.unlockedForms = [1];
+
+  }
+
+  if (
+    progress.unlockedForms
+      .indexOf(2) === -1
+  ) {
+
+    progress.unlockedForms.push(
+      2
+    );
+
+  }
+
+  progress.activeForm = 2;
+
+  saveCharacterProgress();
+
+  return progress;
+
+}
+
+
+function hideFormUnlockReveal() {
+
+  const overlay =
+    document.getElementById(
+      "form-unlock-overlay"
+    );
+
+  if (!overlay) {
+
+    return;
+
+  }
+
+  overlay.classList.remove(
+    "is-visible"
+  );
+
+  overlay.hidden = true;
+
+}
+
+
+function playForm2UnlockReveal(
+  character,
+  form2,
+  onComplete
+) {
+
+  const overlay =
+    document.getElementById(
+      "form-unlock-overlay"
+    );
+
+  const image =
+    document.getElementById(
+      "form-unlock-image"
+    );
+
+  const label =
+    document.getElementById(
+      "form-unlock-label"
+    );
+
+  const nameEl =
+    document.getElementById(
+      "form-unlock-name"
+    );
+
+  if (
+    !overlay ||
+    !image ||
+    !character ||
+    !form2 ||
+    !form2.images ||
+    !form2.images.menu
+  ) {
+
+    if (
+      typeof onComplete ===
+      "function"
+    ) {
+
+      onComplete();
+
+    }
+
+    return;
+
+  }
+
+  if (formUnlockRevealTimer) {
+
+    clearTimeout(
+      formUnlockRevealTimer
+    );
+
+    formUnlockRevealTimer =
+      null;
+
+  }
+
+  image.src =
+    form2.images.menu;
+
+  image.alt =
+    character.name;
+
+  const menuScale =
+    getCharacterMenuScale(
+      form2
+    );
+
+  image.style.width =
+    menuScale * 100 + "%";
+
+  image.style.maxWidth =
+    "min(42vw, 160px)";
+
+  if (label) {
+
+    label.textContent =
+      "FORM-2 解放！";
+
+  }
+
+  if (nameEl) {
+
+    nameEl.textContent =
+      character.name;
+
+  }
+
+  overlay.hidden = false;
+
+  // Force reflow so the fade-in transition runs.
+  void overlay.offsetWidth;
+
+  overlay.classList.add(
+    "is-visible"
+  );
+
+  isFormUnlockRevealPlaying =
+    true;
+
+  formUnlockRevealTimer =
+    setTimeout(() => {
+
+      formUnlockRevealTimer =
+        null;
+
+      overlay.classList.remove(
+        "is-visible"
+      );
+
+      setTimeout(() => {
+
+        hideFormUnlockReveal();
+
+        isFormUnlockRevealPlaying =
+          false;
+
+        if (
+          typeof onComplete ===
+          "function"
+        ) {
+
+          onComplete();
+
+        }
+
+      }, 240);
+
+    }, 1400);
+
+}
+
+
+function tryEvolveSelectedCharacter() {
+
+  if (isFormUnlockRevealPlaying) {
+
+    return;
+
+  }
+
+  const characterId =
+    selectedEvolveCharacterId;
+
+  if (!characterId) {
+
+    return;
+
+  }
+
+  if (
+    !canUnlockCharacterForm2(
+      characterId
+    )
+  ) {
+
+    return;
+
+  }
+
+  const character =
+    CHARACTERS[characterId];
+
+  const form2 =
+    getCharacterForm(
+      character,
+      2
+    );
+
+  const progress =
+    unlockCharacterForm2(
+      characterId
+    );
+
+  if (!progress) {
+
+    return;
+
+  }
+
+  playForm2UnlockReveal(
+    character,
+    form2,
+    () => {
+
+      if (
+        selectedEvolveCharacterId ===
+        characterId
+      ) {
+
+        renderEvolveDetail();
+
+      }
+
+    }
+  );
+
+}
+
+
 if (evolveDetailConfirm) {
 
   evolveDetailConfirm.addEventListener(
     "click",
     () => {
 
-      if (
-        !selectedEvolveCharacterId
-      ) {
-
-        return;
-
-      }
-
-      const progress =
-        getEnhanceCardProgress(
-          selectedEvolveCharacterId
-        );
-
-      if (
-        clampCharacterLevel(
-          progress.level
-        ) < CHARACTER_LEVEL_MAX
-      ) {
-
-        return;
-
-      }
-
-      console.log(
-        "進化実行予定:",
-        selectedEvolveCharacterId
-      );
+      tryEvolveSelectedCharacter();
 
     }
   );

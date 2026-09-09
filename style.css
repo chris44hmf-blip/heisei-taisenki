@@ -1226,6 +1226,100 @@ h2 {
   cursor: default;
 }
 
+.form-unlock-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 80;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.88);
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: opacity 0.22s ease;
+}
+
+.form-unlock-overlay[hidden] {
+  display: none !important;
+}
+
+.form-unlock-overlay.is-visible {
+  opacity: 1;
+
+  pointer-events: auto;
+}
+
+.form-unlock-panel {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 8px;
+
+  max-width: min(70vw, 280px);
+
+  text-align: center;
+
+  transform: scale(0.92);
+
+  opacity: 0;
+
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
+}
+
+.form-unlock-overlay.is-visible .form-unlock-panel {
+  transform: scale(1);
+
+  opacity: 1;
+}
+
+.form-unlock-image {
+  width: min(42vw, 160px);
+
+  max-height: min(48vh, 200px);
+
+  aspect-ratio: 3 / 4;
+
+  object-fit: contain;
+
+  object-position: center;
+
+  display: block;
+
+  pointer-events: none;
+
+  filter: drop-shadow(0 0 18px rgba(255, 170, 60, 0.35));
+}
+
+.form-unlock-label {
+  color: #fff;
+
+  font-size: clamp(18px, 3.2vw, 28px);
+
+  letter-spacing: 0.14em;
+}
+
+.form-unlock-name {
+  color: #ddd;
+
+  font-size: clamp(14px, 2.2vw, 20px);
+
+  letter-spacing: 0.1em;
+}
+
 .enhance-filters {
   display: flex;
 
@@ -4249,6 +4343,8 @@ h3,
 .evolve-detail-body,
 .evolve-detail-confirm,
 .evolve-detail-compare,
+.form-unlock-label,
+.form-unlock-name,
 .timeline-header h3,
 .timeline-resource,
 .year-node,
