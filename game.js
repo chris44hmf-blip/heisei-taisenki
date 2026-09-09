@@ -3031,7 +3031,7 @@ function renderEnhanceDetail() {
   if (ownedBeatsEl) {
 
     ownedBeatsEl.textContent =
-      "0";
+      String(getBeats());
 
   }
 
@@ -4070,6 +4070,221 @@ function initCharacterOwnership() {
 initCharacterOwnership();
 
 initCharacterProgress();
+
+
+const BEATS_KEY =
+  "beats";
+
+const INITIAL_BEATS =
+  1000;
+
+let beats =
+  INITIAL_BEATS;
+
+
+function sanitizeBeats(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+
+    return INITIAL_BEATS;
+
+  }
+
+  const integer =
+    Math.floor(number);
+
+  if (integer < 0) {
+
+    return 0;
+
+  }
+
+  return integer;
+
+}
+
+
+function saveBeats() {
+
+  localStorage.setItem(
+    BEATS_KEY,
+    JSON.stringify(beats)
+  );
+
+}
+
+
+function loadBeats() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        BEATS_KEY
+      );
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return null;
+
+    }
+
+    return sanitizeBeats(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+  return INITIAL_BEATS;
+
+}
+
+
+function getBeats() {
+
+  return beats;
+
+}
+
+
+function updateBeatsDisplay() {
+
+  const homeBeats =
+    document.getElementById(
+      "beats"
+    );
+
+  if (homeBeats) {
+
+    homeBeats.textContent =
+      String(beats);
+
+  }
+
+  const detailBeats =
+    document.getElementById(
+      "enhance-detail-owned-beats"
+    );
+
+  if (detailBeats) {
+
+    detailBeats.textContent =
+      String(beats);
+
+  }
+
+}
+
+
+function setBeats(value) {
+
+  beats =
+    sanitizeBeats(value);
+
+  saveBeats();
+
+  updateBeatsDisplay();
+
+  return beats;
+
+}
+
+
+function addBeats(amount) {
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isFinite(add) ||
+    add === 0
+  ) {
+
+    return beats;
+
+  }
+
+  return setBeats(
+    beats + Math.floor(add)
+  );
+
+}
+
+
+function spendBeats(amount) {
+
+  const cost =
+    Number(amount);
+
+  if (
+    !Number.isFinite(cost) ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const spend =
+    Math.floor(cost);
+
+  if (beats < spend) {
+
+    return false;
+
+  }
+
+  setBeats(beats - spend);
+
+  return true;
+
+}
+
+
+function initBeats() {
+
+  const loaded =
+    loadBeats();
+
+  if (loaded === null) {
+
+    beats =
+      INITIAL_BEATS;
+
+    saveBeats();
+
+  } else {
+
+    beats =
+      loaded;
+
+    if (
+      localStorage.getItem(
+        BEATS_KEY
+      ) !==
+      JSON.stringify(beats)
+    ) {
+
+      saveBeats();
+
+    }
+
+  }
+
+  updateBeatsDisplay();
+
+}
+
+
+initBeats();
 
 
 const BATTLE_DECK_KEY =
