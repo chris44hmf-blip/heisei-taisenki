@@ -433,6 +433,43 @@
         強化する
       </button>
 
+      <div class="enhance-detail-plus">
+
+        <div
+          id="enhance-detail-fragment-name"
+          class="enhance-detail-plus-title"
+        >
+          かけら
+        </div>
+
+        <div class="enhance-detail-plus-rows">
+
+          <div class="enhance-detail-plus-row">
+            <span>所持</span>
+            <strong
+              id="enhance-detail-owned-fragments"
+            >0</strong>
+          </div>
+
+          <div class="enhance-detail-plus-row">
+            <span>必要</span>
+            <strong
+              id="enhance-detail-need-fragments"
+            >—</strong>
+          </div>
+
+        </div>
+
+        <button
+          id="enhance-detail-plus-confirm"
+          class="enhance-detail-plus-confirm"
+          type="button"
+        >
+          +強化
+        </button>
+
+      </div>
+
     </div>
 
   </div>
@@ -740,7 +777,7 @@
 >
 
   <div
-    class="debug-confirm-panel"
+    class="debug-confirm-panel debug-menu-panel"
     role="dialog"
     aria-modal="true"
     aria-labelledby="debug-confirm-title"
@@ -753,32 +790,66 @@
       DEBUG
     </div>
 
-    <p
-      id="debug-confirm-message"
-      class="debug-confirm-message"
-    >
-      BEATSを99,999にしますか？
-    </p>
-
-    <div class="debug-confirm-actions">
+    <div class="debug-menu-actions">
 
       <button
-        id="debug-confirm-cancel"
-        class="debug-confirm-cancel"
+        id="debug-menu-beats"
+        class="debug-menu-button"
         type="button"
+        data-debug-action="beats"
       >
-        キャンセル
+        BEATS 99,999
       </button>
 
       <button
-        id="debug-confirm-execute"
-        class="debug-confirm-execute"
+        id="debug-menu-fragment-sena"
+        class="debug-menu-button"
         type="button"
+        data-debug-action="fragment"
+        data-character-id="sena"
       >
-        実行
+        せなのかけら +100
+      </button>
+
+      <button
+        id="debug-menu-fragment-kaede"
+        class="debug-menu-button"
+        type="button"
+        data-debug-action="fragment"
+        data-character-id="kaede"
+      >
+        楓のかけら +100
+      </button>
+
+      <button
+        id="debug-menu-fragment-kairi"
+        class="debug-menu-button"
+        type="button"
+        data-debug-action="fragment"
+        data-character-id="kairi"
+      >
+        カイリのかけら +100
+      </button>
+
+      <button
+        id="debug-menu-fragment-chris"
+        class="debug-menu-button"
+        type="button"
+        data-debug-action="fragment"
+        data-character-id="chris"
+      >
+        Chrisのかけら +100
       </button>
 
     </div>
+
+    <button
+      id="debug-confirm-cancel"
+      class="debug-confirm-cancel debug-menu-close"
+      type="button"
+    >
+      閉じる
+    </button>
 
   </div>
 

@@ -1786,7 +1786,9 @@ h2 {
 
   padding: 0;
 
-  overflow: hidden;
+  overflow-x: hidden;
+
+  overflow-y: auto;
 }
 
 .enhance-detail-number {
@@ -1937,6 +1939,168 @@ h2 {
   background: #1a1a1a;
 
   cursor: default;
+}
+
+.enhance-detail-plus {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+
+  margin-top: 8px;
+
+  padding-top: 6px;
+
+  border-top: 1px solid #333;
+}
+
+.enhance-detail-plus-title {
+  color: #ddd;
+
+  font-size: clamp(12px, 1.7vw, 15px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.25;
+}
+
+.enhance-detail-plus-rows {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.enhance-detail-plus-row {
+  display: flex;
+
+  align-items: baseline;
+
+  justify-content: space-between;
+
+  gap: 12px;
+
+  color: #bbb;
+
+  font-size: clamp(12px, 1.7vw, 16px);
+}
+
+.enhance-detail-plus-row strong {
+  color: #fff;
+
+  font-weight: 400;
+}
+
+.enhance-detail-plus-confirm {
+  margin-top: 4px;
+
+  width: 64%;
+
+  max-width: 180px;
+
+  align-self: center;
+
+  padding: 8px 14px;
+
+  border: 2px solid #fff;
+  border-radius: 6px;
+
+  background:
+    linear-gradient(
+      #333,
+      #151515
+    );
+
+  color: white;
+
+  font-size: clamp(14px, 2vw, 18px);
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
+
+.enhance-detail-plus-confirm:active:not(:disabled) {
+  transform: scale(0.98);
+
+  background: #444;
+}
+
+.enhance-detail-plus-confirm:disabled {
+  border-color: #666;
+
+  color: #888;
+
+  background: #1a1a1a;
+
+  cursor: default;
+}
+
+.debug-menu-panel {
+  width: min(82vw, 360px);
+
+  max-height: min(86vh, 420px);
+
+  gap: 8px;
+
+  padding:
+    max(12px, env(safe-area-inset-top, 0px))
+    14px
+    max(10px, env(safe-area-inset-bottom, 0px));
+
+  overflow-x: hidden;
+
+  overflow-y: auto;
+}
+
+.debug-menu-actions {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: stretch;
+
+  gap: 6px;
+
+  width: 100%;
+}
+
+.debug-menu-button {
+  width: 100%;
+
+  min-height: 36px;
+
+  margin: 0;
+  padding: 8px 10px;
+
+  border: 1px solid #888;
+  border-radius: 6px;
+
+  background: #1c1c1c;
+
+  color: #eee;
+
+  font-size: clamp(13px, 2vw, 16px);
+
+  letter-spacing: 0.04em;
+
+  cursor: pointer;
+}
+
+.debug-menu-button:active {
+  transform: scale(0.98);
+
+  background: #333;
+}
+
+.debug-menu-close {
+  width: 100%;
+
+  max-width: none;
+
+  margin-top: 4px;
 }
 
 .timeline-resource {

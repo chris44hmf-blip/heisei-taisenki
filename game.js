@@ -3881,6 +3881,8 @@ const CHARACTER_LEVEL_MIN = 1;
 
 const CHARACTER_LEVEL_MAX = 10;
 
+const CHARACTER_PLUS_MAX = 10;
+
 
 let selectedEnhanceCharacterId =
   null;
@@ -3928,6 +3930,12 @@ function clampCharacterPlus(plus) {
   if (value < 0) {
 
     return 0;
+
+  }
+
+  if (value > CHARACTER_PLUS_MAX) {
+
+    return CHARACTER_PLUS_MAX;
 
   }
 
@@ -4452,7 +4460,16 @@ function renderEnhanceDetail() {
         "MAX";
 
     } else if (
-      needBeats != null &&
+      needBeats == null
+    ) {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "強化する";
+
+    } else if (
       getBeats() < needBeats
     ) {
 
@@ -4469,6 +4486,96 @@ function renderEnhanceDetail() {
 
       confirmButton.textContent =
         "強化する";
+
+    }
+
+  }
+
+  const isMaxPlus =
+    plus >= CHARACTER_PLUS_MAX;
+
+  const needFragments =
+    getPlusEnhanceFragmentCost(
+      character
+    );
+
+  const ownedFragments =
+    getCharacterFragmentCount(
+      characterId
+    );
+
+  const fragmentNameEl =
+    document.getElementById(
+      "enhance-detail-fragment-name"
+    );
+
+  if (fragmentNameEl) {
+
+    fragmentNameEl.textContent =
+      getCharacterFragmentLabel(
+        character
+      );
+
+  }
+
+  const ownedFragmentsEl =
+    document.getElementById(
+      "enhance-detail-owned-fragments"
+    );
+
+  if (ownedFragmentsEl) {
+
+    ownedFragmentsEl.textContent =
+      String(ownedFragments);
+
+  }
+
+  const needFragmentsEl =
+    document.getElementById(
+      "enhance-detail-need-fragments"
+    );
+
+  if (needFragmentsEl) {
+
+    needFragmentsEl.textContent =
+      isMaxPlus
+        ? "—"
+        : String(needFragments);
+
+  }
+
+  const plusConfirmButton =
+    document.getElementById(
+      "enhance-detail-plus-confirm"
+    );
+
+  if (plusConfirmButton) {
+
+    if (isMaxPlus) {
+
+      plusConfirmButton.disabled =
+        true;
+
+      plusConfirmButton.textContent =
+        "MAX";
+
+    } else if (
+      ownedFragments < needFragments
+    ) {
+
+      plusConfirmButton.disabled =
+        true;
+
+      plusConfirmButton.textContent =
+        "かけら不足";
+
+    } else {
+
+      plusConfirmButton.disabled =
+        false;
+
+      plusConfirmButton.textContent =
+        "+強化";
 
     }
 
@@ -4630,6 +4737,36 @@ if (enhanceDetailConfirm) {
       }
 
       tryEnhanceCharacterLevelUp(
+        selectedEnhanceCharacterId
+      );
+
+    }
+  );
+
+}
+
+
+const enhanceDetailPlusConfirm =
+  document.getElementById(
+    "enhance-detail-plus-confirm"
+  );
+
+
+if (enhanceDetailPlusConfirm) {
+
+  enhanceDetailPlusConfirm.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !selectedEnhanceCharacterId
+      ) {
+
+        return;
+
+      }
+
+      tryEnhanceCharacterPlus(
         selectedEnhanceCharacterId
       );
 
@@ -5966,10 +6103,12 @@ function sanitizeCharacterProgressEntry(
     toPositiveInt(entry.plus);
 
   sanitized.plus =
-    plus !== null &&
-    plus >= 0
-      ? plus
-      : defaults.plus;
+    clampCharacterPlus(
+      plus !== null &&
+      plus >= 0
+        ? plus
+        : defaults.plus
+    );
 
   const unlockedForms = [];
 
@@ -6441,6 +6580,440 @@ function initBeats() {
 initBeats();
 
 
+const CHARACTER_FRAGMENTS_KEY =
+  "characterFragments";
+
+const DEBUG_FRAGMENT_GRANT_AMOUNT =
+  100;
+
+const PLUS_ENHANCE_FRAGMENT_COST = {
+
+  [CHARACTER_RARITY.IPPANJIN]: 10,
+
+  [CHARACTER_RARITY.BANDMAN]: 15,
+
+  [CHARACTER_RARITY.HEADLINER]: 20,
+
+  [CHARACTER_RARITY.LEGEND]: 30
+
+};
+
+let characterFragments = {};
+
+
+function createEmptyCharacterFragments() {
+
+  return {};
+
+}
+
+
+function sanitizeCharacterFragmentCount(
+  value
+) {
+
+  const number =
+    Number(value);
+
+  if (
+    !Number.isInteger(number) ||
+    number < 0
+  ) {
+
+    return 0;
+
+  }
+
+  return number;
+
+}
+
+
+function sanitizeCharacterFragments(
+  raw
+) {
+
+  const sanitized =
+    createEmptyCharacterFragments();
+
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    Array.isArray(raw)
+  ) {
+
+    return sanitized;
+
+  }
+
+  Object.keys(raw).forEach(
+    (characterId) => {
+
+      if (
+        !CHARACTERS[characterId]
+      ) {
+
+        return;
+
+      }
+
+      sanitized[characterId] =
+        sanitizeCharacterFragmentCount(
+          raw[characterId]
+        );
+
+    }
+  );
+
+  return sanitized;
+
+}
+
+
+function saveCharacterFragments() {
+
+  localStorage.setItem(
+    CHARACTER_FRAGMENTS_KEY,
+    JSON.stringify(
+      characterFragments
+    )
+  );
+
+}
+
+
+function loadCharacterFragments() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        CHARACTER_FRAGMENTS_KEY
+      );
+
+    if (!raw) {
+
+      characterFragments =
+        createEmptyCharacterFragments();
+
+      return characterFragments;
+
+    }
+
+    characterFragments =
+      sanitizeCharacterFragments(
+        JSON.parse(raw)
+      );
+
+  } catch (error) {
+
+    characterFragments =
+      createEmptyCharacterFragments();
+
+  }
+
+  return characterFragments;
+
+}
+
+
+function getCharacterFragmentCount(
+  characterId
+) {
+
+  if (!CHARACTERS[characterId]) {
+
+    return 0;
+
+  }
+
+  return sanitizeCharacterFragmentCount(
+    characterFragments[characterId]
+  );
+
+}
+
+
+function setCharacterFragmentCount(
+  characterId,
+  count
+) {
+
+  if (!CHARACTERS[characterId]) {
+
+    return 0;
+
+  }
+
+  const sanitized =
+    sanitizeCharacterFragmentCount(
+      count
+    );
+
+  characterFragments[characterId] =
+    sanitized;
+
+  saveCharacterFragments();
+
+  return sanitized;
+
+}
+
+
+function addCharacterFragments(
+  characterId,
+  amount
+) {
+
+  if (!CHARACTERS[characterId]) {
+
+    return getCharacterFragmentCount(
+      characterId
+    );
+
+  }
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isInteger(add) ||
+    add <= 0
+  ) {
+
+    return getCharacterFragmentCount(
+      characterId
+    );
+
+  }
+
+  return setCharacterFragmentCount(
+    characterId,
+    getCharacterFragmentCount(
+      characterId
+    ) + add
+  );
+
+}
+
+
+function spendCharacterFragments(
+  characterId,
+  amount
+) {
+
+  const spend =
+    Number(amount);
+
+  if (
+    !Number.isInteger(spend) ||
+    spend <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const owned =
+    getCharacterFragmentCount(
+      characterId
+    );
+
+  if (owned < spend) {
+
+    return false;
+
+  }
+
+  setCharacterFragmentCount(
+    characterId,
+    owned - spend
+  );
+
+  return true;
+
+}
+
+
+function getPlusEnhanceFragmentCostByRarity(
+  rarity
+) {
+
+  const cost =
+    PLUS_ENHANCE_FRAGMENT_COST[
+      rarity
+    ];
+
+  if (typeof cost === "number") {
+
+    return cost;
+
+  }
+
+  return PLUS_ENHANCE_FRAGMENT_COST[
+    CHARACTER_RARITY.IPPANJIN
+  ];
+
+}
+
+
+function getPlusEnhanceFragmentCost(
+  characterOrId
+) {
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  if (!character) {
+
+    return getPlusEnhanceFragmentCostByRarity(
+      CHARACTER_RARITY.IPPANJIN
+    );
+
+  }
+
+  return getPlusEnhanceFragmentCostByRarity(
+    getCharacterRarity(character)
+  );
+
+}
+
+
+function getCharacterFragmentLabel(
+  characterOrId
+) {
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  if (!character) {
+
+    return "かけら";
+
+  }
+
+  return character.name + "のかけら";
+
+}
+
+
+function canEnhanceCharacterPlus(
+  characterId
+) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return false;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const plus =
+    clampCharacterPlus(
+      progress.plus
+    );
+
+  if (plus >= CHARACTER_PLUS_MAX) {
+
+    return false;
+
+  }
+
+  const need =
+    getPlusEnhanceFragmentCost(
+      characterId
+    );
+
+  return (
+    getCharacterFragmentCount(
+      characterId
+    ) >= need
+  );
+
+}
+
+
+function tryEnhanceCharacterPlus(
+  characterId
+) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return false;
+
+  }
+
+  const savedProgress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const currentPlus =
+    clampCharacterPlus(
+      savedProgress.plus
+    );
+
+  if (
+    currentPlus >=
+    CHARACTER_PLUS_MAX
+  ) {
+
+    return false;
+
+  }
+
+  const need =
+    getPlusEnhanceFragmentCost(
+      characterId
+    );
+
+  if (
+    !spendCharacterFragments(
+      characterId,
+      need
+    )
+  ) {
+
+    return false;
+
+  }
+
+  savedProgress.plus =
+    currentPlus + 1;
+
+  characterProgress[characterId] =
+    sanitizeCharacterProgressEntry(
+      savedProgress
+    );
+
+  saveCharacterProgress();
+
+  renderEnhanceDetail();
+
+  return true;
+
+}
+
+
+loadCharacterFragments();
+
+
 const DEBUG_BEATS_TAP_COUNT = 5;
 
 const DEBUG_BEATS_TAP_WINDOW_MS =
@@ -6499,21 +7072,16 @@ function registerDebugBeatsTap() {
 
   resetDebugBeatsTapCount();
 
-  openDebugBeatsConfirm();
+  openDebugMenu();
 
 }
 
 
-function openDebugBeatsConfirm() {
+function openDebugMenu() {
 
   const overlay =
     document.getElementById(
       "debug-confirm-overlay"
-    );
-
-  const message =
-    document.getElementById(
-      "debug-confirm-message"
     );
 
   if (!overlay) {
@@ -6528,13 +7096,6 @@ function openDebugBeatsConfirm() {
 
   }
 
-  if (message) {
-
-    message.textContent =
-      "BEATSを99,999にしますか？";
-
-  }
-
   debugConfirmOpen = true;
 
   overlay.hidden = false;
@@ -6542,7 +7103,7 @@ function openDebugBeatsConfirm() {
 }
 
 
-function closeDebugBeatsConfirm() {
+function closeDebugMenu() {
 
   const overlay =
     document.getElementById(
@@ -6574,7 +7135,37 @@ function applyDebugBeatsGrant() {
 }
 
 
-function executeDebugBeatsGrant() {
+function applyDebugFragmentGrant(
+  characterId
+) {
+
+  if (!CHARACTERS[characterId]) {
+
+    return;
+
+  }
+
+  addCharacterFragments(
+    characterId,
+    DEBUG_FRAGMENT_GRANT_AMOUNT
+  );
+
+  if (
+    selectedEnhanceCharacterId ===
+    characterId
+  ) {
+
+    renderEnhanceDetail();
+
+  }
+
+}
+
+
+function handleDebugMenuAction(
+  action,
+  characterId
+) {
 
   if (!debugConfirmOpen) {
 
@@ -6582,9 +7173,21 @@ function executeDebugBeatsGrant() {
 
   }
 
-  applyDebugBeatsGrant();
+  if (action === "beats") {
 
-  closeDebugBeatsConfirm();
+    applyDebugBeatsGrant();
+
+    return;
+
+  }
+
+  if (action === "fragment") {
+
+    applyDebugFragmentGrant(
+      characterId
+    );
+
+  }
 
 }
 
@@ -6602,11 +7205,6 @@ function initDebugCommands() {
   const cancelButton =
     document.getElementById(
       "debug-confirm-cancel"
-    );
-
-  const executeButton =
-    document.getElementById(
-      "debug-confirm-execute"
     );
 
   const overlay =
@@ -6655,20 +7253,7 @@ function initDebugCommands() {
       "click",
       () => {
 
-        closeDebugBeatsConfirm();
-
-      }
-    );
-
-  }
-
-  if (executeButton) {
-
-    executeButton.addEventListener(
-      "click",
-      () => {
-
-        executeDebugBeatsGrant();
+        closeDebugMenu();
 
       }
     );
@@ -6686,9 +7271,30 @@ function initDebugCommands() {
           overlay
         ) {
 
-          closeDebugBeatsConfirm();
+          closeDebugMenu();
+
+          return;
 
         }
+
+        const button =
+          event.target.closest(
+            "[data-debug-action]"
+          );
+
+        if (
+          !button ||
+          !overlay.contains(button)
+        ) {
+
+          return;
+
+        }
+
+        handleDebugMenuAction(
+          button.dataset.debugAction,
+          button.dataset.characterId
+        );
 
       }
     );
