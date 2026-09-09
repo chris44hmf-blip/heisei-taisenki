@@ -308,6 +308,14 @@ h2 {
   align-items: center;
 
   gap: 0.35em;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  touch-action: manipulation;
 }
 
 .beats-icon {
@@ -1318,6 +1326,133 @@ h2 {
   font-size: clamp(14px, 2.2vw, 20px);
 
   letter-spacing: 0.1em;
+}
+
+.debug-confirm-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 90;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.72);
+
+  padding: 3vh 4vw;
+}
+
+.debug-confirm-overlay[hidden] {
+  display: none !important;
+}
+
+.debug-confirm-panel {
+  width: min(78vw, 340px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 10px;
+
+  padding: 14px 16px 12px;
+
+  border: 2px solid #888;
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      #2a2a2a,
+      #121212
+    );
+
+  text-align: center;
+}
+
+.debug-confirm-title {
+  color: #f0c060;
+
+  font-size: clamp(16px, 2.8vw, 24px);
+
+  letter-spacing: 0.18em;
+}
+
+.debug-confirm-message {
+  margin: 0;
+
+  color: #eee;
+
+  font-size: clamp(13px, 2.1vw, 17px);
+
+  line-height: 1.45;
+
+  letter-spacing: 0.04em;
+}
+
+.debug-confirm-actions {
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  margin-top: 4px;
+}
+
+.debug-confirm-cancel,
+.debug-confirm-execute {
+  flex: 1 1 0;
+
+  min-width: 0;
+
+  max-width: 140px;
+
+  padding: 8px 10px;
+
+  border-radius: 6px;
+
+  font-size: clamp(13px, 2vw, 16px);
+
+  letter-spacing: 0.08em;
+
+  cursor: pointer;
+}
+
+.debug-confirm-cancel {
+  border: 2px solid #777;
+
+  background: #1a1a1a;
+
+  color: #ccc;
+}
+
+.debug-confirm-execute {
+  border: 2px solid #f0c060;
+
+  background:
+    linear-gradient(
+      #3a3218,
+      #1c1808
+    );
+
+  color: #ffe7a0;
+}
+
+.debug-confirm-cancel:active,
+.debug-confirm-execute:active {
+  transform: scale(0.98);
 }
 
 .enhance-filters {
@@ -4345,6 +4480,10 @@ h3,
 .evolve-detail-compare,
 .form-unlock-label,
 .form-unlock-name,
+.debug-confirm-title,
+.debug-confirm-message,
+.debug-confirm-cancel,
+.debug-confirm-execute,
 .timeline-header h3,
 .timeline-resource,
 .year-node,

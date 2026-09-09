@@ -6044,6 +6044,266 @@ function initBeats() {
 initBeats();
 
 
+const DEBUG_BEATS_TAP_COUNT = 5;
+
+const DEBUG_BEATS_TAP_WINDOW_MS =
+  2000;
+
+const DEBUG_BEATS_GRANT_AMOUNT =
+  99999;
+
+let debugBeatsTapTimes = [];
+
+let debugConfirmOpen = false;
+
+
+function resetDebugBeatsTapCount() {
+
+  debugBeatsTapTimes = [];
+
+}
+
+
+function registerDebugBeatsTap() {
+
+  if (debugConfirmOpen) {
+
+    return;
+
+  }
+
+  const now =
+    Date.now();
+
+  if (
+    debugBeatsTapTimes.length ===
+      0 ||
+    now -
+      debugBeatsTapTimes[0] >
+      DEBUG_BEATS_TAP_WINDOW_MS
+  ) {
+
+    debugBeatsTapTimes = [now];
+
+    return;
+
+  }
+
+  debugBeatsTapTimes.push(now);
+
+  if (
+    debugBeatsTapTimes.length <
+    DEBUG_BEATS_TAP_COUNT
+  ) {
+
+    return;
+
+  }
+
+  resetDebugBeatsTapCount();
+
+  openDebugBeatsConfirm();
+
+}
+
+
+function openDebugBeatsConfirm() {
+
+  const overlay =
+    document.getElementById(
+      "debug-confirm-overlay"
+    );
+
+  const message =
+    document.getElementById(
+      "debug-confirm-message"
+    );
+
+  if (!overlay) {
+
+    return;
+
+  }
+
+  if (debugConfirmOpen) {
+
+    return;
+
+  }
+
+  if (message) {
+
+    message.textContent =
+      "BEATSを99,999にしますか？";
+
+  }
+
+  debugConfirmOpen = true;
+
+  overlay.hidden = false;
+
+}
+
+
+function closeDebugBeatsConfirm() {
+
+  const overlay =
+    document.getElementById(
+      "debug-confirm-overlay"
+    );
+
+  if (overlay) {
+
+    overlay.hidden = true;
+
+  }
+
+  debugConfirmOpen = false;
+
+  resetDebugBeatsTapCount();
+
+}
+
+
+function applyDebugBeatsGrant() {
+
+  setBeats(
+    Math.max(
+      getBeats(),
+      DEBUG_BEATS_GRANT_AMOUNT
+    )
+  );
+
+}
+
+
+function executeDebugBeatsGrant() {
+
+  if (!debugConfirmOpen) {
+
+    return;
+
+  }
+
+  applyDebugBeatsGrant();
+
+  closeDebugBeatsConfirm();
+
+}
+
+
+function initDebugCommands() {
+
+  const beatsResource =
+    document.getElementById(
+      "home-beats-resource"
+    ) ||
+    document.querySelector(
+      ".resource-beats"
+    );
+
+  const cancelButton =
+    document.getElementById(
+      "debug-confirm-cancel"
+    );
+
+  const executeButton =
+    document.getElementById(
+      "debug-confirm-execute"
+    );
+
+  const overlay =
+    document.getElementById(
+      "debug-confirm-overlay"
+    );
+
+  if (beatsResource) {
+
+    beatsResource.addEventListener(
+      "click",
+      (event) => {
+
+        event.preventDefault();
+
+        registerDebugBeatsTap();
+
+      }
+    );
+
+    beatsResource.addEventListener(
+      "keydown",
+      (event) => {
+
+        if (
+          event.key !== "Enter" &&
+          event.key !== " "
+        ) {
+
+          return;
+
+        }
+
+        event.preventDefault();
+
+        registerDebugBeatsTap();
+
+      }
+    );
+
+  }
+
+  if (cancelButton) {
+
+    cancelButton.addEventListener(
+      "click",
+      () => {
+
+        closeDebugBeatsConfirm();
+
+      }
+    );
+
+  }
+
+  if (executeButton) {
+
+    executeButton.addEventListener(
+      "click",
+      () => {
+
+        executeDebugBeatsGrant();
+
+      }
+    );
+
+  }
+
+  if (overlay) {
+
+    overlay.addEventListener(
+      "click",
+      (event) => {
+
+        if (
+          event.target ===
+          overlay
+        ) {
+
+          closeDebugBeatsConfirm();
+
+        }
+
+      }
+    );
+
+  }
+
+}
+
+
+initDebugCommands();
+
+
 const BATTLE_DECK_KEY =
   "battleDeck";
 

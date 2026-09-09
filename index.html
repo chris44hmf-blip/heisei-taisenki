@@ -112,7 +112,13 @@
 
         <div class="resources">
 
-          <div class="resource resource-beats">
+          <div
+            class="resource resource-beats"
+            id="home-beats-resource"
+            role="button"
+            tabindex="0"
+            aria-label="BEATS"
+          >
             <span
               class="beats-icon"
               aria-hidden="true"
@@ -716,6 +722,57 @@
       id="form-unlock-name"
       class="form-unlock-name"
     ></div>
+
+  </div>
+
+</div>
+
+<div
+  id="debug-confirm-overlay"
+  class="debug-confirm-overlay"
+  hidden
+>
+
+  <div
+    class="debug-confirm-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="debug-confirm-title"
+  >
+
+    <div
+      id="debug-confirm-title"
+      class="debug-confirm-title"
+    >
+      DEBUG
+    </div>
+
+    <p
+      id="debug-confirm-message"
+      class="debug-confirm-message"
+    >
+      BEATSを99,999にしますか？
+    </p>
+
+    <div class="debug-confirm-actions">
+
+      <button
+        id="debug-confirm-cancel"
+        class="debug-confirm-cancel"
+        type="button"
+      >
+        キャンセル
+      </button>
+
+      <button
+        id="debug-confirm-execute"
+        class="debug-confirm-execute"
+        type="button"
+      >
+        実行
+      </button>
+
+    </div>
 
   </div>
 
