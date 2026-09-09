@@ -5322,6 +5322,185 @@ function getCharacterFormLabel(
 }
 
 
+function getUnlockedCharacterFormNumbers(
+  characterOrId
+) {
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  if (!character) {
+
+    return [];
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      character.id
+    );
+
+  const unlocked =
+    Array.isArray(
+      progress.unlockedForms
+    )
+      ? progress.unlockedForms
+      : [1];
+
+  const forms = [];
+
+  unlocked.forEach((value) => {
+
+    const formNumber =
+      Number(value);
+
+    if (
+      !Number.isInteger(formNumber) ||
+      formNumber < 1 ||
+      forms.indexOf(formNumber) !==
+        -1
+    ) {
+
+      return;
+
+    }
+
+    const form =
+      getCharacterForm(
+        character,
+        formNumber
+      );
+
+    if (
+      !form ||
+      !form.images ||
+      !form.images.menu ||
+      !form.stats
+    ) {
+
+      return;
+
+    }
+
+    forms.push(formNumber);
+
+  });
+
+  forms.sort((a, b) => a - b);
+
+  return forms;
+
+}
+
+
+function getSafeActiveFormNumber(
+  characterOrId
+) {
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      characterOrId
+    );
+
+  if (!unlocked.length) {
+
+    return 1;
+
+  }
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  const progress =
+    character
+      ? getEnhanceCardProgress(
+          character.id
+        )
+      : null;
+
+  const activeForm =
+    progress
+      ? Number(progress.activeForm)
+      : NaN;
+
+  if (
+    unlocked.indexOf(activeForm) !==
+    -1
+  ) {
+
+    return activeForm;
+
+  }
+
+  if (unlocked.indexOf(1) !== -1) {
+
+    return 1;
+
+  }
+
+  return unlocked[0];
+
+}
+
+
+function getCharacterFormForDisplay(
+  characterOrId,
+  formNumber
+) {
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  if (!character) {
+
+    return null;
+
+  }
+
+  const form =
+    getCharacterForm(
+      character,
+      formNumber
+    );
+
+  if (
+    form &&
+    form.images &&
+    form.stats
+  ) {
+
+    return form;
+
+  }
+
+  return null;
+
+}
+
+
+function getCharacterActiveFormForDisplay(
+  characterOrId
+) {
+
+  const formNumber =
+    getSafeActiveFormNumber(
+      characterOrId
+    );
+
+  return getCharacterFormForDisplay(
+    characterOrId,
+    formNumber
+  );
+
+}
+
+
 const OWNED_CHARACTERS_KEY =
   "ownedCharacters";
 
@@ -6765,6 +6944,12 @@ let formationDraftDeck = null;
 let selectedFormationCharacterId =
   null;
 
+let formationFormDetailCharacterId =
+  null;
+
+let formationFormPreviewNumber =
+  null;
+
 let formationRarityFilter =
   FORMATION_RARITY_FILTER_ALL;
 
@@ -6928,6 +7113,8 @@ function startFormationEditing() {
   selectedFormationCharacterId =
     null;
 
+  closeFormationFormDetail(true);
+
   formationRarityFilter =
     FORMATION_RARITY_FILTER_ALL;
 
@@ -7032,6 +7219,8 @@ function resetFormationEditing() {
   selectedFormationCharacterId =
     null;
 
+  closeFormationFormDetail(true);
+
   formationRarityFilter =
     FORMATION_RARITY_FILTER_ALL;
 
@@ -7085,6 +7274,615 @@ function setSelectedFormationCharacter(
   renderFormationScreen();
 
 }
+
+
+function closeFormationFormDetail(
+  skipRender
+) {
+
+  formationFormDetailCharacterId =
+    null;
+
+  formationFormPreviewNumber =
+    null;
+
+  const detail =
+    document.getElementById(
+      "formation-form-detail"
+    );
+
+  if (detail) {
+
+    detail.hidden = true;
+
+  }
+
+  if (!skipRender) {
+
+    renderFormationScreen();
+
+  }
+
+}
+
+
+function openFormationFormDetail(
+  characterId
+) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  selectedFormationCharacterId =
+    characterId;
+
+  formationFormDetailCharacterId =
+    characterId;
+
+  formationFormPreviewNumber =
+    getSafeActiveFormNumber(
+      characterId
+    );
+
+  renderFormationScreen();
+
+  renderFormationFormDetail();
+
+}
+
+
+function shiftFormationFormPreview(
+  direction
+) {
+
+  const characterId =
+    formationFormDetailCharacterId;
+
+  if (!characterId) {
+
+    return;
+
+  }
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      characterId
+    );
+
+  if (unlocked.length <= 1) {
+
+    return;
+
+  }
+
+  let index =
+    unlocked.indexOf(
+      Number(
+        formationFormPreviewNumber
+      )
+    );
+
+  if (index === -1) {
+
+    index = 0;
+
+  }
+
+  const nextIndex =
+    (
+      index +
+      direction +
+      unlocked.length
+    ) %
+    unlocked.length;
+
+  formationFormPreviewNumber =
+    unlocked[nextIndex];
+
+  renderFormationFormDetail();
+
+}
+
+
+function applyFormationFormPreview() {
+
+  const characterId =
+    formationFormDetailCharacterId;
+
+  if (!characterId) {
+
+    return;
+
+  }
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      characterId
+    );
+
+  const preview =
+    Number(
+      formationFormPreviewNumber
+    );
+
+  if (
+    unlocked.indexOf(preview) ===
+    -1
+  ) {
+
+    return;
+
+  }
+
+  const activeForm =
+    getSafeActiveFormNumber(
+      characterId
+    );
+
+  if (preview === activeForm) {
+
+    return;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  progress.activeForm =
+    preview;
+
+  saveCharacterProgress();
+
+  renderFormationFormDetail();
+
+  renderFormationScreen();
+
+}
+
+
+function renderFormationFormDetail() {
+
+  const detail =
+    document.getElementById(
+      "formation-form-detail"
+    );
+
+  const characterId =
+    formationFormDetailCharacterId;
+
+  const character =
+    characterId
+      ? CHARACTERS[characterId]
+      : null;
+
+  if (
+    !detail ||
+    !character
+  ) {
+
+    if (detail) {
+
+      detail.hidden = true;
+
+    }
+
+    return;
+
+  }
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      character
+    );
+
+  if (!unlocked.length) {
+
+    detail.hidden = true;
+
+    return;
+
+  }
+
+  let preview =
+    Number(
+      formationFormPreviewNumber
+    );
+
+  if (
+    unlocked.indexOf(preview) ===
+    -1
+  ) {
+
+    preview =
+      getSafeActiveFormNumber(
+        character
+      );
+
+    formationFormPreviewNumber =
+      preview;
+
+  }
+
+  const form =
+    getCharacterFormForDisplay(
+      character,
+      preview
+    );
+
+  if (!form) {
+
+    detail.hidden = true;
+
+    return;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const level =
+    clampCharacterLevel(
+      progress.level
+    );
+
+  const plus =
+    clampCharacterPlus(
+      progress.plus
+    );
+
+  const activeForm =
+    getSafeActiveFormNumber(
+      characterId
+    );
+
+  const combat =
+    calculateCharacterCombatStats(
+      form,
+      level,
+      plus
+    );
+
+  const yaniCost =
+    Number(
+      form.stats &&
+      form.stats.yaniCost
+    ) || 0;
+
+  const image =
+    document.getElementById(
+      "formation-form-detail-image"
+    );
+
+  if (image) {
+
+    image.src =
+      form.images.menu;
+
+    image.alt =
+      character.name;
+
+    const menuScale =
+      getCharacterMenuScale(
+        form
+      );
+
+    image.style.width =
+      menuScale * 100 + "%";
+
+    image.style.height =
+      menuScale * 100 + "%";
+
+  }
+
+  const numberEl =
+    document.getElementById(
+      "formation-form-detail-number"
+    );
+
+  if (numberEl) {
+
+    numberEl.textContent =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+  }
+
+  const rarityEl =
+    document.getElementById(
+      "formation-form-detail-rarity"
+    );
+
+  if (rarityEl) {
+
+    rarityEl.textContent =
+      getRarityLabel(
+        getCharacterRarity(character)
+      );
+
+  }
+
+  const nameEl =
+    document.getElementById(
+      "formation-form-detail-name"
+    );
+
+  if (nameEl) {
+
+    nameEl.textContent =
+      character.name;
+
+  }
+
+  const groupEl =
+    document.getElementById(
+      "formation-form-detail-group"
+    );
+
+  if (groupEl) {
+
+    groupEl.textContent =
+      getCharacterGroup(character);
+
+  }
+
+  const levelEl =
+    document.getElementById(
+      "formation-form-detail-level"
+    );
+
+  if (levelEl) {
+
+    levelEl.textContent =
+      "Lv." +
+      level +
+      " +" +
+      plus;
+
+  }
+
+  const hpEl =
+    document.getElementById(
+      "formation-form-detail-hp"
+    );
+
+  if (hpEl) {
+
+    hpEl.textContent =
+      String(combat.hp);
+
+  }
+
+  const attackEl =
+    document.getElementById(
+      "formation-form-detail-attack"
+    );
+
+  if (attackEl) {
+
+    attackEl.textContent =
+      String(combat.attack);
+
+  }
+
+  const yaniEl =
+    document.getElementById(
+      "formation-form-detail-yani"
+    );
+
+  if (yaniEl) {
+
+    yaniEl.textContent =
+      String(yaniCost);
+
+  }
+
+  const formLabelEl =
+    document.getElementById(
+      "formation-form-detail-form-label"
+    );
+
+  if (formLabelEl) {
+
+    formLabelEl.textContent =
+      getCharacterFormLabel(
+        preview
+      );
+
+  }
+
+  const canSwitch =
+    unlocked.length > 1;
+
+  const prevButton =
+    document.getElementById(
+      "formation-form-detail-prev"
+    );
+
+  const nextButton =
+    document.getElementById(
+      "formation-form-detail-next"
+    );
+
+  if (prevButton) {
+
+    prevButton.disabled =
+      !canSwitch;
+
+    prevButton.hidden =
+      !canSwitch;
+
+  }
+
+  if (nextButton) {
+
+    nextButton.disabled =
+      !canSwitch;
+
+    nextButton.hidden =
+      !canSwitch;
+
+  }
+
+  const isActivePreview =
+    preview === activeForm;
+
+  const statusEl =
+    document.getElementById(
+      "formation-form-detail-status"
+    );
+
+  if (statusEl) {
+
+    statusEl.textContent =
+      isActivePreview
+        ? "使用中"
+        : "";
+
+  }
+
+  const useButton =
+    document.getElementById(
+      "formation-form-detail-use"
+    );
+
+  if (useButton) {
+
+    if (isActivePreview) {
+
+      useButton.disabled =
+        true;
+
+      useButton.textContent =
+        "使用中";
+
+    } else {
+
+      useButton.disabled =
+        false;
+
+      useButton.textContent =
+        "このFORMを使用";
+
+    }
+
+  }
+
+  detail.hidden = false;
+
+}
+
+
+(
+  function initFormationFormDetailControls() {
+
+    const closeButton =
+      document.getElementById(
+        "formation-form-detail-close"
+      );
+
+    const backdrop =
+      document.getElementById(
+        "formation-form-detail-backdrop"
+      );
+
+    const prevButton =
+      document.getElementById(
+        "formation-form-detail-prev"
+      );
+
+    const nextButton =
+      document.getElementById(
+        "formation-form-detail-next"
+      );
+
+    const useButton =
+      document.getElementById(
+        "formation-form-detail-use"
+      );
+
+    if (closeButton) {
+
+      closeButton.addEventListener(
+        "click",
+        () => {
+
+          closeFormationFormDetail();
+
+        }
+      );
+
+    }
+
+    if (backdrop) {
+
+      backdrop.addEventListener(
+        "click",
+        () => {
+
+          closeFormationFormDetail();
+
+        }
+      );
+
+    }
+
+    if (prevButton) {
+
+      prevButton.addEventListener(
+        "click",
+        () => {
+
+          shiftFormationFormPreview(
+            -1
+          );
+
+        }
+      );
+
+    }
+
+    if (nextButton) {
+
+      nextButton.addEventListener(
+        "click",
+        () => {
+
+          shiftFormationFormPreview(
+            1
+          );
+
+        }
+      );
+
+    }
+
+    if (useButton) {
+
+      useButton.addEventListener(
+        "click",
+        () => {
+
+          applyFormationFormPreview();
+
+        }
+      );
+
+    }
+
+  }
+)();
 
 
 function placeFormationDraftCharacter(
@@ -7231,7 +8029,7 @@ function handleFormationSlotTap(
 }
 
 
-function applyFormationMenuScale(image, character) {
+function applyFormationMenuScale(image, formOrCharacter) {
 
   if (!image) {
 
@@ -7242,7 +8040,7 @@ function applyFormationMenuScale(image, character) {
   image.style.transform =
     "scale(" +
     getCharacterMenuScale(
-      character
+      formOrCharacter
     ) +
     ")";
 
@@ -7252,13 +8050,23 @@ function applyFormationMenuScale(image, character) {
 }
 
 
-function createFormationCardMetaHtml(character) {
+function createFormationCardMetaHtml(
+  character,
+  form
+) {
+
+  const yaniCost =
+    form &&
+    form.stats &&
+    form.stats.yaniCost != null
+      ? form.stats.yaniCost
+      : character.stats.yaniCost;
 
   return `
     <span class="formation-card-meta">
       <strong>${character.name}</strong>
       <span class="formation-card-yani">
-        🚬 ${character.stats.yaniCost}
+        🚬 ${yaniCost}
       </span>
     </span>
   `;
@@ -7288,10 +8096,18 @@ function createFormationOwnedCard(character, box) {
 
   }
 
+  const activeForm =
+    getCharacterActiveFormForDisplay(
+      character
+    ) || character;
+
   const menuImage =
-    getCharacterImages(
-      character.id
-    ).menu;
+    activeForm.images &&
+    activeForm.images.menu
+      ? activeForm.images.menu
+      : getCharacterImages(
+          character.id
+        ).menu;
 
   card.innerHTML = `
 
@@ -7304,7 +8120,7 @@ function createFormationOwnedCard(character, box) {
       >
     </span>
 
-    ${createFormationCardMetaHtml(character)}
+    ${createFormationCardMetaHtml(character, activeForm)}
 
   `;
 
@@ -7312,14 +8128,14 @@ function createFormationOwnedCard(character, box) {
 
   applyFormationMenuScale(
     card.querySelector("img"),
-    character
+    activeForm
   );
 
   card.addEventListener(
     "click",
     () => {
 
-      setSelectedFormationCharacter(
+      openFormationFormDetail(
         character.id
       );
 
@@ -7362,10 +8178,18 @@ function createFormationDeckSlot(
     slot.dataset.characterId =
       character.id;
 
+    const activeForm =
+      getCharacterActiveFormForDisplay(
+        character
+      ) || character;
+
     const menuImage =
-      getCharacterImages(
-        character.id
-      ).menu;
+      activeForm.images &&
+      activeForm.images.menu
+        ? activeForm.images.menu
+        : getCharacterImages(
+            character.id
+          ).menu;
 
     slot.innerHTML = `
 
@@ -7378,13 +8202,13 @@ function createFormationDeckSlot(
         >
       </span>
 
-      ${createFormationCardMetaHtml(character)}
+      ${createFormationCardMetaHtml(character, activeForm)}
 
     `;
 
     applyFormationMenuScale(
       slot.querySelector("img"),
-      character
+      activeForm
     );
 
     if (
