@@ -29,6 +29,11 @@ const enhanceScreen =
     "enhance-screen"
   );
 
+const enhanceDetailScreen =
+  document.getElementById(
+    "enhance-detail-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -2447,8 +2452,7 @@ function renderEnhanceList() {
       "click",
       () => {
 
-        console.log(
-          "強化キャラクター選択:",
+        openEnhanceDetail(
           character.id
         );
 
@@ -2502,6 +2506,653 @@ enhanceFilterButtons.forEach((button) => {
   );
 
 });
+
+
+const CHARACTER_LEVEL_MIN = 1;
+
+const CHARACTER_LEVEL_MAX = 10;
+
+
+let selectedEnhanceCharacterId =
+  null;
+
+
+function clampCharacterLevel(level) {
+
+  const value =
+    Number(level);
+
+  if (!Number.isInteger(value)) {
+
+    return CHARACTER_LEVEL_MIN;
+
+  }
+
+  if (value < CHARACTER_LEVEL_MIN) {
+
+    return CHARACTER_LEVEL_MIN;
+
+  }
+
+  if (value > CHARACTER_LEVEL_MAX) {
+
+    return CHARACTER_LEVEL_MAX;
+
+  }
+
+  return value;
+
+}
+
+
+function clampCharacterPlus(plus) {
+
+  const value =
+    Number(plus);
+
+  if (!Number.isInteger(value)) {
+
+    return 0;
+
+  }
+
+  if (value < 0) {
+
+    return 0;
+
+  }
+
+  return value;
+
+}
+
+
+function getLevelStatMultiplier(level) {
+
+  const lv =
+    clampCharacterLevel(level);
+
+  return 1 + 0.1 * (lv - 1);
+
+}
+
+
+function getPlusStatMultiplier(plus) {
+
+  const value =
+    clampCharacterPlus(plus);
+
+  return 1 + 0.02 * value;
+
+}
+
+
+function roundCharacterStat(value) {
+
+  return Math.round(Number(value) || 0);
+
+}
+
+
+function getCharacterBaseCombatStats(
+  character
+) {
+
+  const stats =
+    character &&
+    character.stats;
+
+  return {
+
+    hp:
+      Number(
+        stats &&
+        stats.hp
+      ) || 0,
+
+    attack:
+      Number(
+        stats &&
+        stats.attack
+      ) || 0
+
+  };
+
+}
+
+
+function calculateCharacterCombatStats(
+  character,
+  level,
+  plus
+) {
+
+  const base =
+    getCharacterBaseCombatStats(
+      character
+    );
+
+  const multiplier =
+    getLevelStatMultiplier(level) *
+    getPlusStatMultiplier(plus);
+
+  return {
+
+    hp:
+      roundCharacterStat(
+        base.hp * multiplier
+      ),
+
+    attack:
+      roundCharacterStat(
+        base.attack * multiplier
+      )
+
+  };
+
+}
+
+
+function getCharacterStatAtProgress(
+  character,
+  progress
+) {
+
+  const level =
+    progress &&
+    progress.level != null
+      ? progress.level
+      : CHARACTER_LEVEL_MIN;
+
+  const plus =
+    progress &&
+    progress.plus != null
+      ? progress.plus
+      : 0;
+
+  return calculateCharacterCombatStats(
+    character,
+    level,
+    plus
+  );
+
+}
+
+
+const ENHANCE_LEVEL_UP_BEATS_BASE = {
+
+  1: 100,
+
+  2: 150,
+
+  3: 200,
+
+  4: 300,
+
+  5: 450,
+
+  6: 650,
+
+  7: 900,
+
+  8: 1200,
+
+  9: 1500
+
+};
+
+
+const ENHANCE_RARITY_BEATS_MULTIPLIER = {
+
+  [CHARACTER_RARITY.IPPANJIN]: 1.0,
+
+  [CHARACTER_RARITY.BANDMAN]: 1.5,
+
+  [CHARACTER_RARITY.HEADLINER]: 2.0,
+
+  [CHARACTER_RARITY.LEGEND]: 2.5
+
+};
+
+
+function getEnhanceRarityBeatsMultiplier(
+  rarity
+) {
+
+  const multiplier =
+    ENHANCE_RARITY_BEATS_MULTIPLIER[
+      rarity
+    ];
+
+  if (typeof multiplier !== "number") {
+
+    return 1.0;
+
+  }
+
+  return multiplier;
+
+}
+
+
+function getEnhanceLevelUpBeats(
+  character,
+  level
+) {
+
+  const lv =
+    clampCharacterLevel(level);
+
+  if (lv >= CHARACTER_LEVEL_MAX) {
+
+    return null;
+
+  }
+
+  const baseCost =
+    ENHANCE_LEVEL_UP_BEATS_BASE[lv];
+
+  if (typeof baseCost !== "number") {
+
+    return null;
+
+  }
+
+  const multiplier =
+    getEnhanceRarityBeatsMultiplier(
+      getCharacterRarity(character)
+    );
+
+  return Math.round(
+    baseCost * multiplier
+  );
+
+}
+
+
+function formatEnhanceStatPreview(
+  currentValue,
+  nextValue,
+  isMaxLevel
+) {
+
+  if (isMaxLevel) {
+
+    return String(currentValue);
+
+  }
+
+  return (
+    currentValue +
+    " → " +
+    nextValue
+  );
+
+}
+
+
+function openEnhanceDetail(characterId) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  selectedEnhanceCharacterId =
+    characterId;
+
+  renderEnhanceDetail();
+
+  showScreen(enhanceDetailScreen);
+
+}
+
+
+function closeEnhanceDetail() {
+
+  selectedEnhanceCharacterId =
+    null;
+
+  showScreen(enhanceScreen);
+
+  renderEnhanceList();
+
+}
+
+
+function renderEnhanceDetail() {
+
+  const characterId =
+    selectedEnhanceCharacterId;
+
+  const character =
+    characterId
+      ? CHARACTERS[characterId]
+      : null;
+
+  if (
+    !character ||
+    !enhanceDetailScreen
+  ) {
+
+    return;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const level =
+    clampCharacterLevel(
+      progress.level
+    );
+
+  const plus =
+    clampCharacterPlus(
+      progress.plus
+    );
+
+  const isMaxLevel =
+    level >= CHARACTER_LEVEL_MAX;
+
+  const currentStats =
+    calculateCharacterCombatStats(
+      character,
+      level,
+      plus
+    );
+
+  const nextStats =
+    isMaxLevel
+      ? currentStats
+      : calculateCharacterCombatStats(
+          character,
+          level + 1,
+          plus
+        );
+
+  const needBeats =
+    getEnhanceLevelUpBeats(
+      character,
+      level
+    );
+
+
+  const image =
+    document.getElementById(
+      "enhance-detail-image"
+    );
+
+  if (image) {
+
+    image.src =
+      character.images.menu;
+
+    image.alt =
+      character.name;
+
+    const menuScale =
+      getCharacterMenuScale(
+        character
+      );
+
+    image.style.width =
+      menuScale * 100 + "%";
+
+    image.style.height =
+      menuScale * 100 + "%";
+
+  }
+
+
+  const numberEl =
+    document.getElementById(
+      "enhance-detail-number"
+    );
+
+  if (numberEl) {
+
+    numberEl.textContent =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+  }
+
+  const rarityEl =
+    document.getElementById(
+      "enhance-detail-rarity"
+    );
+
+  if (rarityEl) {
+
+    rarityEl.textContent =
+      getRarityLabel(
+        getCharacterRarity(character)
+      );
+
+  }
+
+  const nameEl =
+    document.getElementById(
+      "enhance-detail-name"
+    );
+
+  if (nameEl) {
+
+    nameEl.textContent =
+      character.name;
+
+  }
+
+  const groupEl =
+    document.getElementById(
+      "enhance-detail-group"
+    );
+
+  if (groupEl) {
+
+    groupEl.textContent =
+      getCharacterGroup(character);
+
+  }
+
+  const levelEl =
+    document.getElementById(
+      "enhance-detail-level"
+    );
+
+  if (levelEl) {
+
+    if (isMaxLevel) {
+
+      levelEl.textContent =
+        "Lv." +
+        level +
+        " MAX  +" +
+        plus;
+
+    } else {
+
+      levelEl.textContent =
+        "Lv." +
+        level +
+        " +" +
+        plus;
+
+    }
+
+  }
+
+  const hpEl =
+    document.getElementById(
+      "enhance-detail-hp"
+    );
+
+  if (hpEl) {
+
+    hpEl.textContent =
+      formatEnhanceStatPreview(
+        currentStats.hp,
+        nextStats.hp,
+        isMaxLevel
+      );
+
+  }
+
+  const attackEl =
+    document.getElementById(
+      "enhance-detail-attack"
+    );
+
+  if (attackEl) {
+
+    attackEl.textContent =
+      formatEnhanceStatPreview(
+        currentStats.attack,
+        nextStats.attack,
+        isMaxLevel
+      );
+
+  }
+
+  const ownedBeatsEl =
+    document.getElementById(
+      "enhance-detail-owned-beats"
+    );
+
+  if (ownedBeatsEl) {
+
+    ownedBeatsEl.textContent =
+      "0";
+
+  }
+
+  const needBeatsEl =
+    document.getElementById(
+      "enhance-detail-need-beats"
+    );
+
+  if (needBeatsEl) {
+
+    if (
+      isMaxLevel ||
+      needBeats == null
+    ) {
+
+      needBeatsEl.textContent =
+        "—";
+
+    } else {
+
+      needBeatsEl.textContent =
+        String(needBeats);
+
+    }
+
+  }
+
+  const confirmButton =
+    document.getElementById(
+      "enhance-detail-confirm"
+    );
+
+  if (confirmButton) {
+
+    if (isMaxLevel) {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "MAX";
+
+    } else {
+
+      confirmButton.disabled =
+        false;
+
+      confirmButton.textContent =
+        "強化する";
+
+    }
+
+  }
+
+}
+
+
+const enhanceDetailBack =
+  document.getElementById(
+    "enhance-detail-back"
+  );
+
+
+if (enhanceDetailBack) {
+
+  enhanceDetailBack.addEventListener(
+    "click",
+    () => {
+
+      closeEnhanceDetail();
+
+    }
+  );
+
+}
+
+
+const enhanceDetailConfirm =
+  document.getElementById(
+    "enhance-detail-confirm"
+  );
+
+
+if (enhanceDetailConfirm) {
+
+  enhanceDetailConfirm.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !selectedEnhanceCharacterId
+      ) {
+
+        return;
+
+      }
+
+      const progress =
+        getEnhanceCardProgress(
+          selectedEnhanceCharacterId
+        );
+
+      if (
+        clampCharacterLevel(
+          progress.level
+        ) >= CHARACTER_LEVEL_MAX
+      ) {
+
+        return;
+
+      }
+
+      console.log(
+        "強化実行予定:",
+        selectedEnhanceCharacterId
+      );
+
+    }
+  );
+
+}
 
 
 const ATTACK_TYPE = {
