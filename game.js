@@ -8294,6 +8294,24 @@ let isDoritikeGachaBusy =
 let doritikeGachaLastPullCount =
   1;
 
+let doritikeAnimSequenceId =
+  0;
+
+let doritikeAnimTimeoutIds =
+  [];
+
+let doritikeAnimActive =
+  false;
+
+let doritikeAnimPendingResults =
+  null;
+
+let doritikeAnimPendingPullCount =
+  1;
+
+let doritikeAnimPendingLine =
+  "";
+
 
 const doritikeGachaBack =
   document.getElementById(
@@ -8303,6 +8321,11 @@ const doritikeGachaBack =
 const doritikeGachaMain =
   document.getElementById(
     "doritike-gacha-main"
+  );
+
+const doritikeGachaAnimation =
+  document.getElementById(
+    "doritike-gacha-animation"
   );
 
 const doritikeGachaResult =
@@ -8339,6 +8362,29 @@ const doritikeGachaResultBack =
   document.getElementById(
     "doritike-gacha-result-back"
   );
+
+const doritikeGachaClerkLine =
+  document.getElementById(
+    "doritike-gacha-clerk-line"
+  );
+
+const doritikeGachaResultLine =
+  document.getElementById(
+    "doritike-gacha-result-line"
+  );
+
+
+const DORITIKE_CLERK_LINE_ENCORE =
+  "……これ、あったわ。";
+
+const DORITIKE_CLERK_LINE_JACKPOT =
+  "もう一個持ってけ。";
+
+const DORITIKE_CLERK_LINE_GOOD =
+  "お、ええやん。";
+
+const DORITIKE_CLERK_LINE_NORMAL =
+  "ほい。";
 
 
 function formatDoritikeGachaAmount(
@@ -8452,6 +8498,165 @@ function getDoritikeGachaResultLabel(
 }
 
 
+function isDoritikeGachaResultGood(
+  result
+) {
+
+  if (
+    !result ||
+    typeof result !== "object"
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    result.category ===
+    "fragment"
+  ) {
+
+    return (
+      Number(result.amount) >=
+      20
+    );
+
+  }
+
+  if (result.category === "beats") {
+
+    return (
+      Number(result.amount) >=
+      2000
+    );
+
+  }
+
+  if (result.category === "item") {
+
+    if (
+      result.itemId ===
+      "encore"
+    ) {
+
+      return false;
+
+    }
+
+    return (
+      result.itemId ===
+        "engine" ||
+      result.itemId ===
+        "moshStaff"
+    );
+
+  }
+
+  return false;
+
+}
+
+
+function getDoritikeClerkLine(
+  results
+) {
+
+  const list =
+    Array.isArray(results)
+      ? results
+      : results
+        ? [results]
+        : [];
+
+  let hasEncore =
+    false;
+
+  let hasJackpot =
+    false;
+
+  let hasGood =
+    false;
+
+  list.forEach((result) => {
+
+    if (
+      !result ||
+      typeof result !== "object"
+    ) {
+
+      return;
+
+    }
+
+    if (
+      result.category ===
+        "item" &&
+      result.itemId ===
+        "encore"
+    ) {
+
+      hasEncore = true;
+
+      return;
+
+    }
+
+    if (result.jackpot === true) {
+
+      hasJackpot = true;
+
+    }
+
+    if (
+      isDoritikeGachaResultGood(
+        result
+      )
+    ) {
+
+      hasGood = true;
+
+    }
+
+  });
+
+  if (hasEncore) {
+
+    return DORITIKE_CLERK_LINE_ENCORE;
+
+  }
+
+  if (hasJackpot) {
+
+    return DORITIKE_CLERK_LINE_JACKPOT;
+
+  }
+
+  if (hasGood) {
+
+    return DORITIKE_CLERK_LINE_GOOD;
+
+  }
+
+  return DORITIKE_CLERK_LINE_NORMAL;
+
+}
+
+
+function prefersDoritikeReducedMotion() {
+
+  return (
+    typeof window !==
+      "undefined" &&
+    typeof window.matchMedia ===
+      "function" &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+  );
+
+}
+
+
 function setDoritikeGachaBusy(
   busy
 ) {
@@ -8536,7 +8741,191 @@ function showDoritikeGachaMessage(
 }
 
 
+function clearDoritikeAnimTimeouts() {
+
+  doritikeAnimTimeoutIds.forEach(
+    (timeoutId) => {
+
+      clearTimeout(timeoutId);
+
+    }
+  );
+
+  doritikeAnimTimeoutIds = [];
+
+}
+
+
+function scheduleDoritikeAnimTimeout(
+  sequenceId,
+  delayMs,
+  callback
+) {
+
+  const timeoutId =
+    setTimeout(
+      () => {
+
+        if (
+          sequenceId !==
+          doritikeAnimSequenceId
+        ) {
+
+          return;
+
+        }
+
+        callback();
+
+      },
+      delayMs
+    );
+
+  doritikeAnimTimeoutIds.push(
+    timeoutId
+  );
+
+}
+
+
+function clearDoritikeAnimPhaseClasses() {
+
+  if (!doritikeGachaAnimation) {
+
+    return;
+
+  }
+
+  doritikeGachaAnimation.classList.remove(
+    "is-x10",
+    "phase-ticket-in",
+    "phase-ticket-move",
+    "phase-hand",
+    "phase-take",
+    "phase-rummage",
+    "phase-reward",
+    "phase-line"
+  );
+
+}
+
+
+function setDoritikeAnimPhase(
+  phaseClass
+) {
+
+  if (!doritikeGachaAnimation) {
+
+    return;
+
+  }
+
+  doritikeGachaAnimation.classList.remove(
+    "phase-ticket-in",
+    "phase-ticket-move",
+    "phase-hand",
+    "phase-take",
+    "phase-rummage",
+    "phase-reward",
+    "phase-line"
+  );
+
+  if (phaseClass) {
+
+    doritikeGachaAnimation.classList.add(
+      phaseClass
+    );
+
+  }
+
+}
+
+
+function resetDoritikeGachaAnimation() {
+
+  clearDoritikeAnimTimeouts();
+
+  doritikeAnimActive =
+    false;
+
+  doritikeAnimPendingResults =
+    null;
+
+  doritikeAnimPendingPullCount =
+    1;
+
+  doritikeAnimPendingLine =
+    "";
+
+  clearDoritikeAnimPhaseClasses();
+
+  if (doritikeGachaClerkLine) {
+
+    doritikeGachaClerkLine.textContent =
+      "";
+
+  }
+
+  if (doritikeGachaAnimation) {
+
+    doritikeGachaAnimation.hidden =
+      true;
+
+  }
+
+}
+
+
+function hideDoritikeGachaAnimation() {
+
+  if (!doritikeGachaAnimation) {
+
+    return;
+
+  }
+
+  doritikeGachaAnimation.hidden =
+    true;
+
+  clearDoritikeAnimPhaseClasses();
+
+}
+
+
+function setDoritikeGachaResultLine(
+  text
+) {
+
+  if (!doritikeGachaResultLine) {
+
+    return;
+
+  }
+
+  if (!text) {
+
+    doritikeGachaResultLine.hidden =
+      true;
+
+    doritikeGachaResultLine.textContent =
+      "";
+
+    return;
+
+  }
+
+  doritikeGachaResultLine.textContent =
+    text;
+
+  doritikeGachaResultLine.hidden =
+    false;
+
+}
+
+
 function showDoritikeGachaMainView() {
+
+  hideDoritikeGachaAnimation();
 
   if (doritikeGachaMain) {
 
@@ -8558,6 +8947,8 @@ function showDoritikeGachaMainView() {
       "";
 
   }
+
+  setDoritikeGachaResultLine("");
 
 }
 
@@ -8657,7 +9048,8 @@ function renderDoritikeGachaResults(
 
 function showDoritikeGachaResultView(
   results,
-  pullCount
+  pullCount,
+  clerkLine
 ) {
 
   doritikeGachaLastPullCount =
@@ -8672,9 +9064,7 @@ function showDoritikeGachaResultView(
 
   }
 
-  renderDoritikeGachaResults(
-    results
-  );
+  hideDoritikeGachaAnimation();
 
   if (doritikeGachaMain) {
 
@@ -8682,6 +9072,17 @@ function showDoritikeGachaResultView(
       true;
 
   }
+
+  renderDoritikeGachaResults(
+    results
+  );
+
+  setDoritikeGachaResultLine(
+    clerkLine ||
+      getDoritikeClerkLine(
+        results
+      )
+  );
 
   if (doritikeGachaResult) {
 
@@ -8693,6 +9094,277 @@ function showDoritikeGachaResultView(
 }
 
 
+function finishDoritikeGachaAnimation(
+  sequenceId
+) {
+
+  if (
+    sequenceId !==
+    doritikeAnimSequenceId
+  ) {
+
+    return;
+
+  }
+
+  clearDoritikeAnimTimeouts();
+
+  doritikeAnimActive =
+    false;
+
+  const results =
+    doritikeAnimPendingResults ||
+    [];
+
+  const pullCount =
+    doritikeAnimPendingPullCount;
+
+  const clerkLine =
+    doritikeAnimPendingLine ||
+    getDoritikeClerkLine(
+      results
+    );
+
+  doritikeAnimPendingResults =
+    null;
+
+  showDoritikeGachaResultView(
+    results,
+    pullCount,
+    clerkLine
+  );
+
+  setDoritikeGachaBusy(false);
+
+}
+
+
+function skipDoritikeGachaAnimation() {
+
+  if (
+    !doritikeAnimActive ||
+    !isDoritikeGachaBusy
+  ) {
+
+    return;
+
+  }
+
+  finishDoritikeGachaAnimation(
+    doritikeAnimSequenceId
+  );
+
+}
+
+
+function playDoritikeGachaAnimation(
+  results,
+  pullCount
+) {
+
+  doritikeAnimSequenceId +=
+    1;
+
+  const sequenceId =
+    doritikeAnimSequenceId;
+
+  clearDoritikeAnimTimeouts();
+
+  clearDoritikeAnimPhaseClasses();
+
+  doritikeAnimActive =
+    true;
+
+  doritikeAnimPendingResults =
+    Array.isArray(results)
+      ? results.slice()
+      : [];
+
+  doritikeAnimPendingPullCount =
+    pullCount;
+
+  doritikeAnimPendingLine =
+    getDoritikeClerkLine(
+      doritikeAnimPendingResults
+    );
+
+  if (doritikeGachaMain) {
+
+    doritikeGachaMain.hidden =
+      true;
+
+  }
+
+  if (doritikeGachaResult) {
+
+    doritikeGachaResult.hidden =
+      true;
+
+  }
+
+  if (doritikeGachaClerkLine) {
+
+    doritikeGachaClerkLine.textContent =
+      "";
+
+  }
+
+  if (!doritikeGachaAnimation) {
+
+    finishDoritikeGachaAnimation(
+      sequenceId
+    );
+
+    return;
+
+  }
+
+  doritikeGachaAnimation.hidden =
+    false;
+
+  if (pullCount === 10) {
+
+    doritikeGachaAnimation.classList.add(
+      "is-x10"
+    );
+
+  }
+
+  const reduced =
+    prefersDoritikeReducedMotion();
+
+  const timing =
+    reduced
+      ? {
+          ticketIn: 0,
+          ticketMove: 80,
+          hand: 140,
+          take: 200,
+          rummage: 260,
+          reward: 360,
+          line: 420,
+          done: 520
+        }
+      : pullCount === 10
+        ? {
+            ticketIn: 0,
+            ticketMove: 280,
+            hand: 560,
+            take: 820,
+            rummage: 1040,
+            reward: 2100,
+            line: 2360,
+            done: 2860
+          }
+        : {
+            ticketIn: 0,
+            ticketMove: 260,
+            hand: 520,
+            take: 780,
+            rummage: 980,
+            reward: 1880,
+            line: 2140,
+            done: 2620
+          };
+
+  setDoritikeAnimPhase(
+    "phase-ticket-in"
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.ticketMove,
+    () => {
+
+      setDoritikeAnimPhase(
+        "phase-ticket-move"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.hand,
+    () => {
+
+      setDoritikeAnimPhase(
+        "phase-hand"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.take,
+    () => {
+
+      setDoritikeAnimPhase(
+        "phase-take"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.rummage,
+    () => {
+
+      setDoritikeAnimPhase(
+        "phase-rummage"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.reward,
+    () => {
+
+      setDoritikeAnimPhase(
+        "phase-reward"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.line,
+    () => {
+
+      if (doritikeGachaClerkLine) {
+
+        doritikeGachaClerkLine.textContent =
+          doritikeAnimPendingLine;
+
+      }
+
+      setDoritikeAnimPhase(
+        "phase-line"
+      );
+
+    }
+  );
+
+  scheduleDoritikeAnimTimeout(
+    sequenceId,
+    timing.done,
+    () => {
+
+      finishDoritikeGachaAnimation(
+        sequenceId
+      );
+
+    }
+  );
+
+}
+
+
 function openDoritikeGacha() {
 
   if (!doritikeGachaScreen) {
@@ -8700,6 +9372,8 @@ function openDoritikeGacha() {
     return;
 
   }
+
+  resetDoritikeGachaAnimation();
 
   clearDoritikeGachaMessage();
 
@@ -8721,6 +9395,8 @@ function closeDoritikeGacha() {
     return;
 
   }
+
+  resetDoritikeGachaAnimation();
 
   clearDoritikeGachaMessage();
 
@@ -8755,6 +9431,8 @@ function runDoritikeGachaPull(
   }
 
   clearDoritikeGachaMessage();
+
+  resetDoritikeGachaAnimation();
 
   setDoritikeGachaBusy(true);
 
@@ -8794,12 +9472,10 @@ function runDoritikeGachaPull(
 
   }
 
-  showDoritikeGachaResultView(
+  playDoritikeGachaAnimation(
     outcome.results,
     pullCount
   );
-
-  setDoritikeGachaBusy(false);
 
 }
 
@@ -8879,6 +9555,20 @@ if (doritikeGachaResultBack) {
       showDoritikeGachaMainView();
 
       updateDrinkTicketsDisplay();
+
+    }
+  );
+
+}
+
+
+if (doritikeGachaAnimation) {
+
+  doritikeGachaAnimation.addEventListener(
+    "click",
+    () => {
+
+      skipDoritikeGachaAnimation();
 
     }
   );

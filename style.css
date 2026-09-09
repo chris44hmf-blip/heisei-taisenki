@@ -78,6 +78,10 @@ h3,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,
+.doritike-anim-line-text,
+.doritike-anim-skip,
+.doritike-anim-rummage-text,
+.doritike-gacha-result-line,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,
@@ -1356,6 +1360,718 @@ h2 {
   .doritike-gacha-pull,
   .doritike-gacha-result-back {
     min-height: clamp(44px, 12vh, 58px);
+  }
+
+}
+
+
+/* =========================
+   DORITIKE GACHA ANIMATION
+========================= */
+
+.doritike-gacha-animation {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: clamp(6px, 1.2vh, 10px);
+
+  width: 100%;
+
+  user-select: none;
+
+  -webkit-user-select: none;
+
+  cursor: pointer;
+
+  touch-action: manipulation;
+}
+
+.doritike-gacha-animation[hidden] {
+  display: none;
+}
+
+.doritike-anim-stage {
+  position: relative;
+
+  width: min(100%, 520px);
+
+  height: min(58vh, 280px);
+
+  min-height: 180px;
+
+  overflow: hidden;
+
+  border: 3px solid #3a3428;
+
+  background: #12100c;
+
+  box-sizing: border-box;
+}
+
+.doritike-anim-counter {
+  position: absolute;
+
+  left: 8%;
+
+  right: 8%;
+
+  bottom: 18%;
+
+  height: 42%;
+}
+
+.doritike-anim-counter-top {
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  top: 0;
+
+  height: 18%;
+
+  background: #5a4a2e;
+
+  border-bottom: 3px solid #2a2214;
+}
+
+.doritike-anim-counter-face {
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  top: 18%;
+
+  height: 34%;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      #3a3020 0 6px,
+      #2e2618 6px 12px
+    );
+
+  border-bottom: 3px solid #1a150e;
+}
+
+.doritike-anim-under {
+  position: absolute;
+
+  left: 6%;
+
+  right: 6%;
+
+  top: 52%;
+
+  bottom: 0;
+
+  background: #0a0907;
+
+  border: 2px solid #1f1a12;
+
+  overflow: hidden;
+}
+
+.doritike-anim-shadow {
+  position: absolute;
+
+  left: 42%;
+
+  top: 28%;
+
+  width: 18px;
+
+  height: 12px;
+
+  background: #1c1810;
+
+  border: 2px solid #0f0d09;
+
+  opacity: 0;
+
+  transform: translateX(0);
+}
+
+.doritike-anim-rummage-text {
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  bottom: 8%;
+
+  color: #8a7a55;
+
+  font-size: clamp(10px, 1.6vw, 13px);
+
+  letter-spacing: 0.12em;
+
+  text-align: center;
+
+  opacity: 0;
+}
+
+.doritike-anim-ticket {
+  position: absolute;
+
+  left: 18%;
+
+  bottom: 52%;
+
+  width: 34px;
+
+  height: 20px;
+
+  opacity: 0;
+
+  transform: translate(0, 0);
+
+  z-index: 3;
+}
+
+.doritike-anim-ticket-body {
+  position: absolute;
+
+  inset: 0;
+
+  background: #c8b878;
+
+  border: 2px solid #3a3420;
+
+  box-shadow:
+    inset 0 0 0 2px #e4d9a4;
+}
+
+.doritike-anim-ticket-stripe {
+  position: absolute;
+
+  left: 4px;
+
+  right: 4px;
+
+  top: 6px;
+
+  height: 4px;
+
+  background: #6a5530;
+
+  border: 1px solid #2a2214;
+}
+
+.doritike-anim-ticket-stack,
+.doritike-anim-ticket-stack-b {
+  display: none;
+
+  position: absolute;
+
+  inset: 0;
+
+  background: #b8a868;
+
+  border: 2px solid #3a3420;
+
+  z-index: -1;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-anim-ticket {
+  width: 40px;
+
+  height: 24px;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-anim-ticket-stack {
+  display: block;
+
+  transform: translate(3px, -3px);
+}
+
+.doritike-gacha-animation.is-x10 .doritike-anim-ticket-stack-b {
+  display: block;
+
+  transform: translate(6px, -6px);
+
+  background: #a89858;
+}
+
+.doritike-anim-hand {
+  position: absolute;
+
+  right: 10%;
+
+  bottom: 48%;
+
+  width: 36px;
+
+  height: 28px;
+
+  opacity: 0;
+
+  transform: translateX(28px);
+
+  z-index: 4;
+}
+
+.doritike-anim-hand-arm {
+  position: absolute;
+
+  right: 0;
+
+  top: 8px;
+
+  width: 22px;
+
+  height: 10px;
+
+  background: #4a4030;
+
+  border: 2px solid #1a1610;
+}
+
+.doritike-anim-hand-palm {
+  position: absolute;
+
+  left: 0;
+
+  top: 4px;
+
+  width: 16px;
+
+  height: 14px;
+
+  background: #5a4e3a;
+
+  border: 2px solid #1a1610;
+}
+
+.doritike-anim-hand-finger,
+.doritike-anim-hand-finger-b {
+  position: absolute;
+
+  left: -4px;
+
+  top: 2px;
+
+  width: 8px;
+
+  height: 6px;
+
+  background: #5a4e3a;
+
+  border: 2px solid #1a1610;
+}
+
+.doritike-anim-hand-finger-b {
+  top: 12px;
+}
+
+.doritike-anim-reward {
+  position: absolute;
+
+  left: 46%;
+
+  bottom: 52%;
+
+  opacity: 0;
+
+  transform: translateY(12px);
+
+  z-index: 3;
+
+  pointer-events: none;
+}
+
+.doritike-anim-reward-multi {
+  left: 40%;
+
+  display: none;
+
+  width: 72px;
+
+  height: 28px;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-anim-reward-single {
+  display: none;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-anim-reward-multi {
+  display: block;
+}
+
+.doritike-anim-parcel {
+  display: block;
+
+  width: 22px;
+
+  height: 18px;
+
+  background: #6a5a38;
+
+  border: 2px solid #1e1810;
+
+  box-shadow:
+    inset 0 0 0 2px #8a7448;
+}
+
+.doritike-anim-parcel-b,
+.doritike-anim-parcel-c {
+  position: absolute;
+
+  top: 0;
+}
+
+.doritike-anim-parcel-b {
+  left: 20px;
+
+  background: #5a4a30;
+}
+
+.doritike-anim-parcel-c {
+  left: 40px;
+
+  top: 4px;
+
+  background: #7a6840;
+}
+
+.doritike-anim-line-box {
+  position: absolute;
+
+  left: 6%;
+
+  right: 6%;
+
+  bottom: 4%;
+
+  min-height: 34px;
+
+  padding: 6px 8px;
+
+  border: 3px solid #d8d0b8;
+
+  background: #10100c;
+
+  box-shadow:
+    inset 0 0 0 2px #3a3828;
+
+  opacity: 0;
+
+  z-index: 5;
+
+  box-sizing: border-box;
+}
+
+.doritike-anim-line-text {
+  margin: 0;
+
+  color: #f2eee0;
+
+  font-size: clamp(13px, 2.1vw, 17px);
+
+  letter-spacing: 0.06em;
+
+  line-height: 1.35;
+
+  white-space: pre-wrap;
+}
+
+.doritike-anim-skip {
+  flex: 0 0 auto;
+
+  color: #9a9078;
+
+  font-size: clamp(10px, 1.5vw, 12px);
+
+  letter-spacing: 0.14em;
+}
+
+.doritike-gacha-result-line {
+  flex: 0 0 auto;
+
+  width: min(100%, 560px);
+
+  margin: 0 auto clamp(6px, 1vh, 10px);
+
+  padding: 6px 8px;
+
+  border: 3px solid #d8d0b8;
+
+  background: #10100c;
+
+  box-shadow:
+    inset 0 0 0 2px #3a3828;
+
+  color: #f2eee0;
+
+  font-size: clamp(12px, 1.9vw, 15px);
+
+  letter-spacing: 0.06em;
+
+  line-height: 1.35;
+
+  box-sizing: border-box;
+}
+
+.doritike-gacha-result-line[hidden] {
+  display: none;
+}
+
+/* phase visibility / stepped motion */
+
+.doritike-gacha-animation.phase-ticket-in .doritike-anim-ticket {
+  opacity: 1;
+
+  animation:
+    doritike-ticket-pop 180ms steps(3, end) both;
+}
+
+.doritike-gacha-animation.phase-ticket-move .doritike-anim-ticket {
+  opacity: 1;
+
+  animation:
+    doritike-ticket-move 280ms steps(4, end) both;
+}
+
+.doritike-gacha-animation.is-x10.phase-ticket-move .doritike-anim-ticket {
+  animation-name: doritike-ticket-move-x10;
+}
+
+.doritike-gacha-animation.phase-hand .doritike-anim-ticket {
+  opacity: 1;
+
+  transform: translate(42%, -8%);
+}
+
+.doritike-gacha-animation.is-x10.phase-hand .doritike-anim-ticket {
+  transform: translate(36%, -6%);
+}
+
+.doritike-gacha-animation.phase-hand .doritike-anim-hand {
+  opacity: 1;
+
+  animation:
+    doritike-hand-in 220ms steps(3, end) both;
+}
+
+.doritike-gacha-animation.phase-take .doritike-anim-ticket {
+  opacity: 0;
+}
+
+.doritike-gacha-animation.phase-take .doritike-anim-hand {
+  opacity: 1;
+
+  animation:
+    doritike-hand-out 220ms steps(3, end) both;
+}
+
+.doritike-gacha-animation.phase-rummage .doritike-anim-shadow {
+  opacity: 1;
+
+  animation:
+    doritike-rummage 420ms steps(4, end) infinite;
+}
+
+.doritike-gacha-animation.phase-rummage .doritike-anim-rummage-text {
+  opacity: 1;
+
+  animation:
+    doritike-rummage-blink 360ms steps(2, end) infinite;
+}
+
+.doritike-gacha-animation.is-x10.phase-rummage .doritike-anim-shadow {
+  animation-duration: 480ms;
+}
+
+.doritike-gacha-animation.phase-reward .doritike-anim-reward {
+  opacity: 1;
+
+  animation:
+    doritike-reward-drop 240ms steps(3, end) both;
+}
+
+.doritike-gacha-animation.phase-reward .doritike-anim-shadow,
+.doritike-gacha-animation.phase-reward .doritike-anim-rummage-text {
+  opacity: 0;
+
+  animation: none;
+}
+
+.doritike-gacha-animation.phase-line .doritike-anim-reward {
+  opacity: 1;
+
+  transform: translateY(0);
+}
+
+.doritike-gacha-animation.phase-line .doritike-anim-line-box {
+  opacity: 1;
+
+  animation:
+    doritike-line-pop 160ms steps(2, end) both;
+}
+
+@keyframes doritike-ticket-pop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes doritike-ticket-move {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(42%, -8%);
+  }
+}
+
+@keyframes doritike-ticket-move-x10 {
+  0% {
+    transform: translate(0, 0);
+  }
+
+  100% {
+    transform: translate(36%, -6%);
+  }
+}
+
+@keyframes doritike-hand-in {
+  0% {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes doritike-hand-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+}
+
+@keyframes doritike-rummage {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-3px);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+
+  75% {
+    transform: translateX(-2px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes doritike-rummage-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes doritike-reward-drop {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes doritike-line-pop {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-height: 380px) {
+
+  .doritike-anim-stage {
+    height: min(54vh, 210px);
+
+    min-height: 150px;
+  }
+
+  .doritike-anim-line-box {
+    min-height: 28px;
+
+    padding: 4px 6px;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .doritike-gacha-animation.phase-ticket-in .doritike-anim-ticket,
+  .doritike-gacha-animation.phase-ticket-move .doritike-anim-ticket,
+  .doritike-gacha-animation.phase-hand .doritike-anim-hand,
+  .doritike-gacha-animation.phase-take .doritike-anim-hand,
+  .doritike-gacha-animation.phase-rummage .doritike-anim-shadow,
+  .doritike-gacha-animation.phase-rummage .doritike-anim-rummage-text,
+  .doritike-gacha-animation.phase-reward .doritike-anim-reward,
+  .doritike-gacha-animation.phase-line .doritike-anim-line-box {
+    animation-duration: 1ms !important;
+
+    animation-iteration-count: 1 !important;
+  }
+
+  .doritike-gacha-animation.phase-hand .doritike-anim-ticket,
+  .doritike-gacha-animation.is-x10.phase-hand .doritike-anim-ticket {
+    transform: translate(30%, 0);
+  }
+
+  .doritike-gacha-animation.phase-rummage .doritike-anim-shadow {
+    transform: none;
   }
 
 }
@@ -5671,6 +6387,10 @@ h3,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,
+.doritike-anim-line-text,
+.doritike-anim-skip,
+.doritike-anim-rummage-text,
+.doritike-gacha-result-line,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,
