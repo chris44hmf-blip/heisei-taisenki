@@ -4341,9 +4341,9 @@ h2 {
 
   z-index: 1;
 
-  width: min(92%, 560px);
+  width: min(94%, 580px);
 
-  max-height: min(92%, 340px);
+  max-height: min(94%, 360px);
 
   display: flex;
 
@@ -4363,10 +4363,14 @@ h2 {
     );
 
   overflow: hidden;
+
+  box-sizing: border-box;
 }
 
 .formation-form-detail-close {
   align-self: flex-end;
+
+  flex: 0 0 auto;
 
   margin: 0;
   padding: 4px 10px;
@@ -4386,27 +4390,35 @@ h2 {
 }
 
 .formation-form-detail-body {
-  display: flex;
+  display: grid;
 
-  flex-direction: row;
+  grid-template-columns:
+    minmax(84px, 34%)
+    minmax(0, 1fr);
 
-  align-items: stretch;
+  align-items: start;
 
-  gap: 12px;
+  column-gap: 12px;
 
   min-height: 0;
 
   flex: 1 1 auto;
+
+  overflow: hidden;
 }
 
 .formation-form-detail-art {
-  flex: 0 0 auto;
+  grid-column: 1;
 
-  width: min(28vw, 120px);
+  width: 100%;
 
-  max-height: min(58vh, 220px);
+  max-width: 140px;
+
+  max-height: min(62vh, 240px);
 
   aspect-ratio: 3 / 4;
+
+  justify-self: center;
 
   display: flex;
 
@@ -4424,11 +4436,16 @@ h2 {
       #222,
       #0a0a0a
     );
+
+  box-sizing: border-box;
 }
 
 .formation-form-detail-art img {
   width: 100%;
   height: 100%;
+
+  max-width: 100%;
+  max-height: 100%;
 
   object-fit: contain;
 
@@ -4438,66 +4455,99 @@ h2 {
 }
 
 .formation-form-detail-info {
-  flex: 1 1 auto;
+  grid-column: 2;
 
   min-width: 0;
+
+  max-height: 100%;
 
   display: flex;
 
   flex-direction: column;
 
-  align-items: flex-start;
+  align-items: stretch;
 
-  gap: 2px;
+  justify-content: flex-start;
 
-  overflow: hidden;
+  gap: 3px;
+
+  overflow-x: hidden;
+
+  overflow-y: auto;
 }
 
 .formation-form-detail-number,
 .formation-form-detail-rarity,
+.formation-form-detail-name,
 .formation-form-detail-group,
 .formation-form-detail-level,
 .formation-form-detail-status {
+  position: static;
+
+  display: block;
+
+  flex: 0 0 auto;
+
+  width: 100%;
+
+  margin: 0;
+
   font-family: var(--formation-ui-font);
 
-  line-height: 1.2;
+  line-height: 1.25;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
 }
 
 .formation-form-detail-number {
   color: #888;
 
   font-size: clamp(10px, 1.3vw, 12px);
+
+  min-height: 1.25em;
 }
 
 .formation-form-detail-rarity {
   color: #ccc;
 
   font-size: clamp(11px, 1.4vw, 13px);
+
+  min-height: 1.25em;
 }
 
 .formation-form-detail-name {
   color: #fff;
 
-  font-family: var(--formation-ui-font);
-
-  font-size: clamp(16px, 2.4vw, 22px);
+  font-size: clamp(15px, 2.2vw, 20px);
 
   letter-spacing: 0.06em;
+
+  min-height: 1.3em;
 }
 
 .formation-form-detail-group {
   color: #aaa;
 
   font-size: clamp(11px, 1.4vw, 13px);
+
+  min-height: 1.25em;
 }
 
 .formation-form-detail-level {
   color: #ddd;
 
   font-size: clamp(12px, 1.6vw, 15px);
+
+  min-height: 1.25em;
 }
 
 .formation-form-detail-stats {
+  flex: 0 0 auto;
+
   width: 100%;
 
   margin-top: 4px;
@@ -4506,23 +4556,27 @@ h2 {
 
   flex-direction: column;
 
-  gap: 1px;
+  gap: 2px;
 }
 
 .formation-form-detail-stat {
-  display: flex;
+  display: grid;
 
-  flex-direction: row;
+  grid-template-columns: 3em 1fr;
 
-  justify-content: space-between;
+  align-items: baseline;
 
-  gap: 12px;
+  column-gap: 10px;
 
-  width: min(100%, 220px);
+  width: 100%;
+
+  max-width: 240px;
 
   font-family: var(--formation-ui-font);
 
   font-size: clamp(12px, 1.6vw, 15px);
+
+  line-height: 1.3;
 
   color: #ccc;
 }
@@ -4533,9 +4587,13 @@ h2 {
   font-weight: 400;
 
   font-variant-numeric: tabular-nums;
+
+  text-align: right;
 }
 
 .formation-form-detail-switch {
+  flex: 0 0 auto;
+
   display: flex;
 
   flex-direction: row;
@@ -4550,6 +4608,8 @@ h2 {
 }
 
 .formation-form-detail-arrow {
+  flex: 0 0 auto;
+
   width: 34px;
   height: 30px;
 
@@ -4575,6 +4635,8 @@ h2 {
 }
 
 .formation-form-detail-form-label {
+  flex: 0 0 auto;
+
   min-width: 4.8em;
 
   text-align: center;
@@ -4586,10 +4648,14 @@ h2 {
   font-size: clamp(13px, 1.9vw, 17px);
 
   letter-spacing: 0.08em;
+
+  line-height: 1.2;
 }
 
 .formation-form-detail-status {
-  min-height: 1.1em;
+  flex: 0 0 auto;
+
+  min-height: 1.2em;
 
   margin-top: 2px;
 
@@ -4599,6 +4665,8 @@ h2 {
 }
 
 .formation-form-detail-use {
+  flex: 0 0 auto;
+
   margin-top: 4px;
 
   width: min(100%, 200px);
@@ -4637,6 +4705,44 @@ h2 {
 
 .formation-form-detail-use:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+.formation-owned-detail-button {
+  position: absolute;
+
+  top: 4%;
+  right: 4%;
+
+  z-index: 5;
+
+  min-width: 34px;
+  min-height: 22px;
+
+  margin: 0;
+  padding: 2px 6px;
+
+  border: 1px solid #bbb;
+  border-radius: 3px;
+
+  background: rgba(20, 20, 20, 0.88);
+
+  color: #fff;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(8px, 1.2cqw, 11px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.2;
+
+  cursor: pointer;
+
+  pointer-events: auto;
+}
+
+.formation-owned-detail-button:active {
+  transform: scale(0.96);
 }
 
 .formation-cover {

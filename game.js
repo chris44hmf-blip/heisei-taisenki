@@ -2337,11 +2337,19 @@ function renderEnhanceList() {
     imageWrap.className =
       "enhance-card-image";
 
+    const displayForm =
+      getHighestUnlockedCharacterForm(
+        character
+      ) || character;
+
     const image =
       document.createElement("img");
 
     image.src =
-      character.images.menu;
+      displayForm.images &&
+      displayForm.images.menu
+        ? displayForm.images.menu
+        : character.images.menu;
 
     image.alt =
       character.name;
@@ -2351,7 +2359,7 @@ function renderEnhanceList() {
 
     const menuScale =
       getCharacterMenuScale(
-        character
+        displayForm
       );
 
     image.style.width =
@@ -2659,36 +2667,79 @@ function renderEvolveDetail() {
       ? progress.unlockedForms
       : [1];
 
-  const hasForm2UnlockFlag =
-    unlockedForms.indexOf(2) !==
-    -1;
+  const currentFormNumber =
+    getHighestUnlockedCharacterFormNumber(
+      character
+    );
 
-  const form1 =
+  const currentForm =
+    getHighestUnlockedCharacterForm(
+      character
+    ) ||
     getCharacterForm(
       character,
       1
-    ) || character;
+    ) ||
+    character;
 
-  const form2 =
+  const nextFormNumber =
+    currentFormNumber + 1;
+
+  const nextForm =
     getCharacterForm(
       character,
-      2
+      nextFormNumber
     );
+
+  const hasNextUnlockFlag =
+    unlockedForms.indexOf(
+      nextFormNumber
+    ) !== -1;
 
   const canEvolveLevel =
     level >= CHARACTER_LEVEL_MAX;
 
-  const form2Ready =
+  const nextFormReady =
     !!(
-      form2 &&
-      form2.images &&
-      form2.images.menu
+      nextForm &&
+      nextForm.images &&
+      nextForm.images.menu
     );
 
   const canEvolve =
-    form2Ready &&
+    nextFormReady &&
     canEvolveLevel &&
-    !hasForm2UnlockFlag;
+    !hasNextUnlockFlag &&
+    nextFormNumber === 2;
+
+
+  const labelCurrent =
+    document.getElementById(
+      "evolve-detail-label-current"
+    );
+
+  if (labelCurrent) {
+
+    labelCurrent.textContent =
+      getCharacterFormLabel(
+        currentFormNumber
+      );
+
+  }
+
+  const labelNext =
+    document.getElementById(
+      "evolve-detail-label-next"
+    );
+
+  if (labelNext) {
+
+    labelNext.textContent =
+      getCharacterFormLabel(
+        nextFormNumber
+      );
+
+  }
 
 
   const image =
@@ -2699,9 +2750,9 @@ function renderEvolveDetail() {
   if (image) {
 
     image.src =
-      form1.images &&
-      form1.images.menu
-        ? form1.images.menu
+      currentForm.images &&
+      currentForm.images.menu
+        ? currentForm.images.menu
         : character.images.menu;
 
     image.alt =
@@ -2709,7 +2760,7 @@ function renderEvolveDetail() {
 
     const menuScale =
       getCharacterMenuScale(
-        form1
+        currentForm
       );
 
     image.style.width =
@@ -2807,18 +2858,18 @@ function renderEvolveDetail() {
       "evolve-detail-next-name"
     );
 
-  if (form2 && form2.images && form2.images.menu) {
+  if (nextFormReady) {
 
     if (nextWrap) {
 
       nextWrap.classList.toggle(
         "evolve-detail-locked",
-        !hasForm2UnlockFlag
+        !hasNextUnlockFlag
       );
 
       nextWrap.classList.toggle(
         "is-silhouette",
-        !hasForm2UnlockFlag
+        !hasNextUnlockFlag
       );
 
     }
@@ -2828,16 +2879,16 @@ function renderEvolveDetail() {
       nextImage.hidden = false;
 
       nextImage.src =
-        form2.images.menu;
+        nextForm.images.menu;
 
       nextImage.alt =
-        hasForm2UnlockFlag
+        hasNextUnlockFlag
           ? character.name
           : "";
 
       const nextScale =
         getCharacterMenuScale(
-          form2
+          nextForm
         );
 
       nextImage.style.width =
@@ -2857,7 +2908,7 @@ function renderEvolveDetail() {
     if (nextNameEl) {
 
       nextNameEl.textContent =
-        hasForm2UnlockFlag
+        hasNextUnlockFlag
           ? character.name
           : "???";
 
@@ -2912,9 +2963,13 @@ function renderEvolveDetail() {
   if (nextNoteEl) {
 
     nextNoteEl.textContent =
-      hasForm2UnlockFlag &&
-      !form2
-        ? "FORM-2データ未実装"
+      !nextFormReady
+        ? (
+            getCharacterFormLabel(
+              nextFormNumber
+            ) +
+            "データ未実装"
+          )
         : "";
 
   }
@@ -2934,57 +2989,57 @@ function renderEvolveDetail() {
       "evolve-detail-compare-yani"
     );
 
-  const form1Combat =
+  const currentCombat =
     calculateCharacterCombatStats(
-      form1,
+      currentForm,
       level,
       plus
     );
 
-  const form1Yani =
+  const currentYani =
     Number(
-      form1.stats &&
-      form1.stats.yaniCost
+      currentForm.stats &&
+      currentForm.stats.yaniCost
     ) || 0;
 
-  if (form2 && form2.stats) {
+  if (nextForm && nextForm.stats) {
 
-    const form2Combat =
+    const nextCombat =
       calculateCharacterCombatStats(
-        form2,
+        nextForm,
         level,
         plus
       );
 
-    const form2Yani =
+    const nextYani =
       Number(
-        form2.stats.yaniCost
+        nextForm.stats.yaniCost
       ) || 0;
 
     if (compareHp) {
 
       compareHp.textContent =
-        form1Combat.hp +
+        currentCombat.hp +
         " → " +
-        form2Combat.hp;
+        nextCombat.hp;
 
     }
 
     if (compareAttack) {
 
       compareAttack.textContent =
-        form1Combat.attack +
+        currentCombat.attack +
         " → " +
-        form2Combat.attack;
+        nextCombat.attack;
 
     }
 
     if (compareYani) {
 
       compareYani.textContent =
-        form1Yani +
+        currentYani +
         " → " +
-        form2Yani;
+        nextYani;
 
     }
 
@@ -2993,7 +3048,7 @@ function renderEvolveDetail() {
     if (compareHp) {
 
       compareHp.textContent =
-        form1Combat.hp +
+        currentCombat.hp +
         " → ???";
 
     }
@@ -3001,7 +3056,7 @@ function renderEvolveDetail() {
     if (compareAttack) {
 
       compareAttack.textContent =
-        form1Combat.attack +
+        currentCombat.attack +
         " → ???";
 
     }
@@ -3009,7 +3064,7 @@ function renderEvolveDetail() {
     if (compareYani) {
 
       compareYani.textContent =
-        form1Yani +
+        currentYani +
         " → ???";
 
     }
@@ -3023,7 +3078,28 @@ function renderEvolveDetail() {
 
   if (statusEl) {
 
-    if (hasForm2UnlockFlag) {
+    if (
+      unlockedForms.indexOf(2) !==
+      -1 &&
+      nextFormNumber > 2
+    ) {
+
+      statusEl.textContent =
+        "Lv." +
+        level +
+        " / " +
+        CHARACTER_LEVEL_MAX +
+        "  解放済み";
+
+      statusEl.classList.add(
+        "is-met"
+      );
+
+      statusEl.classList.remove(
+        "is-unmet"
+      );
+
+    } else if (hasNextUnlockFlag) {
 
       statusEl.textContent =
         "Lv." +
@@ -3075,7 +3151,7 @@ function renderEvolveDetail() {
 
   if (confirmButton) {
 
-    if (hasForm2UnlockFlag) {
+    if (hasNextUnlockFlag) {
 
       confirmButton.disabled =
         true;
@@ -3083,7 +3159,7 @@ function renderEvolveDetail() {
       confirmButton.textContent =
         "解放済み";
 
-    } else if (!form2Ready) {
+    } else if (!nextFormReady) {
 
       confirmButton.disabled =
         true;
@@ -3642,11 +3718,19 @@ function renderEvolveList() {
     imageWrap.className =
       "enhance-card-image";
 
+    const displayForm =
+      getHighestUnlockedCharacterForm(
+        character
+      ) || character;
+
     const image =
       document.createElement("img");
 
     image.src =
-      character.images.menu;
+      displayForm.images &&
+      displayForm.images.menu
+        ? displayForm.images.menu
+        : character.images.menu;
 
     image.alt =
       character.name;
@@ -3656,7 +3740,7 @@ function renderEvolveList() {
 
     const menuScale =
       getCharacterMenuScale(
-        character
+        displayForm
       );
 
     image.style.width =
@@ -4143,9 +4227,14 @@ function renderEnhanceDetail() {
   const isMaxLevel =
     level >= CHARACTER_LEVEL_MAX;
 
+  const displayForm =
+    getHighestUnlockedCharacterForm(
+      character
+    ) || character;
+
   const currentStats =
     calculateCharacterCombatStats(
-      character,
+      displayForm,
       level,
       plus
     );
@@ -4154,7 +4243,7 @@ function renderEnhanceDetail() {
     isMaxLevel
       ? currentStats
       : calculateCharacterCombatStats(
-          character,
+          displayForm,
           level + 1,
           plus
         );
@@ -4174,14 +4263,17 @@ function renderEnhanceDetail() {
   if (image) {
 
     image.src =
-      character.images.menu;
+      displayForm.images &&
+      displayForm.images.menu
+        ? displayForm.images.menu
+        : character.images.menu;
 
     image.alt =
       character.name;
 
     const menuScale =
       getCharacterMenuScale(
-        character
+        displayForm
       );
 
     image.style.width =
@@ -5496,6 +5588,103 @@ function getCharacterActiveFormForDisplay(
   return getCharacterFormForDisplay(
     characterOrId,
     formNumber
+  );
+
+}
+
+
+function getHighestUnlockedCharacterFormNumber(
+  characterOrId
+) {
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      characterOrId
+    );
+
+  if (!unlocked.length) {
+
+    return 1;
+
+  }
+
+  let highest = unlocked[0];
+
+  unlocked.forEach((formNumber) => {
+
+    if (formNumber > highest) {
+
+      highest = formNumber;
+
+    }
+
+  });
+
+  return highest;
+
+}
+
+
+function getHighestUnlockedCharacterForm(
+  characterOrId
+) {
+
+  const formNumber =
+    getHighestUnlockedCharacterFormNumber(
+      characterOrId
+    );
+
+  const form =
+    getCharacterFormForDisplay(
+      characterOrId,
+      formNumber
+    );
+
+  if (form) {
+
+    return form;
+
+  }
+
+  const fallbackForm1 =
+    getCharacterFormForDisplay(
+      characterOrId,
+      1
+    );
+
+  if (fallbackForm1) {
+
+    return fallbackForm1;
+
+  }
+
+  const unlocked =
+    getUnlockedCharacterFormNumbers(
+      characterOrId
+    );
+
+  let index = 0;
+
+  while (index < unlocked.length) {
+
+    const unlockedForm =
+      getCharacterFormForDisplay(
+        characterOrId,
+        unlocked[index]
+      );
+
+    if (unlockedForm) {
+
+      return unlockedForm;
+
+    }
+
+    index += 1;
+
+  }
+
+  return resolveCharacterReference(
+    characterOrId
   );
 
 }
@@ -7572,16 +7761,19 @@ function renderFormationFormDetail() {
     image.alt =
       character.name;
 
-    const menuScale =
+    image.style.width = "";
+
+    image.style.height = "";
+
+    image.style.transform =
+      "scale(" +
       getCharacterMenuScale(
         form
-      );
+      ) +
+      ")";
 
-    image.style.width =
-      menuScale * 100 + "%";
-
-    image.style.height =
-      menuScale * 100 + "%";
+    image.style.transformOrigin =
+      "center center";
 
   }
 
@@ -8122,6 +8314,13 @@ function createFormationOwnedCard(character, box) {
 
     ${createFormationCardMetaHtml(character, activeForm)}
 
+    <button
+      type="button"
+      class="formation-owned-detail-button"
+    >
+      詳細
+    </button>
+
   `;
 
   applyFormationPercentBox(card, box);
@@ -8131,11 +8330,35 @@ function createFormationOwnedCard(character, box) {
     activeForm
   );
 
+  const detailButton =
+    card.querySelector(
+      ".formation-owned-detail-button"
+    );
+
+  if (detailButton) {
+
+    detailButton.addEventListener(
+      "click",
+      (event) => {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        openFormationFormDetail(
+          character.id
+        );
+
+      }
+    );
+
+  }
+
   card.addEventListener(
     "click",
     () => {
 
-      openFormationFormDetail(
+      setSelectedFormationCharacter(
         character.id
       );
 
