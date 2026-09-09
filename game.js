@@ -39,6 +39,11 @@ const evolveScreen =
     "evolve-screen"
   );
 
+const evolveDetailScreen =
+  document.getElementById(
+    "evolve-detail-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -2563,6 +2568,339 @@ evolveFilterButtons.forEach((button) => {
 });
 
 
+let selectedEvolveCharacterId =
+  null;
+
+
+function openEvolveDetail(characterId) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return;
+
+  }
+
+  selectedEvolveCharacterId =
+    characterId;
+
+  renderEvolveDetail();
+
+  showScreen(evolveDetailScreen);
+
+}
+
+
+function closeEvolveDetail() {
+
+  selectedEvolveCharacterId =
+    null;
+
+  showScreen(evolveScreen);
+
+  renderEvolveList();
+
+}
+
+
+function renderEvolveDetail() {
+
+  const characterId =
+    selectedEvolveCharacterId;
+
+  const character =
+    characterId
+      ? CHARACTERS[characterId]
+      : null;
+
+  if (
+    !character ||
+    !evolveDetailScreen
+  ) {
+
+    return;
+
+  }
+
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const level =
+    clampCharacterLevel(
+      progress.level
+    );
+
+  const plus =
+    clampCharacterPlus(
+      progress.plus
+    );
+
+  const canEvolve =
+    level >= CHARACTER_LEVEL_MAX;
+
+  const unlockedForms =
+    Array.isArray(
+      progress.unlockedForms
+    )
+      ? progress.unlockedForms
+      : [1];
+
+  const hasForm2UnlockFlag =
+    unlockedForms.indexOf(2) !==
+    -1;
+
+
+  const image =
+    document.getElementById(
+      "evolve-detail-image"
+    );
+
+  if (image) {
+
+    image.src =
+      character.images.menu;
+
+    image.alt =
+      character.name;
+
+    const menuScale =
+      getCharacterMenuScale(
+        character
+      );
+
+    image.style.width =
+      menuScale * 100 + "%";
+
+    image.style.height =
+      menuScale * 100 + "%";
+
+  }
+
+  const numberEl =
+    document.getElementById(
+      "evolve-detail-number"
+    );
+
+  if (numberEl) {
+
+    numberEl.textContent =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+  }
+
+  const rarityEl =
+    document.getElementById(
+      "evolve-detail-rarity"
+    );
+
+  if (rarityEl) {
+
+    rarityEl.textContent =
+      getRarityLabel(
+        getCharacterRarity(character)
+      );
+
+  }
+
+  const nameEl =
+    document.getElementById(
+      "evolve-detail-name"
+    );
+
+  if (nameEl) {
+
+    nameEl.textContent =
+      character.name;
+
+  }
+
+  const groupEl =
+    document.getElementById(
+      "evolve-detail-group"
+    );
+
+  if (groupEl) {
+
+    groupEl.textContent =
+      getCharacterGroup(character);
+
+  }
+
+  const levelEl =
+    document.getElementById(
+      "evolve-detail-level"
+    );
+
+  if (levelEl) {
+
+    levelEl.textContent =
+      "Lv." +
+      level +
+      " +" +
+      plus;
+
+  }
+
+  const nextNameEl =
+    document.getElementById(
+      "evolve-detail-next-name"
+    );
+
+  if (nextNameEl) {
+
+    nextNameEl.textContent =
+      "???";
+
+  }
+
+  const nextNoteEl =
+    document.getElementById(
+      "evolve-detail-next-note"
+    );
+
+  if (nextNoteEl) {
+
+    nextNoteEl.textContent =
+      hasForm2UnlockFlag
+        ? "第2形態データ未実装"
+        : "";
+
+  }
+
+  const statusEl =
+    document.getElementById(
+      "evolve-detail-condition-status"
+    );
+
+  if (statusEl) {
+
+    statusEl.textContent =
+      "Lv." +
+      level +
+      " / " +
+      CHARACTER_LEVEL_MAX +
+      "  " +
+      (
+        canEvolve
+          ? "達成"
+          : "未達成"
+      );
+
+    statusEl.classList.toggle(
+      "is-met",
+      canEvolve
+    );
+
+    statusEl.classList.toggle(
+      "is-unmet",
+      !canEvolve
+    );
+
+  }
+
+  const confirmButton =
+    document.getElementById(
+      "evolve-detail-confirm"
+    );
+
+  if (confirmButton) {
+
+    if (canEvolve) {
+
+      confirmButton.disabled =
+        false;
+
+      confirmButton.textContent =
+        "進化する";
+
+    } else {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "条件未達成";
+
+    }
+
+  }
+
+}
+
+
+const evolveDetailBack =
+  document.getElementById(
+    "evolve-detail-back"
+  );
+
+
+if (evolveDetailBack) {
+
+  evolveDetailBack.addEventListener(
+    "click",
+    () => {
+
+      closeEvolveDetail();
+
+    }
+  );
+
+}
+
+
+const evolveDetailConfirm =
+  document.getElementById(
+    "evolve-detail-confirm"
+  );
+
+
+if (evolveDetailConfirm) {
+
+  evolveDetailConfirm.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !selectedEvolveCharacterId
+      ) {
+
+        return;
+
+      }
+
+      const progress =
+        getEnhanceCardProgress(
+          selectedEvolveCharacterId
+        );
+
+      if (
+        clampCharacterLevel(
+          progress.level
+        ) < CHARACTER_LEVEL_MAX
+      ) {
+
+        return;
+
+      }
+
+      console.log(
+        "進化実行予定:",
+        selectedEvolveCharacterId
+      );
+
+    }
+  );
+
+}
+
+
 let evolveRarityFilter =
   FORMATION_RARITY_FILTER_ALL;
 
@@ -2844,8 +3182,7 @@ function renderEvolveList() {
       "click",
       () => {
 
-        console.log(
-          "進化画面予定:",
+        openEvolveDetail(
           character.id
         );
 

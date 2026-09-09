@@ -75,6 +75,8 @@ h3,
 .enhance-empty,
 .enhance-detail-panel,
 .enhance-detail-confirm,
+.evolve-detail-body,
+.evolve-detail-confirm,
 .timeline-header h3,
 .timeline-resource,
 .year-node,
@@ -769,6 +771,286 @@ h2 {
   flex-direction: column;
 
   background: #111;
+}
+
+
+#evolve-detail-screen {
+  flex-direction: column;
+
+  background: #111;
+}
+
+.evolve-detail-body {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-start;
+
+  gap: 8px;
+
+  overflow: hidden;
+
+  padding: 8px 3vw 10px;
+}
+
+.evolve-detail-forms {
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: stretch;
+
+  justify-content: center;
+
+  gap: 10px;
+
+  width: 100%;
+
+  min-height: 0;
+
+  flex: 1 1 auto;
+}
+
+.evolve-detail-form {
+  flex: 1 1 0;
+
+  min-width: 0;
+
+  max-width: 280px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 4px;
+}
+
+.evolve-detail-form-label {
+  color: #aaa;
+
+  font-size: clamp(11px, 1.5vw, 14px);
+
+  letter-spacing: 0.08em;
+}
+
+.evolve-detail-image-wrap {
+  width: min(100%, 140px);
+
+  aspect-ratio: 3 / 4;
+
+  max-height: min(42vh, 180px);
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  border: 2px solid #555;
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      #222,
+      #0a0a0a
+    );
+}
+
+.evolve-detail-image-wrap img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+
+  object-position: center;
+
+  pointer-events: none;
+}
+
+.evolve-detail-locked {
+  border-style: dashed;
+
+  border-color: #666;
+
+  background: #141414;
+}
+
+.evolve-detail-locked-mark {
+  font-size: clamp(36px, 7vw, 54px);
+
+  line-height: 1;
+
+  color: #888;
+}
+
+.evolve-detail-arrow {
+  flex: 0 0 auto;
+
+  align-self: center;
+
+  color: #ccc;
+
+  font-size: clamp(22px, 4vw, 34px);
+
+  padding-top: 18px;
+}
+
+.evolve-detail-meta {
+  width: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 1px;
+
+  text-align: center;
+}
+
+.evolve-detail-number {
+  color: #888;
+
+  font-size: clamp(10px, 1.3vw, 12px);
+
+  letter-spacing: 0.06em;
+}
+
+.evolve-detail-rarity {
+  color: #ccc;
+
+  font-size: clamp(10px, 1.4vw, 13px);
+}
+
+.evolve-detail-name {
+  font-size: clamp(16px, 2.6vw, 24px);
+
+  letter-spacing: 0.06em;
+}
+
+.evolve-detail-group {
+  color: #aaa;
+
+  font-size: clamp(11px, 1.5vw, 14px);
+}
+
+.evolve-detail-level {
+  color: #ddd;
+
+  font-size: clamp(12px, 1.7vw, 16px);
+}
+
+.evolve-detail-next-name {
+  color: #888;
+
+  font-size: clamp(16px, 2.6vw, 24px);
+
+  letter-spacing: 0.12em;
+}
+
+.evolve-detail-next-note {
+  color: #666;
+
+  font-size: clamp(10px, 1.3vw, 12px);
+
+  min-height: 1em;
+}
+
+.evolve-detail-condition {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 2px;
+
+  padding: 6px 14px;
+
+  border: 1px solid #555;
+  border-radius: 6px;
+
+  background: #161616;
+
+  min-width: min(70%, 260px);
+}
+
+.evolve-detail-condition-title {
+  color: #aaa;
+
+  font-size: clamp(11px, 1.5vw, 14px);
+}
+
+.evolve-detail-condition-rule {
+  font-size: clamp(14px, 2vw, 18px);
+}
+
+.evolve-detail-condition-status {
+  font-size: clamp(12px, 1.7vw, 15px);
+}
+
+.evolve-detail-condition-status.is-met {
+  color: #c8f0c8;
+}
+
+.evolve-detail-condition-status.is-unmet {
+  color: #f0b0b0;
+}
+
+.evolve-detail-confirm {
+  margin-top: 2px;
+
+  width: 64%;
+
+  max-width: 180px;
+
+  padding: 8px 14px;
+
+  border: 2px solid #fff;
+  border-radius: 6px;
+
+  background:
+    linear-gradient(
+      #333,
+      #151515
+    );
+
+  color: white;
+
+  font-size: clamp(14px, 2vw, 18px);
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+}
+
+.evolve-detail-confirm:active:not(:disabled) {
+  transform: scale(0.98);
+
+  background: #444;
+}
+
+.evolve-detail-confirm:disabled {
+  border-color: #666;
+
+  color: #888;
+
+  background: #1a1a1a;
+
+  cursor: default;
 }
 
 .enhance-filters {
@@ -3791,6 +4073,8 @@ h3,
 .enhance-card-progress,
 .enhance-detail-panel,
 .enhance-detail-confirm,
+.evolve-detail-body,
+.evolve-detail-confirm,
 .timeline-header h3,
 .timeline-resource,
 .year-node,
