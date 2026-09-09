@@ -7191,6 +7191,346 @@ function initBsPass() {
 initBsPass();
 
 
+const ITEMS = {
+
+  sake: {
+
+    id: "sake",
+
+    name: "酒"
+
+  },
+
+  battleSpeed: {
+
+    id: "battleSpeed",
+
+    name: "戦闘スピードアップ"
+
+  },
+
+  smokingMax: {
+
+    id: "smokingMax",
+
+    name: "喫煙所MAX"
+
+  },
+
+  engine: {
+
+    id: "engine",
+
+    name: "エンジン"
+
+  },
+
+  moshStaff: {
+
+    id: "moshStaff",
+
+    name: "MOSH要員"
+
+  },
+
+  encore: {
+
+    id: "encore",
+
+    name: "アンコール"
+
+  }
+
+};
+
+
+const PLAYER_ITEMS_KEY =
+  "playerItems";
+
+let playerItems = {};
+
+
+function createEmptyPlayerItems() {
+
+  const empty = {};
+
+  Object.keys(ITEMS).forEach(
+    (itemId) => {
+
+      empty[itemId] = 0;
+
+    }
+  );
+
+  return empty;
+
+}
+
+
+function isKnownItemId(itemId) {
+
+  return Boolean(
+    itemId &&
+    ITEMS[itemId]
+  );
+
+}
+
+
+function sanitizeItemCount(value) {
+
+  const number =
+    Number(value);
+
+  if (!Number.isFinite(number)) {
+
+    return 0;
+
+  }
+
+  const integer =
+    Math.floor(number);
+
+  if (integer < 0) {
+
+    return 0;
+
+  }
+
+  return integer;
+
+}
+
+
+function sanitizePlayerItems(raw) {
+
+  const sanitized =
+    createEmptyPlayerItems();
+
+  if (
+    !raw ||
+    typeof raw !== "object" ||
+    Array.isArray(raw)
+  ) {
+
+    return sanitized;
+
+  }
+
+  Object.keys(ITEMS).forEach(
+    (itemId) => {
+
+      sanitized[itemId] =
+        sanitizeItemCount(
+          raw[itemId]
+        );
+
+    }
+  );
+
+  return sanitized;
+
+}
+
+
+function savePlayerItems() {
+
+  localStorage.setItem(
+    PLAYER_ITEMS_KEY,
+    JSON.stringify(playerItems)
+  );
+
+}
+
+
+function loadPlayerItems() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        PLAYER_ITEMS_KEY
+      );
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return null;
+
+    }
+
+    return sanitizePlayerItems(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+  return createEmptyPlayerItems();
+
+}
+
+
+function getPlayerItems() {
+
+  return sanitizePlayerItems(
+    playerItems
+  );
+
+}
+
+
+function getItemCount(itemId) {
+
+  if (!isKnownItemId(itemId)) {
+
+    return 0;
+
+  }
+
+  return sanitizeItemCount(
+    playerItems[itemId]
+  );
+
+}
+
+
+function setItemCount(itemId, amount) {
+
+  if (!isKnownItemId(itemId)) {
+
+    return 0;
+
+  }
+
+  const sanitized =
+    sanitizeItemCount(amount);
+
+  playerItems =
+    sanitizePlayerItems(
+      playerItems
+    );
+
+  playerItems[itemId] =
+    sanitized;
+
+  savePlayerItems();
+
+  return sanitized;
+
+}
+
+
+function addItem(itemId, amount) {
+
+  if (!isKnownItemId(itemId)) {
+
+    return getItemCount(itemId);
+
+  }
+
+  const add =
+    Number(amount);
+
+  if (
+    !Number.isFinite(add) ||
+    add <= 0
+  ) {
+
+    return getItemCount(itemId);
+
+  }
+
+  return setItemCount(
+    itemId,
+    getItemCount(itemId) +
+      Math.floor(add)
+  );
+
+}
+
+
+function spendItem(itemId, amount) {
+
+  if (!isKnownItemId(itemId)) {
+
+    return false;
+
+  }
+
+  const cost =
+    Number(amount);
+
+  if (
+    !Number.isFinite(cost) ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const spend =
+    Math.floor(cost);
+
+  const owned =
+    getItemCount(itemId);
+
+  if (owned < spend) {
+
+    return false;
+
+  }
+
+  setItemCount(
+    itemId,
+    owned - spend
+  );
+
+  return true;
+
+}
+
+
+function initPlayerItems() {
+
+  const loaded =
+    loadPlayerItems();
+
+  if (loaded === null) {
+
+    playerItems =
+      createEmptyPlayerItems();
+
+    savePlayerItems();
+
+  } else {
+
+    playerItems =
+      loaded;
+
+    if (
+      localStorage.getItem(
+        PLAYER_ITEMS_KEY
+      ) !==
+      JSON.stringify(playerItems)
+    ) {
+
+      savePlayerItems();
+
+    }
+
+  }
+
+}
+
+
+initPlayerItems();
+
+
 const CHARACTER_FRAGMENTS_KEY =
   "characterFragments";
 
