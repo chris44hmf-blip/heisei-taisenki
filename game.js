@@ -19,6 +19,11 @@ const formationScreen =
     "formation-screen"
   );
 
+const trainingScreen =
+  document.getElementById(
+    "training-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -135,6 +140,15 @@ menuButtons.forEach((button) => {
 
       }
 
+      if (menu === "training") {
+
+        showScreen(trainingScreen);
+
+        return;
+
+      }
+
+
       console.log(
         "選択されたメニュー:",
         menu
@@ -158,6 +172,49 @@ timelineBack.addEventListener(
 
   }
 );
+
+
+const trainingBack =
+  document.getElementById(
+    "training-back"
+  );
+
+
+if (trainingBack) {
+
+  trainingBack.addEventListener(
+    "click",
+    () => {
+
+      showScreen(homeScreen);
+
+    }
+  );
+
+}
+
+
+const trainingChoices =
+  document.querySelectorAll(
+    ".training-choice"
+  );
+
+
+trainingChoices.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      console.log(
+        "選択された育成メニュー:",
+        button.dataset.training
+      );
+
+    }
+  );
+
+});
 
 
 const formationBack =
