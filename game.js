@@ -8285,6 +8285,525 @@ function executeDoritikeGachaPull(
 
 
 /* =========================
+   BS GACHA BANNER FOUNDATION
+========================= */
+
+const BS_GACHA_BANNER_TYPE = {
+
+  NORMAL: "normal",
+
+  PICKUP: "pickup",
+
+  EVENT: "event",
+
+  REPRINT: "reprint"
+
+};
+
+
+const BS_GACHA_CURRENCY = {
+
+  BS_PASS: "bsPass",
+
+  GYARA: "gyara"
+
+};
+
+
+const BS_GACHA_RARITY_STAR = {
+
+  [CHARACTER_RARITY.IPPANJIN]: 1,
+
+  [CHARACTER_RARITY.BANDMAN]: 2,
+
+  [CHARACTER_RARITY.HEADLINER]: 3,
+
+  [CHARACTER_RARITY.LEGEND]: 4
+
+};
+
+
+const BS_GACHA_NORMAL_RATES = [
+
+  {
+    rarity: 1,
+    weight: 60
+  },
+
+  {
+    rarity: 2,
+    weight: 25
+  },
+
+  {
+    rarity: 3,
+    weight: 12
+  },
+
+  {
+    rarity: 4,
+    weight: 3
+  }
+
+];
+
+
+const BS_GACHA_GUARANTEE_RATES = [
+
+  {
+    rarity: 3,
+    weight: 90
+  },
+
+  {
+    rarity: 4,
+    weight: 10
+  }
+
+];
+
+
+const BS_GACHA_BANNERS = {
+
+  normal: {
+
+    id: "normal",
+
+    title: "BACKSTAGEガチャ",
+
+    shortTitle: "BSガチャ",
+
+    type: BS_GACHA_BANNER_TYPE.NORMAL,
+
+    enabled: true,
+
+    pool: {
+
+      unlockTypes: [
+        "gacha"
+      ],
+
+      includeCharacterIds: [],
+
+      excludeCharacterIds: [],
+
+      pickupCharacterIds: []
+
+    },
+
+    rates: BS_GACHA_NORMAL_RATES,
+
+    guarantee: {
+
+      enabled: true,
+
+      minRarity: 3,
+
+      rates: BS_GACHA_GUARANTEE_RATES
+
+    },
+
+    costs: {
+
+      multiCount: 10,
+
+      single: [
+
+        {
+          currency: BS_GACHA_CURRENCY.BS_PASS,
+          amount: 1
+        },
+
+        {
+          currency: BS_GACHA_CURRENCY.GYARA,
+          amount: 50
+        }
+
+      ],
+
+      multi: [
+
+        {
+          currency: BS_GACHA_CURRENCY.BS_PASS,
+          amount: 10
+        },
+
+        {
+          currency: BS_GACHA_CURRENCY.GYARA,
+          amount: 450
+        }
+
+      ]
+
+    },
+
+    pickup: null
+
+  }
+
+};
+
+
+function createEmptyBsGachaRarityBuckets() {
+
+  return {
+
+    1: [],
+
+    2: [],
+
+    3: [],
+
+    4: []
+
+  };
+
+}
+
+
+function getBsGachaBanner(bannerId) {
+
+  if (
+    typeof bannerId !== "string" ||
+    !bannerId
+  ) {
+
+    return null;
+
+  }
+
+  const banner =
+    BS_GACHA_BANNERS[bannerId];
+
+  if (
+    !banner ||
+    typeof banner !== "object"
+  ) {
+
+    return null;
+
+  }
+
+  return banner;
+
+}
+
+
+function getEnabledBsGachaBanners() {
+
+  return Object.keys(
+    BS_GACHA_BANNERS
+  )
+    .map((bannerId) => {
+
+      return getBsGachaBanner(
+        bannerId
+      );
+
+    })
+    .filter((banner) => {
+
+      return (
+        banner &&
+        banner.enabled === true
+      );
+
+    });
+
+}
+
+
+function getBsGachaRarityStar(
+  characterOrRarity
+) {
+
+  let rarity =
+    characterOrRarity;
+
+  if (
+    characterOrRarity &&
+    typeof characterOrRarity ===
+      "object"
+  ) {
+
+    rarity =
+      characterOrRarity.rarity;
+
+  }
+
+  if (
+    rarity ===
+      CHARACTER_RARITY.IPPANJIN ||
+    rarity === 1 ||
+    rarity === "1"
+  ) {
+
+    return 1;
+
+  }
+
+  if (
+    rarity ===
+      CHARACTER_RARITY.BANDMAN ||
+    rarity === 2 ||
+    rarity === "2"
+  ) {
+
+    return 2;
+
+  }
+
+  if (
+    rarity ===
+      CHARACTER_RARITY.HEADLINER ||
+    rarity === 3 ||
+    rarity === "3"
+  ) {
+
+    return 3;
+
+  }
+
+  if (
+    rarity ===
+      CHARACTER_RARITY.LEGEND ||
+    rarity === 4 ||
+    rarity === "4"
+  ) {
+
+    return 4;
+
+  }
+
+  if (
+    typeof rarity === "string" &&
+    BS_GACHA_RARITY_STAR[rarity]
+  ) {
+
+    return BS_GACHA_RARITY_STAR[
+      rarity
+    ];
+
+  }
+
+  return null;
+
+}
+
+
+function getBsGachaCharacterUnlockType(
+  character
+) {
+
+  if (
+    !character ||
+    typeof character !== "object" ||
+    !character.unlock ||
+    typeof character.unlock !==
+      "object"
+  ) {
+
+    return null;
+
+  }
+
+  const unlockType =
+    character.unlock.type;
+
+  if (typeof unlockType !== "string") {
+
+    return null;
+
+  }
+
+  return unlockType;
+
+}
+
+
+function isCharacterEligibleForBsBanner(
+  character,
+  banner
+) {
+
+  if (
+    !character ||
+    typeof character !== "object" ||
+    !banner ||
+    typeof banner !== "object"
+  ) {
+
+    return false;
+
+  }
+
+  const characterId =
+    character.id;
+
+  if (
+    typeof characterId !== "string" ||
+    !characterId
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    getBsGachaRarityStar(
+      character
+    ) == null
+  ) {
+
+    return false;
+
+  }
+
+  const pool =
+    banner.pool &&
+    typeof banner.pool === "object"
+      ? banner.pool
+      : {};
+
+  const excludeIds =
+    Array.isArray(
+      pool.excludeCharacterIds
+    )
+      ? pool.excludeCharacterIds
+      : [];
+
+  if (
+    excludeIds.indexOf(
+      characterId
+    ) !== -1
+  ) {
+
+    return false;
+
+  }
+
+  const includeIds =
+    Array.isArray(
+      pool.includeCharacterIds
+    )
+      ? pool.includeCharacterIds
+      : [];
+
+  if (
+    includeIds.length > 0 &&
+    includeIds.indexOf(
+      characterId
+    ) !== -1
+  ) {
+
+    return true;
+
+  }
+
+  const unlockTypes =
+    Array.isArray(pool.unlockTypes)
+      ? pool.unlockTypes
+      : [];
+
+  const unlockType =
+    getBsGachaCharacterUnlockType(
+      character
+    );
+
+  if (
+    unlockType &&
+    unlockTypes.indexOf(
+      unlockType
+    ) !== -1
+  ) {
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+function getBsGachaPool(bannerId) {
+
+  const banner =
+    getBsGachaBanner(bannerId);
+
+  const byRarity =
+    createEmptyBsGachaRarityBuckets();
+
+  if (!banner) {
+
+    return {
+
+      bannerId: bannerId || null,
+
+      all: [],
+
+      byRarity: byRarity
+
+    };
+
+  }
+
+  const all = [];
+
+  Object.keys(CHARACTERS).forEach(
+    (characterId) => {
+
+      const character =
+        CHARACTERS[characterId];
+
+      if (
+        !isCharacterEligibleForBsBanner(
+          character,
+          banner
+        )
+      ) {
+
+        return;
+
+      }
+
+      const rarityStar =
+        getBsGachaRarityStar(
+          character
+        );
+
+      if (
+        rarityStar == null ||
+        !byRarity[rarityStar]
+      ) {
+
+        return;
+
+      }
+
+      all.push(characterId);
+
+      byRarity[rarityStar].push(
+        characterId
+      );
+
+    }
+  );
+
+  return {
+
+    bannerId: banner.id,
+
+    all: all,
+
+    byRarity: byRarity
+
+  };
+
+}
+
+
+/* =========================
    DORITIKE GACHA SCREEN
 ========================= */
 
