@@ -764,7 +764,8 @@ h2 {
 }
 
 
-#enhance-screen {
+#enhance-screen,
+#evolve-screen {
   flex-direction: column;
 
   background: #111;

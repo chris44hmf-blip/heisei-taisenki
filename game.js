@@ -34,6 +34,11 @@ const enhanceDetailScreen =
     "enhance-detail-screen"
   );
 
+const evolveScreen =
+  document.getElementById(
+    "evolve-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -222,6 +227,14 @@ trainingChoices.forEach((button) => {
       if (choice === "enhance") {
 
         openEnhanceList();
+
+        return;
+
+      }
+
+      if (choice === "evolve") {
+
+        openEvolveList();
 
         return;
 
@@ -2228,7 +2241,7 @@ function renderEnhanceList() {
 
   const filterButtons =
     document.querySelectorAll(
-      ".enhance-filter"
+      "#enhance-filters .enhance-filter"
     );
 
 
@@ -2488,7 +2501,7 @@ if (enhanceBack) {
 
 const enhanceFilterButtons =
   document.querySelectorAll(
-    ".enhance-filter"
+    "#enhance-filters .enhance-filter"
   );
 
 
@@ -2506,6 +2519,344 @@ enhanceFilterButtons.forEach((button) => {
   );
 
 });
+
+
+const evolveBack =
+  document.getElementById(
+    "evolve-back"
+  );
+
+
+if (evolveBack) {
+
+  evolveBack.addEventListener(
+    "click",
+    () => {
+
+      closeEvolveList();
+
+    }
+  );
+
+}
+
+
+const evolveFilterButtons =
+  document.querySelectorAll(
+    "#evolve-filters .enhance-filter"
+  );
+
+
+evolveFilterButtons.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      setEvolveRarityFilter(
+        button.dataset.filter
+      );
+
+    }
+  );
+
+});
+
+
+let evolveRarityFilter =
+  FORMATION_RARITY_FILTER_ALL;
+
+
+function openEvolveList() {
+
+  evolveRarityFilter =
+    FORMATION_RARITY_FILTER_ALL;
+
+  if (ensureOwnedCharacterProgress()) {
+
+    saveCharacterProgress();
+
+  }
+
+  renderEvolveList();
+
+  showScreen(evolveScreen);
+
+}
+
+
+function closeEvolveList() {
+
+  showScreen(trainingScreen);
+
+}
+
+
+function setEvolveRarityFilter(filter) {
+
+  if (
+    FORMATION_RARITY_FILTERS.indexOf(
+      filter
+    ) === -1
+  ) {
+
+    return;
+
+  }
+
+  evolveRarityFilter = filter;
+
+  renderEvolveList();
+
+}
+
+
+function renderEvolveList() {
+
+  const list =
+    document.getElementById(
+      "evolve-list"
+    );
+
+  const filterButtons =
+    document.querySelectorAll(
+      "#evolve-filters .enhance-filter"
+    );
+
+
+  if (!list) {
+
+    return;
+
+  }
+
+
+  filterButtons.forEach((button) => {
+
+    button.classList.toggle(
+      "is-selected",
+      button.dataset.filter ===
+        evolveRarityFilter
+    );
+
+  });
+
+
+  list.innerHTML = "";
+
+
+  const ownedRoster =
+    Object.values(CHARACTERS).filter(
+      (character) => {
+
+        return isCharacterOwned(
+          character.id
+        );
+
+      }
+    );
+
+  const visibleRoster =
+    ownedRoster.filter(
+      (character) => {
+
+        return characterMatchesRarityFilter(
+          character,
+          evolveRarityFilter
+        );
+
+      }
+    );
+
+
+  if (visibleRoster.length === 0) {
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "enhance-empty";
+
+    empty.textContent =
+      "該当するキャラクターがいません";
+
+    list.appendChild(empty);
+
+    return;
+
+  }
+
+
+  visibleRoster.forEach((character) => {
+
+    const progress =
+      getEnhanceCardProgress(
+        character.id
+      );
+
+    const card =
+      document.createElement("button");
+
+    card.type = "button";
+
+    card.className =
+      "enhance-card";
+
+    card.dataset.characterId =
+      character.id;
+
+    const imageWrap =
+      document.createElement("div");
+
+    imageWrap.className =
+      "enhance-card-image";
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      character.images.menu;
+
+    image.alt =
+      character.name;
+
+    image.draggable =
+      false;
+
+    const menuScale =
+      getCharacterMenuScale(
+        character
+      );
+
+    image.style.width =
+      menuScale * 100 + "%";
+
+    image.style.height =
+      menuScale * 100 + "%";
+
+    imageWrap.appendChild(image);
+
+
+    const inner =
+      document.createElement("div");
+
+    inner.className =
+      "enhance-card-inner";
+
+
+    const info =
+      document.createElement("div");
+
+    info.className =
+      "enhance-card-info";
+
+    const rarityRow =
+      document.createElement("div");
+
+    rarityRow.className =
+      "enhance-card-rarity-row";
+
+    const rarity =
+      document.createElement("div");
+
+    rarity.className =
+      "enhance-card-rarity";
+
+    rarity.textContent =
+      getRarityLabel(
+        getCharacterRarity(character)
+      );
+
+    rarityRow.appendChild(rarity);
+
+    const numberLabel =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+    if (numberLabel) {
+
+      const number =
+        document.createElement("div");
+
+      number.className =
+        "enhance-card-number";
+
+      number.textContent =
+        numberLabel;
+
+      rarityRow.appendChild(number);
+
+    }
+
+    const name =
+      document.createElement("div");
+
+    name.className =
+      "enhance-card-name";
+
+    name.textContent =
+      character.name;
+
+    const groupName =
+      getCharacterGroup(character);
+
+    const progressText =
+      document.createElement("div");
+
+    progressText.className =
+      "enhance-card-progress";
+
+    progressText.textContent =
+      "Lv." +
+      progress.level +
+      " +" +
+      progress.plus;
+
+    info.appendChild(rarityRow);
+
+    info.appendChild(name);
+
+    if (groupName) {
+
+      const group =
+        document.createElement("div");
+
+      group.className =
+        "enhance-card-group";
+
+      group.textContent =
+        groupName;
+
+      info.appendChild(group);
+
+    }
+
+    info.appendChild(progressText);
+
+    inner.appendChild(imageWrap);
+
+    inner.appendChild(info);
+
+    card.appendChild(inner);
+
+    card.addEventListener(
+      "click",
+      () => {
+
+        console.log(
+          "進化画面予定:",
+          character.id
+        );
+
+      }
+    );
+
+    list.appendChild(card);
+
+  });
+
+}
 
 
 const CHARACTER_LEVEL_MIN = 1;
