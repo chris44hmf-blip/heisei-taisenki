@@ -1447,6 +1447,8 @@ let battlePausedAt = 0;
 
 let deployCooldownUntil = {};
 
+let deployCooldownDurationMs = {};
+
 
 function isBattleActive() {
 
@@ -1740,6 +1742,8 @@ function startBattle() {
   hideBattlePauseMenu();
 
   deployCooldownUntil = {};
+
+  deployCooldownDurationMs = {};
 
   battleCardPage = 0;
 
@@ -5593,6 +5597,28 @@ function getCharacterActiveFormForDisplay(
 }
 
 
+function getActiveCharacterForm(
+  characterOrId
+) {
+
+  const form =
+    getCharacterActiveFormForDisplay(
+      characterOrId
+    );
+
+  if (form) {
+
+    return form;
+
+  }
+
+  return resolveCharacterReference(
+    characterOrId
+  );
+
+}
+
+
 function getHighestUnlockedCharacterFormNumber(
   characterOrId
 ) {
@@ -6993,6 +7019,10 @@ function isCharacterOnCooldown(characterId) {
 
     delete deployCooldownUntil[characterId];
 
+    delete deployCooldownDurationMs[
+      characterId
+    ];
+
     return false;
 
   }
@@ -7004,11 +7034,21 @@ function isCharacterOnCooldown(characterId) {
 
 function getDeployCooldownProgress(characterId) {
 
-  const character =
-    CHARACTERS[characterId];
+  const storedDuration =
+    Number(
+      deployCooldownDurationMs[
+        characterId
+      ]
+    );
 
   const duration =
-    getDeployCooldownMs(character);
+    storedDuration > 0
+      ? storedDuration
+      : getDeployCooldownMs(
+          getActiveCharacterForm(
+            characterId
+          )
+        );
 
   if (duration <= 0) {
 
@@ -7047,19 +7087,29 @@ function getDeployCooldownProgress(characterId) {
 
 function beginDeployCooldown(characterId) {
 
-  const character =
-    CHARACTERS[characterId];
+  const form =
+    getActiveCharacterForm(
+      characterId
+    );
 
   const duration =
-    getDeployCooldownMs(character);
+    getDeployCooldownMs(form);
 
   if (duration <= 0) {
 
     delete deployCooldownUntil[characterId];
 
+    delete deployCooldownDurationMs[
+      characterId
+    ];
+
     return;
 
   }
+
+  deployCooldownDurationMs[
+    characterId
+  ] = duration;
 
   deployCooldownUntil[characterId] =
     Date.now() + duration;
@@ -8641,8 +8691,22 @@ function renderFormationScreen() {
 
 function createBattleUnitCard(character) {
 
+  const form =
+    getActiveCharacterForm(
+      character
+    ) || character;
+
   const yaniCost =
-    character.stats.yaniCost;
+    Number(
+      form.stats &&
+      form.stats.yaniCost
+    ) || 0;
+
+  const menuImageSrc =
+    form.images &&
+    form.images.menu
+      ? form.images.menu
+      : character.images.menu;
 
   const card =
     document.createElement(
@@ -8665,7 +8729,7 @@ function createBattleUnitCard(character) {
     <span class="unit-icon">
       <img
         class="unit-character-image"
-        src="${character.images.menu}"
+        src="${menuImageSrc}"
         alt="${character.name}"
       >
     </span>
@@ -8696,7 +8760,7 @@ function createBattleUnitCard(character) {
     menuImage.style.transform =
       "scale(" +
       getCharacterMenuScale(
-        character
+        form
       ) +
       ")";
 
@@ -8888,8 +8952,16 @@ function updateUnitCardAvailability() {
     }
 
 
+    const form =
+      getActiveCharacterForm(
+        character
+      ) || character;
+
     const yaniCost =
-      character.stats.yaniCost;
+      Number(
+        form.stats &&
+        form.stats.yaniCost
+      ) || 0;
 
     const notEnough =
       yani < yaniCost;
@@ -9045,8 +9117,16 @@ if (battleUnitCards) {
       }
 
 
+      const form =
+        getActiveCharacterForm(
+          character
+        ) || character;
+
       const yaniCost =
-        character.stats.yaniCost;
+        Number(
+          form.stats &&
+          form.stats.yaniCost
+        ) || 0;
 
 
       if (yani < yaniCost) {
@@ -9336,6 +9416,26 @@ function spawnCharacter(characterId) {
   }
 
 
+  const formNumber =
+    getSafeActiveFormNumber(
+      characterId
+    );
+
+  const form =
+    getActiveCharacterForm(
+      characterId
+    ) || data;
+
+  const formImages =
+    form.images || data.images;
+
+  const formStats =
+    form.stats || data.stats;
+
+  const formBattle =
+    form.battle || data.battle;
+
+
   const element =
     document.createElement("div");
 
@@ -9353,7 +9453,7 @@ function spawnCharacter(characterId) {
     <div class="unit-body">
       <img
         class="unit-sprite"
-        src="${data.images.idle}"
+        src="${formImages.idle}"
         alt="${data.name}"
       >
     </div>
@@ -9372,10 +9472,10 @@ function spawnCharacter(characterId) {
 
 
   sprite.style.width =
-    data.battle.spriteSize + "px";
+    formBattle.spriteSize + "px";
 
   sprite.style.height =
-    data.battle.spriteSize + "px";
+    formBattle.spriteSize + "px";
 
 
   applySpawnPosition(
@@ -9396,7 +9496,7 @@ function spawnCharacter(characterId) {
 
   const combatStats =
     getCharacterStatAtProgress(
-      data,
+      form,
       progress
     );
 
@@ -9409,9 +9509,11 @@ function spawnCharacter(characterId) {
 
     name: data.name,
 
-    images: data.images,
+    formNumber: formNumber,
 
-    battle: data.battle,
+    images: formImages,
+
+    battle: formBattle,
 
     element: element,
 
@@ -9430,21 +9532,24 @@ function spawnCharacter(characterId) {
 
     attack: combatStats.attack,
 
-    range: data.stats.range,
+    range: formStats.range,
 
-    speed: data.stats.speed,
+    speed: formStats.speed,
 
     x: getAllySpawnX(),
 
     attackCooldown: 0,
 
     attackInterval:
-      data.stats.attackInterval,
+      formStats.attackInterval,
 
     attackBehavior:
-      getAttackBehavior(data),
+      getAttackBehavior(form),
 
-    traits: data.traits || {},
+    traits:
+      form.traits ||
+      data.traits ||
+      {},
 
     triggeredHealthKnockbacks:
       new Set(),
@@ -11486,6 +11591,8 @@ function stopBattle() {
   hideBattlePauseMenu();
 
   deployCooldownUntil = {};
+
+  deployCooldownDurationMs = {};
 
   clearInterval(yaniTimer);
   clearInterval(battleTimer);
