@@ -2080,6 +2080,36 @@ function getCharacterGroup(character) {
 }
 
 
+function getAllyCharacterNumberLabel(
+  character
+) {
+
+  if (!character) {
+
+    return "";
+
+  }
+
+  const number =
+    Number(character.number);
+
+  if (
+    !Number.isInteger(number) ||
+    number < 1
+  ) {
+
+    return "";
+
+  }
+
+  return (
+    "C-" +
+    String(number).padStart(3, "0")
+  );
+
+}
+
+
 function getRarityLabel(rarity) {
 
   if (
@@ -2323,6 +2353,12 @@ function renderEnhanceList() {
     info.className =
       "enhance-card-info";
 
+    const rarityRow =
+      document.createElement("div");
+
+    rarityRow.className =
+      "enhance-card-rarity-row";
+
     const rarity =
       document.createElement("div");
 
@@ -2333,6 +2369,28 @@ function renderEnhanceList() {
       getRarityLabel(
         getCharacterRarity(character)
       );
+
+    rarityRow.appendChild(rarity);
+
+    const numberLabel =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+    if (numberLabel) {
+
+      const number =
+        document.createElement("div");
+
+      number.className =
+        "enhance-card-number";
+
+      number.textContent =
+        numberLabel;
+
+      rarityRow.appendChild(number);
+
+    }
 
     const name =
       document.createElement("div");
@@ -2358,7 +2416,7 @@ function renderEnhanceList() {
       " +" +
       progress.plus;
 
-    info.appendChild(rarity);
+    info.appendChild(rarityRow);
 
     info.appendChild(name);
 
@@ -2506,6 +2564,8 @@ const CHARACTERS = {
 
     group: "令和黎明期",
 
+    number: 1,
+
     rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
@@ -2572,6 +2632,8 @@ const CHARACTERS = {
     name: "楓",
 
     group: "令和黎明期",
+
+    number: 2,
 
     rarity: CHARACTER_RARITY.IPPANJIN,
 
@@ -2656,6 +2718,8 @@ const CHARACTERS = {
 
     group: "令和黎明期",
 
+    number: 3,
+
     rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
@@ -2739,6 +2803,8 @@ const CHARACTERS = {
     name: "Chris",
 
     group: "令和黎明期",
+
+    number: 4,
 
     rarity: CHARACTER_RARITY.IPPANJIN,
 

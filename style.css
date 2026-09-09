@@ -864,7 +864,24 @@ h2 {
   gap: 1px;
 }
 
+.enhance-card-rarity-row {
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: baseline;
+
+  justify-content: space-between;
+
+  gap: 4px;
+
+  width: 100%;
+
+  flex-shrink: 0;
+}
+
 .enhance-card-rarity,
+.enhance-card-number,
 .enhance-card-name,
 .enhance-card-group,
 .enhance-card-progress {
@@ -881,6 +898,20 @@ h2 {
   font-size: 10px;
 
   font-weight: bold;
+
+  min-width: 0;
+}
+
+.enhance-card-number {
+  color: #888;
+
+  font-size: 9px;
+
+  font-weight: bold;
+
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
 }
 
 .enhance-card-name {
