@@ -7628,6 +7628,647 @@ function initPlayerItems() {
 initPlayerItems();
 
 
+const DORITIKE_GACHA_CATEGORY_WEIGHTS = [
+
+  {
+    value: "fragment",
+    weight: 50
+  },
+
+  {
+    value: "beats",
+    weight: 30
+  },
+
+  {
+    value: "item",
+    weight: 20
+  }
+
+];
+
+
+const DORITIKE_FRAGMENT_AMOUNT_WEIGHTS = [
+
+  {
+    value: 5,
+    weight: 65
+  },
+
+  {
+    value: 10,
+    weight: 27
+  },
+
+  {
+    value: 20,
+    weight: 7
+  },
+
+  {
+    value: 30,
+    weight: 1
+  }
+
+];
+
+
+const DORITIKE_BEATS_AMOUNT_WEIGHTS = [
+
+  {
+    value: 500,
+    weight: 65
+  },
+
+  {
+    value: 1000,
+    weight: 27
+  },
+
+  {
+    value: 2000,
+    weight: 7
+  },
+
+  {
+    value: 5000,
+    weight: 1
+  }
+
+];
+
+
+const DORITIKE_ITEM_GROUP_WEIGHTS = [
+
+  {
+    value: "sake",
+    weight: 35
+  },
+
+  {
+    value: "battleConsumable",
+    weight: 30
+  },
+
+  {
+    value: "engine",
+    weight: 20
+  },
+
+  {
+    value: "moshStaff",
+    weight: 14
+  },
+
+  {
+    value: "encore",
+    weight: 1
+  }
+
+];
+
+
+const DORITIKE_BATTLE_CONSUMABLE_WEIGHTS = [
+
+  {
+    value: "battleSpeed",
+    weight: 50
+  },
+
+  {
+    value: "smokingMax",
+    weight: 50
+  }
+
+];
+
+
+const DORITIKE_ITEM_JACKPOT_RATE =
+  0.10;
+
+const DORITIKE_GACHA_ROLL_RETRY_MAX =
+  20;
+
+
+function pickWeightedValue(entries) {
+
+  if (
+    !Array.isArray(entries) ||
+    entries.length === 0
+  ) {
+
+    return null;
+
+  }
+
+  let totalWeight = 0;
+
+  const normalized = [];
+
+  entries.forEach((entry) => {
+
+    if (!entry) {
+
+      return;
+
+    }
+
+    const weight =
+      Number(entry.weight);
+
+    if (
+      !Number.isFinite(weight) ||
+      weight <= 0
+    ) {
+
+      return;
+
+    }
+
+    normalized.push({
+      value: entry.value,
+      weight: weight
+    });
+
+    totalWeight +=
+      weight;
+
+  });
+
+  if (
+    normalized.length === 0 ||
+    totalWeight <= 0
+  ) {
+
+    return null;
+
+  }
+
+  let roll =
+    Math.random() * totalWeight;
+
+  let index = 0;
+
+  while (index < normalized.length) {
+
+    roll -=
+      normalized[index].weight;
+
+    if (roll < 0) {
+
+      return normalized[index].value;
+
+    }
+
+    index += 1;
+
+  }
+
+  return normalized[
+    normalized.length - 1
+  ].value;
+
+}
+
+
+function getDoritikeFragmentCandidates() {
+
+  const candidates = [];
+
+  Object.values(CHARACTERS).forEach(
+    (character) => {
+
+      if (
+        !character ||
+        !character.id
+      ) {
+
+        return;
+
+      }
+
+      if (
+        !character.unlock ||
+        character.unlock.type !==
+          "story"
+      ) {
+
+        return;
+
+      }
+
+      candidates.push(
+        character.id
+      );
+
+    }
+  );
+
+  return candidates;
+
+}
+
+
+function pickEqualValue(values) {
+
+  if (
+    !Array.isArray(values) ||
+    values.length === 0
+  ) {
+
+    return null;
+
+  }
+
+  const index =
+    Math.floor(
+      Math.random() * values.length
+    );
+
+  if (
+    index < 0 ||
+    index >= values.length
+  ) {
+
+    return values[0];
+
+  }
+
+  return values[index];
+
+}
+
+
+function rollDoritikeFragmentResult() {
+
+  const candidates =
+    getDoritikeFragmentCandidates();
+
+  if (candidates.length === 0) {
+
+    return null;
+
+  }
+
+  const characterId =
+    pickEqualValue(candidates);
+
+  const amount =
+    pickWeightedValue(
+      DORITIKE_FRAGMENT_AMOUNT_WEIGHTS
+    );
+
+  if (
+    !characterId ||
+    amount == null
+  ) {
+
+    return null;
+
+  }
+
+  return {
+
+    category: "fragment",
+
+    characterId: characterId,
+
+    amount: amount
+
+  };
+
+}
+
+
+function rollDoritikeBeatsResult() {
+
+  const amount =
+    pickWeightedValue(
+      DORITIKE_BEATS_AMOUNT_WEIGHTS
+    );
+
+  if (amount == null) {
+
+    return null;
+
+  }
+
+  return {
+
+    category: "beats",
+
+    amount: amount
+
+  };
+
+}
+
+
+function rollDoritikeItemResult() {
+
+  const group =
+    pickWeightedValue(
+      DORITIKE_ITEM_GROUP_WEIGHTS
+    );
+
+  let itemId =
+    null;
+
+  if (group === "battleConsumable") {
+
+    itemId =
+      pickWeightedValue(
+        DORITIKE_BATTLE_CONSUMABLE_WEIGHTS
+      );
+
+  } else {
+
+    itemId =
+      group;
+
+  }
+
+  if (
+    !itemId ||
+    !ITEMS[itemId]
+  ) {
+
+    return null;
+
+  }
+
+  if (itemId === "encore") {
+
+    return {
+
+      category: "item",
+
+      itemId: "encore",
+
+      amount: 1,
+
+      jackpot: false
+
+    };
+
+  }
+
+  const jackpot =
+    Math.random() <
+    DORITIKE_ITEM_JACKPOT_RATE;
+
+  return {
+
+    category: "item",
+
+    itemId: itemId,
+
+    amount: jackpot ? 2 : 1,
+
+    jackpot: jackpot
+
+  };
+
+}
+
+
+function rollDoritikeGachaOnce() {
+
+  let attempt = 0;
+
+  while (
+    attempt <
+    DORITIKE_GACHA_ROLL_RETRY_MAX
+  ) {
+
+    attempt += 1;
+
+    const candidates =
+      getDoritikeFragmentCandidates();
+
+    const categoryWeights =
+      candidates.length === 0
+        ? DORITIKE_GACHA_CATEGORY_WEIGHTS.filter(
+            (entry) => {
+
+              return (
+                entry.value !==
+                "fragment"
+              );
+
+            }
+          )
+        : DORITIKE_GACHA_CATEGORY_WEIGHTS;
+
+    const category =
+      pickWeightedValue(
+        categoryWeights
+      );
+
+    let result =
+      null;
+
+    if (category === "fragment") {
+
+      result =
+        rollDoritikeFragmentResult();
+
+    } else if (category === "beats") {
+
+      result =
+        rollDoritikeBeatsResult();
+
+    } else if (category === "item") {
+
+      result =
+        rollDoritikeItemResult();
+
+    }
+
+    if (result) {
+
+      return result;
+
+    }
+
+  }
+
+  return rollDoritikeBeatsResult() || {
+
+    category: "beats",
+
+    amount: 500
+
+  };
+
+}
+
+
+function grantDoritikeGachaResult(result) {
+
+  if (
+    !result ||
+    typeof result !== "object"
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    result.category ===
+      "fragment"
+  ) {
+
+    if (
+      !result.characterId ||
+      !CHARACTERS[
+        result.characterId
+      ]
+    ) {
+
+      return false;
+
+    }
+
+    addCharacterFragments(
+      result.characterId,
+      result.amount
+    );
+
+    return true;
+
+  }
+
+  if (result.category === "beats") {
+
+    addBeats(result.amount);
+
+    return true;
+
+  }
+
+  if (result.category === "item") {
+
+    if (
+      !result.itemId ||
+      !ITEMS[result.itemId]
+    ) {
+
+      return false;
+
+    }
+
+    addItem(
+      result.itemId,
+      result.amount
+    );
+
+    return true;
+
+  }
+
+  return false;
+
+}
+
+
+function executeDoritikeGachaPull(
+  count
+) {
+
+  const pullCount =
+    Number(count);
+
+  if (
+    !Number.isInteger(pullCount) ||
+    pullCount <= 0
+  ) {
+
+    return {
+
+      ok: false,
+
+      reason: "invalid_count",
+
+      results: []
+
+    };
+
+  }
+
+  const needTickets =
+    pullCount;
+
+  if (
+    getDrinkTickets() <
+    needTickets
+  ) {
+
+    return {
+
+      ok: false,
+
+      reason:
+        "insufficient_tickets",
+
+      results: []
+
+    };
+
+  }
+
+  if (
+    !spendDrinkTickets(
+      needTickets
+    )
+  ) {
+
+    return {
+
+      ok: false,
+
+      reason:
+        "insufficient_tickets",
+
+      results: []
+
+    };
+
+  }
+
+  const results = [];
+
+  let index = 0;
+
+  while (index < pullCount) {
+
+    const result =
+      rollDoritikeGachaOnce();
+
+    grantDoritikeGachaResult(
+      result
+    );
+
+    results.push(result);
+
+    index += 1;
+
+  }
+
+  return {
+
+    ok: true,
+
+    reason: null,
+
+    results: results
+
+  };
+
+}
+
+
 const CHARACTER_FRAGMENTS_KEY =
   "characterFragments";
 
