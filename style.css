@@ -846,6 +846,14 @@ h2 {
   font-weight: 900;
 }
 
+.enhance-card-group {
+  color: #aaa;
+
+  font-size: 12px;
+
+  font-weight: bold;
+}
+
 .enhance-card-progress {
   color: #bbb;
 

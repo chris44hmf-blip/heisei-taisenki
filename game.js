@@ -2060,6 +2060,26 @@ function characterMatchesRarityFilter(
 }
 
 
+function getCharacterGroup(character) {
+
+  if (
+    !character ||
+    typeof character.group !==
+      "string"
+  ) {
+
+    return "";
+
+  }
+
+  const group =
+    character.group.trim();
+
+  return group;
+
+}
+
+
 function getRarityLabel(rarity) {
 
   if (
@@ -2316,6 +2336,9 @@ function renderEnhanceList() {
     name.textContent =
       character.name;
 
+    const groupName =
+      getCharacterGroup(character);
+
     const progressText =
       document.createElement("div");
 
@@ -2331,6 +2354,21 @@ function renderEnhanceList() {
     info.appendChild(rarity);
 
     info.appendChild(name);
+
+    if (groupName) {
+
+      const group =
+        document.createElement("div");
+
+      group.className =
+        "enhance-card-group";
+
+      group.textContent =
+        groupName;
+
+      info.appendChild(group);
+
+    }
 
     info.appendChild(progressText);
 
@@ -2457,6 +2495,8 @@ const CHARACTERS = {
 
     name: "せな",
 
+    group: "令和黎明期",
+
     rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
@@ -2521,6 +2561,8 @@ const CHARACTERS = {
     id: "kaede",
 
     name: "楓",
+
+    group: "令和黎明期",
 
     rarity: CHARACTER_RARITY.IPPANJIN,
 
@@ -2603,6 +2645,8 @@ const CHARACTERS = {
 
     name: "カイリ",
 
+    group: "令和黎明期",
+
     rarity: CHARACTER_RARITY.IPPANJIN,
 
     images:
@@ -2684,6 +2728,8 @@ const CHARACTERS = {
     id: "chris",
 
     name: "Chris",
+
+    group: "令和黎明期",
 
     rarity: CHARACTER_RARITY.IPPANJIN,
 
