@@ -29,6 +29,11 @@ const gachaLobbyScreen =
     "gacha-lobby-screen"
   );
 
+const doritikeGachaScreen =
+  document.getElementById(
+    "doritike-gacha-screen"
+  );
+
 const enhanceScreen =
   document.getElementById(
     "enhance-screen"
@@ -245,9 +250,7 @@ if (gachaLobbyDrip) {
     "click",
     () => {
 
-      console.log(
-        "ドリチケガチャ: coming soon"
-      );
+      openDoritikeGacha();
 
     }
   );
@@ -6774,6 +6777,18 @@ function updateDrinkTicketsDisplay() {
 
   }
 
+  const doritikeGachaTickets =
+    document.getElementById(
+      "doritike-gacha-tickets"
+    );
+
+  if (doritikeGachaTickets) {
+
+    doritikeGachaTickets.textContent =
+      String(drinkTickets);
+
+  }
+
 }
 
 
@@ -8265,6 +8280,608 @@ function executeDoritikeGachaPull(
     results: results
 
   };
+
+}
+
+
+/* =========================
+   DORITIKE GACHA SCREEN
+========================= */
+
+let isDoritikeGachaBusy =
+  false;
+
+let doritikeGachaLastPullCount =
+  1;
+
+
+const doritikeGachaBack =
+  document.getElementById(
+    "doritike-gacha-back"
+  );
+
+const doritikeGachaMain =
+  document.getElementById(
+    "doritike-gacha-main"
+  );
+
+const doritikeGachaResult =
+  document.getElementById(
+    "doritike-gacha-result"
+  );
+
+const doritikeGachaMessage =
+  document.getElementById(
+    "doritike-gacha-message"
+  );
+
+const doritikeGachaPull1 =
+  document.getElementById(
+    "doritike-gacha-pull-1"
+  );
+
+const doritikeGachaPull10 =
+  document.getElementById(
+    "doritike-gacha-pull-10"
+  );
+
+const doritikeGachaResultList =
+  document.getElementById(
+    "doritike-gacha-result-list"
+  );
+
+const doritikeGachaAgain =
+  document.getElementById(
+    "doritike-gacha-again"
+  );
+
+const doritikeGachaResultBack =
+  document.getElementById(
+    "doritike-gacha-result-back"
+  );
+
+
+function formatDoritikeGachaAmount(
+  amount
+) {
+
+  const number =
+    Number(amount);
+
+  if (!Number.isFinite(number)) {
+
+    return String(amount);
+
+  }
+
+  return number.toLocaleString(
+    "ja-JP"
+  );
+
+}
+
+
+function getDoritikeGachaResultLabel(
+  result
+) {
+
+  if (
+    !result ||
+    typeof result !== "object"
+  ) {
+
+    return {
+      name: "不明",
+      amountText: "",
+      jackpot: false
+    };
+
+  }
+
+  if (
+    result.category ===
+    "fragment"
+  ) {
+
+    const character =
+      CHARACTERS[
+        result.characterId
+      ];
+
+    const characterName =
+      character && character.name
+        ? character.name
+        : "キャラクター";
+
+    return {
+      name:
+        characterName +
+        "のかけら",
+      amountText:
+        "×" +
+        formatDoritikeGachaAmount(
+          result.amount
+        ),
+      jackpot: false
+    };
+
+  }
+
+  if (result.category === "beats") {
+
+    return {
+      name: "BEATS",
+      amountText:
+        "×" +
+        formatDoritikeGachaAmount(
+          result.amount
+        ),
+      jackpot: false
+    };
+
+  }
+
+  if (result.category === "item") {
+
+    const item =
+      ITEMS[result.itemId];
+
+    const itemName =
+      item && item.name
+        ? item.name
+        : "アイテム";
+
+    return {
+      name: itemName,
+      amountText:
+        "×" +
+        formatDoritikeGachaAmount(
+          result.amount
+        ),
+      jackpot: !!result.jackpot
+    };
+
+  }
+
+  return {
+    name: "不明",
+    amountText: "",
+    jackpot: false
+  };
+
+}
+
+
+function setDoritikeGachaBusy(
+  busy
+) {
+
+  isDoritikeGachaBusy =
+    !!busy;
+
+  const disabled =
+    isDoritikeGachaBusy;
+
+  if (doritikeGachaPull1) {
+
+    doritikeGachaPull1.disabled =
+      disabled;
+
+  }
+
+  if (doritikeGachaPull10) {
+
+    doritikeGachaPull10.disabled =
+      disabled;
+
+  }
+
+  if (doritikeGachaAgain) {
+
+    doritikeGachaAgain.disabled =
+      disabled;
+
+  }
+
+  if (doritikeGachaResultBack) {
+
+    doritikeGachaResultBack.disabled =
+      disabled;
+
+  }
+
+  if (doritikeGachaBack) {
+
+    doritikeGachaBack.disabled =
+      disabled;
+
+  }
+
+}
+
+
+function clearDoritikeGachaMessage() {
+
+  if (!doritikeGachaMessage) {
+
+    return;
+
+  }
+
+  doritikeGachaMessage.hidden =
+    true;
+
+  doritikeGachaMessage.textContent =
+    "";
+
+}
+
+
+function showDoritikeGachaMessage(
+  text
+) {
+
+  if (!doritikeGachaMessage) {
+
+    return;
+
+  }
+
+  doritikeGachaMessage.textContent =
+    text;
+
+  doritikeGachaMessage.hidden =
+    false;
+
+}
+
+
+function showDoritikeGachaMainView() {
+
+  if (doritikeGachaMain) {
+
+    doritikeGachaMain.hidden =
+      false;
+
+  }
+
+  if (doritikeGachaResult) {
+
+    doritikeGachaResult.hidden =
+      true;
+
+  }
+
+  if (doritikeGachaResultList) {
+
+    doritikeGachaResultList.innerHTML =
+      "";
+
+  }
+
+}
+
+
+function renderDoritikeGachaResults(
+  results
+) {
+
+  if (!doritikeGachaResultList) {
+
+    return;
+
+  }
+
+  doritikeGachaResultList.innerHTML =
+    "";
+
+  const list =
+    Array.isArray(results)
+      ? results
+      : [];
+
+  list.forEach((result) => {
+
+    const label =
+      getDoritikeGachaResultLabel(
+        result
+      );
+
+    const item =
+      document.createElement(
+        "div"
+      );
+
+    item.className =
+      "doritike-gacha-result-item";
+
+    if (label.jackpot) {
+
+      item.classList.add(
+        "is-jackpot"
+      );
+
+    }
+
+    const nameEl =
+      document.createElement(
+        "span"
+      );
+
+    nameEl.className =
+      "doritike-gacha-result-name";
+
+    nameEl.textContent =
+      label.name;
+
+    const amountEl =
+      document.createElement(
+        "span"
+      );
+
+    amountEl.className =
+      "doritike-gacha-result-amount";
+
+    amountEl.textContent =
+      label.amountText;
+
+    item.appendChild(nameEl);
+
+    item.appendChild(amountEl);
+
+    if (label.jackpot) {
+
+      const jackpotEl =
+        document.createElement(
+          "span"
+        );
+
+      jackpotEl.className =
+        "doritike-gacha-result-jackpot";
+
+      jackpotEl.textContent =
+        "大当たり！";
+
+      item.appendChild(jackpotEl);
+
+    }
+
+    doritikeGachaResultList.appendChild(
+      item
+    );
+
+  });
+
+}
+
+
+function showDoritikeGachaResultView(
+  results,
+  pullCount
+) {
+
+  doritikeGachaLastPullCount =
+    pullCount;
+
+  if (doritikeGachaAgain) {
+
+    doritikeGachaAgain.textContent =
+      pullCount === 10
+        ? "もう10回"
+        : "もう1回";
+
+  }
+
+  renderDoritikeGachaResults(
+    results
+  );
+
+  if (doritikeGachaMain) {
+
+    doritikeGachaMain.hidden =
+      true;
+
+  }
+
+  if (doritikeGachaResult) {
+
+    doritikeGachaResult.hidden =
+      false;
+
+  }
+
+}
+
+
+function openDoritikeGacha() {
+
+  if (!doritikeGachaScreen) {
+
+    return;
+
+  }
+
+  clearDoritikeGachaMessage();
+
+  showDoritikeGachaMainView();
+
+  updateDrinkTicketsDisplay();
+
+  setDoritikeGachaBusy(false);
+
+  showScreen(doritikeGachaScreen);
+
+}
+
+
+function closeDoritikeGacha() {
+
+  if (isDoritikeGachaBusy) {
+
+    return;
+
+  }
+
+  clearDoritikeGachaMessage();
+
+  showDoritikeGachaMainView();
+
+  openGachaLobby();
+
+}
+
+
+function runDoritikeGachaPull(
+  count
+) {
+
+  if (isDoritikeGachaBusy) {
+
+    return;
+
+  }
+
+  const pullCount =
+    Number(count);
+
+  if (
+    !Number.isInteger(pullCount) ||
+    (pullCount !== 1 &&
+      pullCount !== 10)
+  ) {
+
+    return;
+
+  }
+
+  clearDoritikeGachaMessage();
+
+  setDoritikeGachaBusy(true);
+
+  const outcome =
+    executeDoritikeGachaPull(
+      pullCount
+    );
+
+  updateDrinkTicketsDisplay();
+
+  if (
+    !outcome ||
+    !outcome.ok
+  ) {
+
+    if (
+      outcome &&
+      outcome.reason ===
+        "insufficient_tickets"
+    ) {
+
+      showDoritikeGachaMessage(
+        "ドリチケが足りません"
+      );
+
+    } else {
+
+      showDoritikeGachaMessage(
+        "抽選に失敗しました"
+      );
+
+    }
+
+    setDoritikeGachaBusy(false);
+
+    return;
+
+  }
+
+  showDoritikeGachaResultView(
+    outcome.results,
+    pullCount
+  );
+
+  setDoritikeGachaBusy(false);
+
+}
+
+
+if (doritikeGachaBack) {
+
+  doritikeGachaBack.addEventListener(
+    "click",
+    () => {
+
+      closeDoritikeGacha();
+
+    }
+  );
+
+}
+
+
+if (doritikeGachaPull1) {
+
+  doritikeGachaPull1.addEventListener(
+    "click",
+    () => {
+
+      runDoritikeGachaPull(1);
+
+    }
+  );
+
+}
+
+
+if (doritikeGachaPull10) {
+
+  doritikeGachaPull10.addEventListener(
+    "click",
+    () => {
+
+      runDoritikeGachaPull(10);
+
+    }
+  );
+
+}
+
+
+if (doritikeGachaAgain) {
+
+  doritikeGachaAgain.addEventListener(
+    "click",
+    () => {
+
+      runDoritikeGachaPull(
+        doritikeGachaLastPullCount
+      );
+
+    }
+  );
+
+}
+
+
+if (doritikeGachaResultBack) {
+
+  doritikeGachaResultBack.addEventListener(
+    "click",
+    () => {
+
+      if (isDoritikeGachaBusy) {
+
+        return;
+
+      }
+
+      clearDoritikeGachaMessage();
+
+      showDoritikeGachaMainView();
+
+      updateDrinkTicketsDisplay();
+
+    }
+  );
 
 }
 

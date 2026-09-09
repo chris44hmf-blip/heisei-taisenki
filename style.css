@@ -72,6 +72,12 @@ h3,
 .training-choice,
 .gacha-lobby-choice-title,
 .gacha-lobby-choice-copy,
+.doritike-gacha-tickets,
+.doritike-gacha-desc,
+.doritike-gacha-message,
+.doritike-gacha-pull,
+.doritike-gacha-result-item,
+.doritike-gacha-result-back,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,
@@ -984,6 +990,372 @@ h2 {
     padding:
       clamp(8px, 1.8vh, 14px)
       clamp(8px, 1.6vw, 14px);
+  }
+
+}
+
+
+/* =========================
+   DORITIKE GACHA
+========================= */
+
+#doritike-gacha-screen {
+  flex-direction: column;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #1c1812 0%,
+      #12100c 48%,
+      #070605 100%
+    );
+}
+
+.doritike-gacha-header {
+  padding-left:
+    max(3vw, env(safe-area-inset-left, 0px));
+
+  padding-right:
+    max(3vw, env(safe-area-inset-right, 0px));
+}
+
+.doritike-gacha-body {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  padding:
+    max(8px, env(safe-area-inset-top, 0px))
+    max(4vw, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(4vw, env(safe-area-inset-left, 0px));
+
+  box-sizing: border-box;
+}
+
+.doritike-gacha-main,
+.doritike-gacha-result {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+}
+
+.doritike-gacha-main[hidden],
+.doritike-gacha-result[hidden] {
+  display: none;
+}
+
+.doritike-gacha-counter {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: clamp(10px, 2.2vh, 18px);
+
+  width: min(100%, 520px);
+
+  margin: 0 auto;
+
+  padding:
+    clamp(16px, 3.5vh, 28px)
+    clamp(14px, 3vw, 24px);
+
+  border: 2px solid #6e5f3f;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2a2318 0%,
+      #17130e 55%,
+      #0d0b08 100%
+    );
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 160, 0.08),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.35);
+
+  box-sizing: border-box;
+
+  text-align: center;
+}
+
+.doritike-gacha-tickets {
+  margin: 0;
+
+  color: #f0e6c8;
+
+  font-size: clamp(18px, 3.2vw, 28px);
+
+  letter-spacing: 0.06em;
+
+  line-height: 1.2;
+}
+
+.doritike-gacha-desc {
+  margin: 0;
+
+  color: #b9ae97;
+
+  font-size: clamp(12px, 1.8vw, 16px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.4;
+}
+
+.doritike-gacha-message {
+  flex: 0 0 auto;
+
+  margin: 0 0 clamp(6px, 1vh, 10px);
+
+  min-height: 1.3em;
+
+  color: #d9a27a;
+
+  font-size: clamp(12px, 1.7vw, 15px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.3;
+
+  text-align: center;
+}
+
+.doritike-gacha-message[hidden] {
+  display: none;
+}
+
+.doritike-gacha-actions,
+.doritike-gacha-result-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: stretch;
+
+  justify-content: center;
+
+  gap: clamp(8px, 1.6vw, 14px);
+
+  width: 100%;
+}
+
+.doritike-gacha-pull,
+.doritike-gacha-result-back {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  min-width: clamp(120px, 28vw, 180px);
+
+  min-height: clamp(52px, 10vh, 72px);
+
+  padding:
+    clamp(8px, 1.6vh, 12px)
+    clamp(12px, 2vw, 18px);
+
+  border: 2px solid #85744a;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #3a3122 0%,
+      #1c1812 100%
+    );
+
+  color: #f4edd8;
+
+  font-size: clamp(14px, 2.1vw, 18px);
+
+  letter-spacing: 0.06em;
+
+  line-height: 1.25;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+}
+
+.doritike-gacha-pull:active,
+.doritike-gacha-result-back:active {
+  transform: scale(0.98);
+
+  filter: brightness(1.1);
+}
+
+.doritike-gacha-pull:disabled,
+.doritike-gacha-result-back:disabled {
+  opacity: 0.55;
+
+  cursor: default;
+
+  transform: none;
+
+  filter: none;
+}
+
+.doritike-gacha-pull-label {
+  font-weight: 700;
+}
+
+.doritike-gacha-pull-cost {
+  color: #c4b58f;
+
+  font-size: clamp(11px, 1.5vw, 13px);
+
+  letter-spacing: 0.04em;
+}
+
+.doritike-gacha-result-back {
+  border-color: #666056;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2c2924 0%,
+      #141210 100%
+    );
+}
+
+.doritike-gacha-result-list {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-x: hidden;
+
+  overflow-y: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: clamp(6px, 1.2vh, 10px);
+
+  width: min(100%, 560px);
+
+  margin: 0 auto;
+
+  padding:
+    clamp(8px, 1.5vh, 12px)
+    clamp(4px, 1vw, 8px);
+
+  box-sizing: border-box;
+
+  -webkit-overflow-scrolling: touch;
+}
+
+.doritike-gacha-result-item {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: baseline;
+
+  justify-content: space-between;
+
+  gap: 6px 12px;
+
+  padding:
+    clamp(8px, 1.5vh, 12px)
+    clamp(10px, 2vw, 14px);
+
+  border: 1px solid #5c5138;
+
+  border-radius: 3px;
+
+  background: rgba(28, 24, 16, 0.92);
+
+  color: #efe6d0;
+
+  font-size: clamp(13px, 2vw, 17px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.35;
+
+  box-sizing: border-box;
+}
+
+.doritike-gacha-result-item.is-jackpot {
+  border-color: #b08a3c;
+
+  background: rgba(48, 36, 14, 0.95);
+}
+
+.doritike-gacha-result-name {
+  min-width: 0;
+
+  flex: 1 1 auto;
+}
+
+.doritike-gacha-result-amount {
+  flex: 0 0 auto;
+
+  color: #f3e7bf;
+
+  font-weight: 700;
+}
+
+.doritike-gacha-result-jackpot {
+  width: 100%;
+
+  color: #e2b45a;
+
+  font-size: clamp(11px, 1.5vw, 13px);
+
+  letter-spacing: 0.08em;
+}
+
+.doritike-gacha-result-actions {
+  flex: 0 0 auto;
+
+  padding-top: clamp(8px, 1.5vh, 12px);
+}
+
+@media (max-height: 380px) {
+
+  .doritike-gacha-counter {
+    gap: 8px;
+
+    padding:
+      clamp(10px, 2.2vh, 16px)
+      clamp(10px, 2vw, 16px);
+  }
+
+  .doritike-gacha-pull,
+  .doritike-gacha-result-back {
+    min-height: clamp(44px, 12vh, 58px);
   }
 
 }
@@ -5293,6 +5665,12 @@ h3,
 .training-choice,
 .gacha-lobby-choice-title,
 .gacha-lobby-choice-copy,
+.doritike-gacha-tickets,
+.doritike-gacha-desc,
+.doritike-gacha-message,
+.doritike-gacha-pull,
+.doritike-gacha-result-item,
+.doritike-gacha-result-back,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,
