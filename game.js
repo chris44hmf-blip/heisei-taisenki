@@ -3074,6 +3074,17 @@ function renderEnhanceDetail() {
       confirmButton.textContent =
         "MAX";
 
+    } else if (
+      needBeats != null &&
+      getBeats() < needBeats
+    ) {
+
+      confirmButton.disabled =
+        true;
+
+      confirmButton.textContent =
+        "ビーツ不足";
+
     } else {
 
       confirmButton.disabled =
@@ -3085,6 +3096,118 @@ function renderEnhanceDetail() {
     }
 
   }
+
+}
+
+
+function tryEnhanceCharacterLevelUp(
+  characterId
+) {
+
+  if (
+    !characterId ||
+    !CHARACTERS[characterId] ||
+    !isCharacterOwned(characterId)
+  ) {
+
+    return false;
+
+  }
+
+  ensureCharacterProgressEntry(
+    characterId
+  );
+
+  const progress =
+    getCharacterProgress(
+      characterId
+    );
+
+  if (!progress) {
+
+    return false;
+
+  }
+
+  const level =
+    clampCharacterLevel(
+      progress.level
+    );
+
+  if (level >= CHARACTER_LEVEL_MAX) {
+
+    return false;
+
+  }
+
+  const character =
+    CHARACTERS[characterId];
+
+  const cost =
+    getEnhanceLevelUpBeats(
+      character,
+      level
+    );
+
+  if (
+    cost == null ||
+    cost <= 0
+  ) {
+
+    return false;
+
+  }
+
+  if (getBeats() < cost) {
+
+    return false;
+
+  }
+
+  if (!spendBeats(cost)) {
+
+    return false;
+
+  }
+
+  const savedProgress =
+    getCharacterProgress(
+      characterId
+    );
+
+  if (!savedProgress) {
+
+    return false;
+
+  }
+
+  const currentLevel =
+    clampCharacterLevel(
+      savedProgress.level
+    );
+
+  if (
+    currentLevel >=
+    CHARACTER_LEVEL_MAX
+  ) {
+
+    return false;
+
+  }
+
+  savedProgress.level =
+    currentLevel + 1;
+
+  characterProgress[characterId] =
+    sanitizeCharacterProgressEntry(
+      savedProgress
+    );
+
+  saveCharacterProgress();
+
+  renderEnhanceDetail();
+
+  return true;
 
 }
 
@@ -3129,23 +3252,7 @@ if (enhanceDetailConfirm) {
 
       }
 
-      const progress =
-        getEnhanceCardProgress(
-          selectedEnhanceCharacterId
-        );
-
-      if (
-        clampCharacterLevel(
-          progress.level
-        ) >= CHARACTER_LEVEL_MAX
-      ) {
-
-        return;
-
-      }
-
-      console.log(
-        "強化実行予定:",
+      tryEnhanceCharacterLevelUp(
         selectedEnhanceCharacterId
       );
 
