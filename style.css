@@ -70,6 +70,8 @@ h3,
 .back-button,
 .training-header h3,
 .training-choice,
+.gacha-lobby-choice-title,
+.gacha-lobby-choice-copy,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,
@@ -825,6 +827,165 @@ h2 {
   transform: scale(0.97);
 
   background: #444;
+}
+
+
+/* =========================
+   GACHA LOBBY
+========================= */
+
+#gacha-lobby-screen {
+  flex-direction: column;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #1a1614 0%,
+      #0c0b0a 55%,
+      #050505 100%
+    );
+}
+
+.gacha-lobby-header {
+  padding-left:
+    max(3vw, env(safe-area-inset-left, 0px));
+
+  padding-right:
+    max(3vw, env(safe-area-inset-right, 0px));
+}
+
+.gacha-lobby-body {
+  flex: 1;
+
+  min-height: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  align-items: stretch;
+
+  justify-content: center;
+
+  gap: clamp(10px, 2.2vw, 18px);
+
+  padding:
+    max(10px, env(safe-area-inset-top, 0px))
+    max(4vw, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(4vw, env(safe-area-inset-left, 0px));
+
+  box-sizing: border-box;
+}
+
+.gacha-lobby-choice {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: clamp(6px, 1.2vh, 10px);
+
+  min-width: 0;
+
+  min-height: clamp(120px, 42vh, 220px);
+
+  padding:
+    clamp(12px, 2.5vh, 20px)
+    clamp(10px, 2vw, 18px);
+
+  border: 2px solid #666;
+  border-radius: 8px;
+
+  color: #f2f2f2;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+}
+
+.gacha-lobby-choice-drip {
+  border-color: #8a7a55;
+
+  background:
+    linear-gradient(
+      160deg,
+      #2a2418 0%,
+      #14110c 70%,
+      #0a0907 100%
+    );
+}
+
+.gacha-lobby-choice-bs {
+  border-color: #6a6a78;
+
+  background:
+    linear-gradient(
+      160deg,
+      #22232c 0%,
+      #121318 70%,
+      #08080a 100%
+    );
+}
+
+.gacha-lobby-choice-icon {
+  font-size: clamp(28px, 5vw, 44px);
+
+  line-height: 1;
+}
+
+.gacha-lobby-choice-title {
+  font-size: clamp(15px, 2.3vw, 24px);
+
+  font-weight: 900;
+
+  letter-spacing: 0.08em;
+
+  line-height: 1.25;
+}
+
+.gacha-lobby-choice-copy {
+  max-width: 16em;
+
+  color: #bdb7ad;
+
+  font-size: clamp(11px, 1.5vw, 15px);
+
+  font-weight: 400;
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.35;
+}
+
+.gacha-lobby-choice:active {
+  transform: scale(0.98);
+
+  filter: brightness(1.12);
+}
+
+@media (max-height: 380px) {
+
+  .gacha-lobby-choice {
+    min-height: clamp(96px, 38vh, 160px);
+
+    gap: 4px;
+
+    padding:
+      clamp(8px, 1.8vh, 14px)
+      clamp(8px, 1.6vw, 14px);
+  }
+
 }
 
 
@@ -5130,6 +5291,8 @@ h3,
 .back-button,
 .training-header h3,
 .training-choice,
+.gacha-lobby-choice-title,
+.gacha-lobby-choice-copy,
 .enhance-filter,
 .enhance-card,
 .enhance-empty,

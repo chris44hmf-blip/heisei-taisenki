@@ -24,6 +24,11 @@ const trainingScreen =
     "training-screen"
   );
 
+const gachaLobbyScreen =
+  document.getElementById(
+    "gacha-lobby-screen"
+  );
+
 const enhanceScreen =
   document.getElementById(
     "enhance-screen"
@@ -168,6 +173,14 @@ menuButtons.forEach((button) => {
 
       }
 
+      if (menu === "gacha") {
+
+        openGachaLobby();
+
+        return;
+
+      }
+
 
       console.log(
         "選択されたメニュー:",
@@ -178,6 +191,90 @@ menuButtons.forEach((button) => {
   );
 
 });
+
+
+function openGachaLobby() {
+
+  if (!gachaLobbyScreen) {
+
+    return;
+
+  }
+
+  showScreen(gachaLobbyScreen);
+
+}
+
+
+function closeGachaLobby() {
+
+  showScreen(homeScreen);
+
+}
+
+
+const gachaLobbyBack =
+  document.getElementById(
+    "gacha-lobby-back"
+  );
+
+
+if (gachaLobbyBack) {
+
+  gachaLobbyBack.addEventListener(
+    "click",
+    () => {
+
+      closeGachaLobby();
+
+    }
+  );
+
+}
+
+
+const gachaLobbyDrip =
+  document.getElementById(
+    "gacha-lobby-drip"
+  );
+
+
+if (gachaLobbyDrip) {
+
+  gachaLobbyDrip.addEventListener(
+    "click",
+    () => {
+
+      console.log(
+        "ドリチケガチャ: coming soon"
+      );
+
+    }
+  );
+
+}
+
+
+const gachaLobbyBs =
+  document.getElementById(
+    "gacha-lobby-bs"
+  );
+
+
+if (gachaLobbyBs) {
+
+  gachaLobbyBs.addEventListener(
+    "click",
+    () => {
+
+      console.log(
+        "BACKSTAGEガチャ: coming soon"
+      );
+
+    }
+  );
+
+}
 
 
 /* =========================
