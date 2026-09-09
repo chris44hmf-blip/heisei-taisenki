@@ -24,6 +24,11 @@ const trainingScreen =
     "training-screen"
   );
 
+const enhanceScreen =
+  document.getElementById(
+    "enhance-screen"
+  );
+
 
 /* =========================
    BUTTONS
@@ -206,9 +211,20 @@ trainingChoices.forEach((button) => {
     "click",
     () => {
 
+      const choice =
+        button.dataset.training;
+
+      if (choice === "enhance") {
+
+        openEnhanceList();
+
+        return;
+
+      }
+
       console.log(
         "選択された育成メニュー:",
-        button.dataset.training
+        choice
       );
 
     }
@@ -2042,6 +2058,355 @@ function characterMatchesRarityFilter(
   );
 
 }
+
+
+function getRarityLabel(rarity) {
+
+  if (
+    rarity ===
+    CHARACTER_RARITY.BANDMAN
+  ) {
+
+    return "★★ BANDMAN";
+
+  }
+
+  if (
+    rarity ===
+    CHARACTER_RARITY.HEADLINER
+  ) {
+
+    return "★★★ HEADLINER";
+
+  }
+
+  if (
+    rarity ===
+    CHARACTER_RARITY.LEGEND
+  ) {
+
+    return "★★★★ LEGEND";
+
+  }
+
+  return "★ IPPANJIN";
+
+}
+
+
+let enhanceRarityFilter =
+  FORMATION_RARITY_FILTER_ALL;
+
+
+function setPortraitAllowed(allowed) {
+
+  document.body.classList.toggle(
+    "allow-portrait",
+    Boolean(allowed)
+  );
+
+}
+
+
+function getEnhanceCardProgress(characterId) {
+
+  ensureCharacterProgressEntry(
+    characterId
+  );
+
+  const progress =
+    getCharacterProgress(
+      characterId
+    );
+
+  if (progress) {
+
+    return progress;
+
+  }
+
+  return createDefaultCharacterProgress();
+
+}
+
+
+function openEnhanceList() {
+
+  enhanceRarityFilter =
+    FORMATION_RARITY_FILTER_ALL;
+
+  if (ensureOwnedCharacterProgress()) {
+
+    saveCharacterProgress();
+
+  }
+
+  setPortraitAllowed(true);
+
+  renderEnhanceList();
+
+  showScreen(enhanceScreen);
+
+}
+
+
+function closeEnhanceList() {
+
+  setPortraitAllowed(false);
+
+  showScreen(trainingScreen);
+
+}
+
+
+function setEnhanceRarityFilter(filter) {
+
+  if (
+    FORMATION_RARITY_FILTERS.indexOf(
+      filter
+    ) === -1
+  ) {
+
+    return;
+
+  }
+
+  enhanceRarityFilter = filter;
+
+  renderEnhanceList();
+
+}
+
+
+function renderEnhanceList() {
+
+  const list =
+    document.getElementById(
+      "enhance-list"
+    );
+
+  const filterButtons =
+    document.querySelectorAll(
+      ".enhance-filter"
+    );
+
+
+  if (!list) {
+
+    return;
+
+  }
+
+
+  filterButtons.forEach((button) => {
+
+    button.classList.toggle(
+      "is-selected",
+      button.dataset.filter ===
+        enhanceRarityFilter
+    );
+
+  });
+
+
+  list.innerHTML = "";
+
+
+  const ownedRoster =
+    Object.values(CHARACTERS).filter(
+      (character) => {
+
+        return isCharacterOwned(
+          character.id
+        );
+
+      }
+    );
+
+  const visibleRoster =
+    ownedRoster.filter(
+      (character) => {
+
+        return characterMatchesRarityFilter(
+          character,
+          enhanceRarityFilter
+        );
+
+      }
+    );
+
+
+  if (visibleRoster.length === 0) {
+
+    const empty =
+      document.createElement("div");
+
+    empty.className =
+      "enhance-empty";
+
+    empty.textContent =
+      "該当するキャラクターがいません";
+
+    list.appendChild(empty);
+
+    return;
+
+  }
+
+
+  visibleRoster.forEach((character) => {
+
+    const progress =
+      getEnhanceCardProgress(
+        character.id
+      );
+
+    const card =
+      document.createElement("button");
+
+    card.type = "button";
+
+    card.className =
+      "enhance-card";
+
+    card.dataset.characterId =
+      character.id;
+
+    const imageWrap =
+      document.createElement("div");
+
+    imageWrap.className =
+      "enhance-card-image";
+
+    const image =
+      document.createElement("img");
+
+    image.src =
+      character.images.menu;
+
+    image.alt =
+      character.name;
+
+    image.draggable =
+      false;
+
+    image.style.transform =
+      "scale(" +
+      getCharacterMenuScale(
+        character
+      ) +
+      ")";
+
+    imageWrap.appendChild(image);
+
+
+    const info =
+      document.createElement("div");
+
+    info.className =
+      "enhance-card-info";
+
+    const rarity =
+      document.createElement("div");
+
+    rarity.className =
+      "enhance-card-rarity";
+
+    rarity.textContent =
+      getRarityLabel(
+        getCharacterRarity(character)
+      );
+
+    const name =
+      document.createElement("div");
+
+    name.className =
+      "enhance-card-name";
+
+    name.textContent =
+      character.name;
+
+    const progressText =
+      document.createElement("div");
+
+    progressText.className =
+      "enhance-card-progress";
+
+    progressText.textContent =
+      "Lv." +
+      progress.level +
+      " +" +
+      progress.plus;
+
+    info.appendChild(rarity);
+
+    info.appendChild(name);
+
+    info.appendChild(progressText);
+
+    card.appendChild(imageWrap);
+
+    card.appendChild(info);
+
+    card.addEventListener(
+      "click",
+      () => {
+
+        console.log(
+          "強化キャラクター選択:",
+          character.id
+        );
+
+      }
+    );
+
+    list.appendChild(card);
+
+  });
+
+}
+
+
+const enhanceBack =
+  document.getElementById(
+    "enhance-back"
+  );
+
+
+if (enhanceBack) {
+
+  enhanceBack.addEventListener(
+    "click",
+    () => {
+
+      closeEnhanceList();
+
+    }
+  );
+
+}
+
+
+const enhanceFilterButtons =
+  document.querySelectorAll(
+    ".enhance-filter"
+  );
+
+
+enhanceFilterButtons.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      setEnhanceRarityFilter(
+        button.dataset.filter
+      );
+
+    }
+  );
+
+});
 
 
 const ATTACK_TYPE = {

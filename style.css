@@ -510,6 +510,10 @@ h2 {
     display: flex;
   }
 
+  body.allow-portrait #rotate-message {
+    display: none !important;
+  }
+
 }
 /* =========================
    TIMELINE
@@ -688,6 +692,162 @@ h2 {
   transform: scale(0.97);
 
   background: #444;
+}
+
+
+#enhance-screen {
+  flex-direction: column;
+
+  background: #111;
+}
+
+.enhance-filters {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  padding: 8px 3vw;
+
+  background: #080808;
+
+  border-bottom: 1px solid #555;
+}
+
+.enhance-filter {
+  padding: 7px 10px;
+
+  border: 1px solid #777;
+  border-radius: 5px;
+
+  background: #161616;
+
+  color: #ddd;
+
+  font-size: 11px;
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.enhance-filter.is-selected {
+  border-color: white;
+
+  background: #333;
+
+  color: white;
+}
+
+.enhance-list {
+  flex: 1;
+
+  overflow-y: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 10px 3vw 18px;
+}
+
+.enhance-empty {
+  margin-top: 24px;
+
+  text-align: center;
+
+  color: #888;
+
+  font-size: 14px;
+}
+
+.enhance-card {
+  display: grid;
+
+  grid-template-columns:
+    72px
+    1fr;
+
+  align-items: center;
+
+  gap: 12px;
+
+  min-height: 88px;
+
+  padding: 10px 12px;
+
+  border: 2px solid #555;
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      #292929,
+      #101010
+    );
+
+  color: white;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.enhance-card:active {
+  transform: scale(0.98);
+
+  background: #444;
+}
+
+.enhance-card-image {
+  width: 72px;
+  height: 72px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+.enhance-card-image img {
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
+}
+
+.enhance-card-info {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.enhance-card-rarity {
+  color: #ccc;
+
+  font-size: 11px;
+
+  font-weight: bold;
+}
+
+.enhance-card-name {
+  font-size: 18px;
+
+  font-weight: 900;
+}
+
+.enhance-card-progress {
+  color: #bbb;
+
+  font-size: 14px;
 }
 
 .timeline-resource {
