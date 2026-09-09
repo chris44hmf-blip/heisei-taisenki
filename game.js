@@ -6663,12 +6663,31 @@ function getDrinkTickets() {
 }
 
 
+function updateDrinkTicketsDisplay() {
+
+  const homeDrinkTickets =
+    document.getElementById(
+      "drink-tickets"
+    );
+
+  if (homeDrinkTickets) {
+
+    homeDrinkTickets.textContent =
+      String(drinkTickets);
+
+  }
+
+}
+
+
 function setDrinkTickets(value) {
 
   drinkTickets =
     sanitizeDrinkTickets(value);
 
   saveDrinkTickets();
+
+  updateDrinkTicketsDisplay();
 
   return drinkTickets;
 
@@ -6757,6 +6776,8 @@ function initDrinkTickets() {
     }
 
   }
+
+  updateDrinkTicketsDisplay();
 
 }
 
@@ -6847,12 +6868,31 @@ function getGyara() {
 }
 
 
+function updateGyaraDisplay() {
+
+  const homeGyara =
+    document.getElementById(
+      "gyara"
+    );
+
+  if (homeGyara) {
+
+    homeGyara.textContent =
+      String(gyara);
+
+  }
+
+}
+
+
 function setGyara(value) {
 
   gyara =
     sanitizeGyara(value);
 
   saveGyara();
+
+  updateGyaraDisplay();
 
   return gyara;
 
@@ -6939,6 +6979,8 @@ function initGyara() {
     }
 
   }
+
+  updateGyaraDisplay();
 
 }
 
