@@ -2769,7 +2769,7 @@ function renderEvolveDetail() {
 
     nextNoteEl.textContent =
       hasForm2UnlockFlag
-        ? "第2形態データ未実装"
+        ? "FORM-2データ未実装"
         : "";
 
   }
@@ -4358,6 +4358,197 @@ const CHARACTERS = {
   }
 
 };
+
+
+/*
+  FORM data foundation:
+  Existing top-level images / stats / battle / ui /
+  attackBehavior / traits remain the FORM-1 source of truth.
+  forms[1] holds the same object references (no duplicated values).
+  forms[2] / forms[3] stay undefined until later STEPs.
+*/
+
+const CHARACTER_FORM_DATA_KEYS = [
+  "images",
+  "stats",
+  "battle",
+  "ui",
+  "attackBehavior",
+  "traits"
+];
+
+
+function buildCharacterForm1Data(
+  character
+) {
+
+  const form = {};
+
+  CHARACTER_FORM_DATA_KEYS.forEach(
+    (key) => {
+
+      if (
+        Object.prototype
+          .hasOwnProperty.call(
+            character,
+            key
+          )
+      ) {
+
+        form[key] =
+          character[key];
+
+      }
+
+    }
+  );
+
+  return form;
+
+}
+
+
+function attachCharacterForms(
+  characters
+) {
+
+  Object.keys(characters).forEach(
+    (characterId) => {
+
+      const character =
+        characters[characterId];
+
+      if (
+        !character ||
+        typeof character !== "object"
+      ) {
+
+        return;
+
+      }
+
+      character.forms = {
+
+        1: buildCharacterForm1Data(
+          character
+        )
+
+      };
+
+    }
+  );
+
+}
+
+
+attachCharacterForms(CHARACTERS);
+
+
+function resolveCharacterReference(
+  characterOrId
+) {
+
+  if (!characterOrId) {
+
+    return null;
+
+  }
+
+  if (
+    typeof characterOrId ===
+    "string"
+  ) {
+
+    return (
+      CHARACTERS[characterOrId] ||
+      null
+    );
+
+  }
+
+  if (
+    typeof characterOrId ===
+    "object"
+  ) {
+
+    return characterOrId;
+
+  }
+
+  return null;
+
+}
+
+
+function getCharacterForm(
+  characterOrId,
+  formNumber
+) {
+
+  const character =
+    resolveCharacterReference(
+      characterOrId
+    );
+
+  if (
+    !character ||
+    !character.forms ||
+    typeof character.forms !==
+      "object"
+  ) {
+
+    return null;
+
+  }
+
+  const number =
+    Number(formNumber);
+
+  if (
+    !Number.isInteger(number) ||
+    number < 1
+  ) {
+
+    return null;
+
+  }
+
+  const form =
+    character.forms[number];
+
+  if (
+    !form ||
+    typeof form !== "object"
+  ) {
+
+    return null;
+
+  }
+
+  return form;
+
+}
+
+
+function getCharacterFormLabel(
+  formNumber
+) {
+
+  const number =
+    Number(formNumber);
+
+  if (
+    !Number.isInteger(number) ||
+    number < 1
+  ) {
+
+    return "";
+
+  }
+
+  return "FORM-" + number;
+
+}
 
 
 const OWNED_CHARACTERS_KEY =
