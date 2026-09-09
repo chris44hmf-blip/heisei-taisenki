@@ -6432,6 +6432,18 @@ function spawnCharacter(characterId) {
   );
 
 
+  const progress =
+    getEnhanceCardProgress(
+      characterId
+    );
+
+  const combatStats =
+    getCharacterStatAtProgress(
+      data,
+      progress
+    );
+
+
   const unit = {
 
     id: data.id,
@@ -6455,11 +6467,11 @@ function spawnCharacter(characterId) {
         ".character-hp-bar"
       ),
 
-    hp: data.stats.hp,
+    hp: combatStats.hp,
 
-    maxHp: data.stats.hp,
+    maxHp: combatStats.hp,
 
-    attack: data.stats.attack,
+    attack: combatStats.attack,
 
     range: data.stats.range,
 
