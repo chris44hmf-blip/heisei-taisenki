@@ -763,19 +763,11 @@ h2 {
 }
 
 .enhance-card {
-  display: grid;
+  display: block;
 
-  grid-template-columns:
-    72px
-    1fr;
+  width: 100%;
 
-  align-items: center;
-
-  gap: 12px;
-
-  min-height: 88px;
-
-  padding: 10px 12px;
+  padding: 0;
 
   border: 2px solid #555;
   border-radius: 8px;
@@ -791,6 +783,9 @@ h2 {
   text-align: left;
 
   cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .enhance-card:active {
@@ -799,7 +794,25 @@ h2 {
   background: #444;
 }
 
+.enhance-card-inner {
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: center;
+
+  gap: 14px;
+
+  width: 100%;
+
+  min-height: 96px;
+
+  padding: 10px 14px;
+}
+
 .enhance-card-image {
+  flex: 0 0 72px;
+
   width: 72px;
   height: 72px;
 
@@ -825,23 +838,44 @@ h2 {
 }
 
 .enhance-card-info {
+  flex: 1 1 auto;
+
+  min-width: 0;
+
+  width: 100%;
+
   display: flex;
 
   flex-direction: column;
 
-  gap: 3px;
+  justify-content: center;
+
+  align-items: flex-start;
+
+  gap: 2px;
+}
+
+.enhance-card-rarity,
+.enhance-card-name,
+.enhance-card-group,
+.enhance-card-progress {
+  flex-shrink: 0;
+
+  max-width: 100%;
+
+  line-height: 1.2;
 }
 
 .enhance-card-rarity {
   color: #ccc;
 
-  font-size: 11px;
+  font-size: 12px;
 
   font-weight: bold;
 }
 
 .enhance-card-name {
-  font-size: 18px;
+  font-size: 20px;
 
   font-weight: 900;
 }
@@ -849,7 +883,7 @@ h2 {
 .enhance-card-group {
   color: #aaa;
 
-  font-size: 12px;
+  font-size: 13px;
 
   font-weight: bold;
 }

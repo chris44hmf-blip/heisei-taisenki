@@ -2310,6 +2310,13 @@ function renderEnhanceList() {
     imageWrap.appendChild(image);
 
 
+    const inner =
+      document.createElement("div");
+
+    inner.className =
+      "enhance-card-inner";
+
+
     const info =
       document.createElement("div");
 
@@ -2372,9 +2379,11 @@ function renderEnhanceList() {
 
     info.appendChild(progressText);
 
-    card.appendChild(imageWrap);
+    inner.appendChild(imageWrap);
 
-    card.appendChild(info);
+    inner.appendChild(info);
+
+    card.appendChild(inner);
 
     card.addEventListener(
       "click",
