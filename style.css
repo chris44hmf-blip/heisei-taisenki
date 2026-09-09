@@ -1010,17 +1010,15 @@ h2 {
 
   align-items: stretch;
 
-  gap: 18px;
+  gap: 14px;
 
-  overflow: auto;
+  overflow: hidden;
 
-  -webkit-overflow-scrolling: touch;
-
-  padding: 12px 3vw 16px;
+  padding: 8px 3vw 10px;
 }
 
 .enhance-detail-portrait {
-  flex: 0 0 38%;
+  flex: 0 0 30%;
 
   display: flex;
 
@@ -1028,14 +1026,16 @@ h2 {
   justify-content: center;
 
   min-width: 0;
+
+  max-height: 100%;
 }
 
 .enhance-detail-image-wrap {
-  width: min(100%, 220px);
+  width: min(100%, 168px);
 
   aspect-ratio: 3 / 4;
 
-  max-height: 72%;
+  max-height: min(58%, 210px);
 
   display: flex;
 
@@ -1072,15 +1072,19 @@ h2 {
 
   min-width: 0;
 
+  max-height: 100%;
+
   display: flex;
 
   flex-direction: column;
 
-  justify-content: center;
+  justify-content: flex-start;
 
-  gap: 6px;
+  gap: 3px;
 
-  padding: 4px 0;
+  padding: 0;
+
+  overflow: hidden;
 }
 
 .enhance-detail-number {
@@ -1098,7 +1102,7 @@ h2 {
 }
 
 .enhance-detail-name {
-  font-size: clamp(22px, 3.4vw, 34px);
+  font-size: clamp(20px, 3vw, 30px);
 
   letter-spacing: 0.08em;
 }
@@ -1110,11 +1114,11 @@ h2 {
 }
 
 .enhance-detail-level {
-  margin-top: 2px;
+  margin-top: 0;
 
   color: #ddd;
 
-  font-size: clamp(14px, 2vw, 20px);
+  font-size: clamp(13px, 1.9vw, 18px);
 }
 
 .enhance-detail-stats {
@@ -1122,11 +1126,11 @@ h2 {
 
   flex-direction: column;
 
-  gap: 6px;
+  gap: 4px;
 
-  margin-top: 8px;
+  margin-top: 4px;
 
-  padding: 10px 12px;
+  padding: 6px 10px;
 
   border: 1px solid #555;
   border-radius: 6px;
@@ -1153,7 +1157,7 @@ h2 {
 .enhance-detail-stat-value {
   color: #fff;
 
-  font-size: clamp(14px, 2vw, 20px);
+  font-size: clamp(13px, 1.9vw, 18px);
 
   letter-spacing: 0.04em;
 }
@@ -1163,9 +1167,9 @@ h2 {
 
   flex-direction: column;
 
-  gap: 4px;
+  gap: 2px;
 
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .enhance-detail-beats-row {
@@ -1189,15 +1193,15 @@ h2 {
 }
 
 .enhance-detail-confirm {
-  margin-top: 10px;
+  margin-top: 6px;
 
-  width: 100%;
+  width: 64%;
 
-  max-width: 280px;
+  max-width: 180px;
 
-  align-self: flex-start;
+  align-self: center;
 
-  padding: 12px 18px;
+  padding: 8px 14px;
 
   border: 2px solid #fff;
   border-radius: 6px;
@@ -1210,7 +1214,7 @@ h2 {
 
   color: white;
 
-  font-size: clamp(15px, 2.2vw, 22px);
+  font-size: clamp(14px, 2vw, 18px);
 
   letter-spacing: 0.12em;
 
