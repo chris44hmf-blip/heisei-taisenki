@@ -2767,8 +2767,15 @@ function renderEvolveDetail() {
 
   if (nextNoteEl) {
 
+    const form2Data =
+      getCharacterForm(
+        character,
+        2
+      );
+
     nextNoteEl.textContent =
-      hasForm2UnlockFlag
+      hasForm2UnlockFlag &&
+      !form2Data
         ? "FORM-2データ未実装"
         : "";
 
@@ -4365,7 +4372,8 @@ const CHARACTERS = {
   Existing top-level images / stats / battle / ui /
   attackBehavior / traits remain the FORM-1 source of truth.
   forms[1] holds the same object references (no duplicated values).
-  forms[2] / forms[3] stay undefined until later STEPs.
+  Additional forms (e.g. forms[2]) are registered separately
+  as their own source of truth objects.
 */
 
 const CHARACTER_FORM_DATA_KEYS = [
@@ -4408,6 +4416,84 @@ function buildCharacterForm1Data(
 }
 
 
+function cloneCharacterFormData(value) {
+
+  if (
+    value === null ||
+    typeof value !== "object"
+  ) {
+
+    return value;
+
+  }
+
+  if (Array.isArray(value)) {
+
+    return value.map(
+      cloneCharacterFormData
+    );
+
+  }
+
+  const cloned = {};
+
+  Object.keys(value).forEach((key) => {
+
+    cloned[key] =
+      cloneCharacterFormData(
+        value[key]
+      );
+
+  });
+
+  return cloned;
+
+}
+
+
+function getCharacterFormImages(
+  characterId,
+  formNumber
+) {
+
+  const folder =
+    "images/characters/" +
+    characterId;
+
+  if (formNumber === 1) {
+
+    return getCharacterImages(
+      characterId
+    );
+
+  }
+
+  const prefix =
+    folder +
+    "/" +
+    characterId +
+    "_form" +
+    formNumber;
+
+  return {
+
+    menu:
+      prefix + "_menu.webp",
+
+    idle:
+      prefix + "_idle.webp",
+
+    attack:
+      prefix + "_attack.webp",
+
+    hurt:
+      prefix + "_hurt.webp"
+
+  };
+
+}
+
+
 function attachCharacterForms(
   characters
 ) {
@@ -4427,6 +4513,13 @@ function attachCharacterForms(
 
       }
 
+      const previousForms =
+        character.forms &&
+        typeof character.forms ===
+          "object"
+          ? character.forms
+          : null;
+
       character.forms = {
 
         1: buildCharacterForm1Data(
@@ -4435,6 +4528,28 @@ function attachCharacterForms(
 
       };
 
+      if (previousForms) {
+
+        Object.keys(
+          previousForms
+        ).forEach((key) => {
+
+          if (
+            key === "1" ||
+            Number(key) === 1
+          ) {
+
+            return;
+
+          }
+
+          character.forms[key] =
+            previousForms[key];
+
+        });
+
+      }
+
     }
   );
 
@@ -4442,6 +4557,73 @@ function attachCharacterForms(
 
 
 attachCharacterForms(CHARACTERS);
+
+
+function registerSenaForm2() {
+
+  const sena =
+    CHARACTERS.sena;
+
+  if (!sena || !sena.forms) {
+
+    return;
+
+  }
+
+  const form1 =
+    getCharacterForm(sena, 1);
+
+  if (!form1 || !form1.stats) {
+
+    return;
+
+  }
+
+  sena.forms[2] = {
+
+    images:
+      getCharacterFormImages(
+        "sena",
+        2
+      ),
+
+    stats: {
+
+      hp: 420,
+
+      attack: 65,
+
+      attackInterval: 900,
+
+      speed: 1.2,
+
+      range: 60,
+
+      yaniCost: 220,
+
+      deployCooldownMs:
+        form1.stats.deployCooldownMs
+
+    },
+
+    battle:
+      cloneCharacterFormData(
+        form1.battle
+      ),
+
+    attackBehavior:
+      cloneCharacterFormData(
+        form1.attackBehavior
+      ),
+
+    ui:
+      cloneCharacterFormData(
+        form1.ui
+      )
+
+  };
+
+}
 
 
 function resolveCharacterReference(
@@ -4528,6 +4710,9 @@ function getCharacterForm(
   return form;
 
 }
+
+
+registerSenaForm2();
 
 
 function getCharacterFormLabel(
