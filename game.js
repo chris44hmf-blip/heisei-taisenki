@@ -2654,6 +2654,18 @@ function renderEvolveDetail() {
     unlockedForms.indexOf(2) !==
     -1;
 
+  const form1 =
+    getCharacterForm(
+      character,
+      1
+    ) || character;
+
+  const form2 =
+    getCharacterForm(
+      character,
+      2
+    );
+
 
   const image =
     document.getElementById(
@@ -2663,14 +2675,17 @@ function renderEvolveDetail() {
   if (image) {
 
     image.src =
-      character.images.menu;
+      form1.images &&
+      form1.images.menu
+        ? form1.images.menu
+        : character.images.menu;
 
     image.alt =
       character.name;
 
     const menuScale =
       getCharacterMenuScale(
-        character
+        form1
       );
 
     image.style.width =
@@ -2748,15 +2763,120 @@ function renderEvolveDetail() {
 
   }
 
+  const nextWrap =
+    document.getElementById(
+      "evolve-detail-next-wrap"
+    );
+
+  const nextImage =
+    document.getElementById(
+      "evolve-detail-next-image"
+    );
+
+  const nextMark =
+    document.getElementById(
+      "evolve-detail-next-mark"
+    );
+
   const nextNameEl =
     document.getElementById(
       "evolve-detail-next-name"
     );
 
-  if (nextNameEl) {
+  if (form2 && form2.images && form2.images.menu) {
 
-    nextNameEl.textContent =
-      "???";
+    if (nextWrap) {
+
+      nextWrap.classList.toggle(
+        "evolve-detail-locked",
+        !hasForm2UnlockFlag
+      );
+
+      nextWrap.classList.toggle(
+        "is-silhouette",
+        !hasForm2UnlockFlag
+      );
+
+    }
+
+    if (nextImage) {
+
+      nextImage.hidden = false;
+
+      nextImage.src =
+        form2.images.menu;
+
+      nextImage.alt =
+        hasForm2UnlockFlag
+          ? character.name
+          : "";
+
+      const nextScale =
+        getCharacterMenuScale(
+          form2
+        );
+
+      nextImage.style.width =
+        nextScale * 100 + "%";
+
+      nextImage.style.height =
+        nextScale * 100 + "%";
+
+    }
+
+    if (nextMark) {
+
+      nextMark.hidden = true;
+
+    }
+
+    if (nextNameEl) {
+
+      nextNameEl.textContent =
+        hasForm2UnlockFlag
+          ? character.name
+          : "???";
+
+    }
+
+  } else {
+
+    if (nextWrap) {
+
+      nextWrap.classList.add(
+        "evolve-detail-locked"
+      );
+
+      nextWrap.classList.remove(
+        "is-silhouette"
+      );
+
+    }
+
+    if (nextImage) {
+
+      nextImage.hidden = true;
+
+      nextImage.removeAttribute(
+        "src"
+      );
+
+      nextImage.alt = "";
+
+    }
+
+    if (nextMark) {
+
+      nextMark.hidden = false;
+
+    }
+
+    if (nextNameEl) {
+
+      nextNameEl.textContent =
+        "???";
+
+    }
 
   }
 
@@ -2767,17 +2887,108 @@ function renderEvolveDetail() {
 
   if (nextNoteEl) {
 
-    const form2Data =
-      getCharacterForm(
-        character,
-        2
-      );
-
     nextNoteEl.textContent =
       hasForm2UnlockFlag &&
-      !form2Data
+      !form2
         ? "FORM-2データ未実装"
         : "";
+
+  }
+
+  const compareHp =
+    document.getElementById(
+      "evolve-detail-compare-hp"
+    );
+
+  const compareAttack =
+    document.getElementById(
+      "evolve-detail-compare-attack"
+    );
+
+  const compareYani =
+    document.getElementById(
+      "evolve-detail-compare-yani"
+    );
+
+  const form1Combat =
+    calculateCharacterCombatStats(
+      form1,
+      level,
+      plus
+    );
+
+  const form1Yani =
+    Number(
+      form1.stats &&
+      form1.stats.yaniCost
+    ) || 0;
+
+  if (form2 && form2.stats) {
+
+    const form2Combat =
+      calculateCharacterCombatStats(
+        form2,
+        level,
+        plus
+      );
+
+    const form2Yani =
+      Number(
+        form2.stats.yaniCost
+      ) || 0;
+
+    if (compareHp) {
+
+      compareHp.textContent =
+        form1Combat.hp +
+        " → " +
+        form2Combat.hp;
+
+    }
+
+    if (compareAttack) {
+
+      compareAttack.textContent =
+        form1Combat.attack +
+        " → " +
+        form2Combat.attack;
+
+    }
+
+    if (compareYani) {
+
+      compareYani.textContent =
+        form1Yani +
+        " → " +
+        form2Yani;
+
+    }
+
+  } else {
+
+    if (compareHp) {
+
+      compareHp.textContent =
+        form1Combat.hp +
+        " → ???";
+
+    }
+
+    if (compareAttack) {
+
+      compareAttack.textContent =
+        form1Combat.attack +
+        " → ???";
+
+    }
+
+    if (compareYani) {
+
+      compareYani.textContent =
+        form1Yani +
+        " → ???";
+
+    }
 
   }
 
