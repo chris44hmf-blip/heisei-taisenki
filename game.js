@@ -2098,16 +2098,6 @@ let enhanceRarityFilter =
   FORMATION_RARITY_FILTER_ALL;
 
 
-function setPortraitAllowed(allowed) {
-
-  document.body.classList.toggle(
-    "allow-portrait",
-    Boolean(allowed)
-  );
-
-}
-
-
 function getEnhanceCardProgress(characterId) {
 
   ensureCharacterProgressEntry(
@@ -2141,8 +2131,6 @@ function openEnhanceList() {
 
   }
 
-  setPortraitAllowed(true);
-
   renderEnhanceList();
 
   showScreen(enhanceScreen);
@@ -2151,8 +2139,6 @@ function openEnhanceList() {
 
 
 function closeEnhanceList() {
-
-  setPortraitAllowed(false);
 
   showScreen(trainingScreen);
 
@@ -2290,12 +2276,16 @@ function renderEnhanceList() {
     image.draggable =
       false;
 
-    image.style.transform =
-      "scale(" +
+    const menuScale =
       getCharacterMenuScale(
         character
-      ) +
-      ")";
+      );
+
+    image.style.width =
+      menuScale * 100 + "%";
+
+    image.style.height =
+      menuScale * 100 + "%";
 
     imageWrap.appendChild(image);
 
