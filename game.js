@@ -9947,7 +9947,8 @@ function resetBsGachaLighting() {
 
     bsGachaLighting.classList.remove(
       "is-shake",
-      "is-strobe"
+      "is-strobe",
+      "is-burst"
     );
 
   }
@@ -10008,9 +10009,9 @@ async function playBsGachaWhiteLighting(token) {
 
   setBsGachaLightingPhase("white");
 
-  setBsGachaLight(bsGachaLightWhite, 0.26);
+  setBsGachaLight(bsGachaLightWhite, 0.4);
 
-  await waitBsGachaLighting(240);
+  await waitBsGachaLighting(180);
 
   if (!isBsGachaLightingToken(token)) {
 
@@ -10018,7 +10019,7 @@ async function playBsGachaWhiteLighting(token) {
 
   }
 
-  setBsGachaLight(bsGachaLightWhite, 0.58);
+  setBsGachaLight(bsGachaLightWhite, 0.86);
 
   await waitBsGachaLighting(520);
 
@@ -10207,14 +10208,26 @@ async function playBsGachaLegendLighting(token) {
 
   setBsGachaLight(bsGachaLightRed, 0);
 
+  if (bsGachaLighting) {
+
+    bsGachaLighting.classList.add(
+      "is-burst"
+    );
+
+  }
+
   setBsGachaLight(
     bsGachaLightFlash,
     prefersBsGachaReducedMotion()
-      ? 0.46
-      : 0.92
+      ? 0.38
+      : 1
   );
 
-  await waitBsGachaLighting(220);
+  await waitBsGachaLighting(
+    prefersBsGachaReducedMotion()
+      ? 80
+      : 110
+  );
 
   if (!isBsGachaLightingToken(token)) {
 
@@ -10224,7 +10237,15 @@ async function playBsGachaLegendLighting(token) {
 
   setBsGachaLight(bsGachaLightFlash, 0);
 
-  await waitBsGachaLighting(280);
+  if (bsGachaLighting) {
+
+    bsGachaLighting.classList.remove(
+      "is-burst"
+    );
+
+  }
+
+  await waitBsGachaLighting(140);
 
   return isBsGachaLightingToken(token);
 
@@ -10564,6 +10585,36 @@ function cancelBsGachaReveal() {
 }
 
 
+function enterBsGachaPresentation() {
+
+  if (bsGachaScreen) {
+
+    bsGachaScreen.classList.add(
+      "is-presenting"
+    );
+
+  }
+
+  closeBsGachaPrompt();
+
+}
+
+
+function exitBsGachaPresentation() {
+
+  if (!bsGachaScreen) {
+
+    return;
+
+  }
+
+  bsGachaScreen.classList.remove(
+    "is-presenting"
+  );
+
+}
+
+
 function cancelBsGachaPullPresentation() {
 
   bsGachaSequenceToken += 1;
@@ -10571,6 +10622,8 @@ function cancelBsGachaPullPresentation() {
   cancelBsGachaLighting();
 
   cancelBsGachaReveal();
+
+  exitBsGachaPresentation();
 
 }
 
@@ -10850,12 +10903,12 @@ async function playBsGachaSingleReveal(
   if (bsGachaRevealFlash) {
 
     bsGachaRevealFlash.style.opacity =
-      reduced ? "0.28" : "0.82";
+      reduced ? "0.3" : "0.96";
 
   }
 
   await waitBsGachaLighting(
-    reduced ? 80 : 140
+    reduced ? 70 : 110
   );
 
   if (token !== bsGachaRevealToken) {
@@ -10985,6 +11038,8 @@ function closeBsGachaReveal() {
 
     resetBsGachaLighting();
 
+    exitBsGachaPresentation();
+
     bsGachaRevealActive = false;
 
     setBsGachaBusy(false);
@@ -11027,11 +11082,24 @@ async function playBsGachaPullPresentation(
     !played
   ) {
 
+    if (
+      token === bsGachaSequenceToken &&
+      !bsGachaRevealActive
+    ) {
+
+      exitBsGachaPresentation();
+
+      setBsGachaBusy(false);
+
+    }
+
     return;
 
   }
 
   if (!single) {
+
+    exitBsGachaPresentation();
 
     setBsGachaBusy(false);
 
@@ -11050,6 +11118,8 @@ async function playBsGachaPullPresentation(
     !revealed
   ) {
 
+    exitBsGachaPresentation();
+
     setBsGachaBusy(false);
 
   }
@@ -11064,7 +11134,7 @@ function startBsGachaPullPresentation(outcome) {
     bsGachaRevealActive
   ) {
 
-    return;
+    return false;
 
   }
 
@@ -11081,7 +11151,7 @@ function startBsGachaPullPresentation(outcome) {
 
     setBsGachaBusy(false);
 
-    return;
+    return false;
 
   }
 
@@ -11096,6 +11166,8 @@ function startBsGachaPullPresentation(outcome) {
     isBsGachaSingleResult(results),
     results[0]
   );
+
+  return true;
 
 }
 
@@ -11788,11 +11860,24 @@ function handoffBsGachaPull(outcome) {
 
   updateGyaraDisplay();
 
-  closeBsGachaPrompt();
+  enterBsGachaPresentation();
 
   showBsGachaMessage("抽選完了");
 
-  startBsGachaPullPresentation(outcome);
+  const started =
+    startBsGachaPullPresentation(outcome);
+
+  if (
+    !started &&
+    !bsGachaLightingActive &&
+    !bsGachaRevealActive
+  ) {
+
+    exitBsGachaPresentation();
+
+    setBsGachaBusy(false);
+
+  }
 
 }
 

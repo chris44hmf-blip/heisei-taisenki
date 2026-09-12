@@ -1437,94 +1437,215 @@ h2 {
   transition-duration: 80ms;
 }
 
+.bs-gacha-light::before,
+.bs-gacha-light::after {
+  content: "";
+
+  position: absolute;
+
+  top: -4%;
+
+  width: 18%;
+
+  height: 108%;
+
+  transform-origin: 50% 0;
+
+  filter: blur(9px);
+
+  pointer-events: none;
+
+  clip-path: polygon(42% 0%, 58% 0%, 86% 100%, 14% 100%);
+}
+
 .bs-gacha-light-white {
   background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.08) 18%,
+      transparent 36%
+    ),
     radial-gradient(
-      ellipse 68% 52% at 50% 16%,
-      rgba(255, 255, 255, 0.78) 0%,
-      rgba(255, 255, 255, 0.28) 38%,
+      ellipse 16% 14% at 50% 5%,
+      rgba(255, 255, 255, 0.75),
       transparent 72%
     );
 }
 
-.bs-gacha-light-blue {
+.bs-gacha-light-white::before,
+.bs-gacha-light-white::after {
   background:
     linear-gradient(
-      118deg,
-      transparent 0%,
-      rgba(18, 42, 108, 0.72) 24%,
-      rgba(14, 32, 84, 0.28) 46%,
-      transparent 68%
-    ),
-    linear-gradient(
-      242deg,
-      transparent 0%,
-      rgba(16, 38, 102, 0.68) 26%,
-      rgba(12, 28, 74, 0.26) 48%,
-      transparent 70%
-    ),
-    radial-gradient(
-      ellipse 42% 56% at 50% 42%,
-      rgba(24, 52, 118, 0.36),
-      transparent 72%
+      to bottom,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.34) 36%,
+      rgba(255, 255, 255, 0.08) 62%,
+      transparent 84%
     );
+}
+
+.bs-gacha-light-white::before {
+  left: 28%;
+
+  transform: rotate(11deg);
+}
+
+.bs-gacha-light-white::after {
+  right: 22%;
+
+  width: 15%;
+
+  transform: rotate(-16deg);
+}
+
+.bs-gacha-light-blue {
+  background:
+    radial-gradient(
+      ellipse 28% 22% at 48% 10%,
+      rgba(36, 72, 150, 0.55),
+      transparent 70%
+    );
+}
+
+.bs-gacha-light-blue::before,
+.bs-gacha-light-blue::after {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(28, 62, 148, 0.95) 0%,
+      rgba(18, 42, 112, 0.42) 40%,
+      rgba(12, 28, 78, 0.1) 64%,
+      transparent 86%
+    );
+}
+
+.bs-gacha-light-blue::before {
+  left: 22%;
+
+  width: 20%;
+
+  transform: rotate(14deg);
+}
+
+.bs-gacha-light-blue::after {
+  right: 16%;
+
+  width: 17%;
+
+  transform: rotate(-12deg);
 }
 
 .bs-gacha-light-red {
   background:
     linear-gradient(
-      118deg,
-      transparent 0%,
-      rgba(132, 16, 26, 0.78) 22%,
-      rgba(84, 10, 16, 0.32) 48%,
-      transparent 70%
-    ),
-    linear-gradient(
-      242deg,
-      transparent 0%,
-      rgba(118, 14, 22, 0.72) 24%,
-      rgba(72, 8, 14, 0.3) 50%,
-      transparent 72%
+      168deg,
+      rgba(176, 24, 32, 0.55) 0%,
+      rgba(120, 12, 18, 0.16) 28%,
+      transparent 52%
     ),
     radial-gradient(
-      ellipse 46% 58% at 50% 40%,
-      rgba(150, 20, 28, 0.46),
+      ellipse 24% 18% at 52% 8%,
+      rgba(190, 36, 40, 0.62),
       transparent 72%
     );
 }
 
+.bs-gacha-light-red::before,
+.bs-gacha-light-red::after {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(188, 28, 34, 0.96) 0%,
+      rgba(140, 16, 22, 0.46) 38%,
+      rgba(90, 8, 14, 0.1) 64%,
+      transparent 86%
+    );
+}
+
+.bs-gacha-light-red::before {
+  left: 16%;
+
+  width: 20%;
+
+  transform: rotate(18deg);
+}
+
+.bs-gacha-light-red::after {
+  right: 12%;
+
+  width: 22%;
+
+  transform: rotate(-13deg);
+}
+
 .bs-gacha-light-legend {
   background:
+    linear-gradient(
+      174deg,
+      rgba(255, 255, 255, 0.7) 0%,
+      rgba(255, 214, 150, 0.22) 24%,
+      transparent 50%
+    ),
     radial-gradient(
-      ellipse 56% 50% at 50% 24%,
-      rgba(255, 255, 255, 0.92) 0%,
-      rgba(255, 226, 168, 0.5) 28%,
-      rgba(226, 142, 58, 0.2) 48%,
-      transparent 74%
+      ellipse 26% 18% at 46% 7%,
+      rgba(255, 255, 255, 0.75),
+      transparent 70%
     ),
+    radial-gradient(
+      ellipse 20% 16% at 62% 12%,
+      rgba(255, 176, 84, 0.45),
+      transparent 72%
+    );
+}
+
+.bs-gacha-light-legend::before {
+  left: 24%;
+
+  width: 16%;
+
+  transform: rotate(13deg);
+
+  background:
     linear-gradient(
-      104deg,
-      transparent 12%,
-      rgba(255, 196, 110, 0.16) 38%,
-      transparent 64%
-    ),
+      to bottom,
+      rgba(255, 255, 255, 0.96) 0%,
+      rgba(255, 236, 200, 0.4) 40%,
+      transparent 82%
+    );
+}
+
+.bs-gacha-light-legend::after {
+  right: 18%;
+
+  width: 18%;
+
+  transform: rotate(-15deg);
+
+  background:
     linear-gradient(
-      256deg,
-      transparent 12%,
-      rgba(255, 214, 150, 0.14) 40%,
-      transparent 66%
+      to bottom,
+      rgba(255, 196, 110, 0.9) 0%,
+      rgba(255, 255, 255, 0.28) 36%,
+      rgba(226, 140, 54, 0.08) 64%,
+      transparent 86%
     );
 }
 
 .bs-gacha-light-flash {
   background:
     radial-gradient(
-      ellipse 78% 70% at 50% 32%,
-      rgba(255, 255, 255, 0.98) 0%,
-      rgba(255, 255, 255, 0.62) 34%,
-      rgba(255, 255, 255, 0.18) 58%,
-      transparent 80%
+      ellipse 70% 62% at 50% 36%,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(255, 255, 255, 0.16) 48%,
+      transparent 76%
     );
+}
+
+.bs-gacha-lighting.is-burst .bs-gacha-light-flash {
+  background: rgba(255, 255, 255, 0.98);
+
+  transition-duration: 70ms;
 }
 
 .bs-gacha-lighting.is-shake {
@@ -1974,6 +2095,9 @@ h2 {
   pointer-events: none;
 }
 
+#bs-gacha-screen.is-presenting .bs-gacha-header,
+#bs-gacha-screen.is-presenting .bs-gacha-body,
+#bs-gacha-screen.is-presenting .bs-gacha-prompt,
 #bs-gacha-screen.is-revealing .bs-gacha-header,
 #bs-gacha-screen.is-revealing .bs-gacha-body {
   visibility: hidden;
@@ -2029,15 +2153,11 @@ h2 {
 .bs-gacha-reveal-flash {
   inset: 0;
 
-  background:
-    radial-gradient(
-      ellipse 64% 72% at 50% 42%,
-      rgba(255, 255, 255, 0.94) 0%,
-      rgba(255, 255, 255, 0.28) 42%,
-      transparent 74%
-    );
+  background: rgba(255, 255, 255, 0.98);
 
   opacity: 0;
+
+  transition: opacity 90ms linear;
 }
 
 .bs-gacha-reveal-character {
@@ -2238,8 +2358,12 @@ h2 {
 
 @media (prefers-reduced-motion: reduce) {
 
-  .bs-gacha-lighting.is-shake {
+  .bs-gacha-lighting.is-shake,
+  .bs-gacha-light::before,
+  .bs-gacha-light::after {
     animation: none;
+
+    transition: none;
   }
 
   .bs-gacha-reveal-character,
