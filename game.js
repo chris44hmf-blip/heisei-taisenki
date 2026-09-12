@@ -9608,6 +9608,10 @@ let bsGachaPrompt = null;
 
 let bsGachaLastOutcome = null;
 
+let bsGachaLightingActive = false;
+
+let bsGachaLightingToken = 0;
+
 
 const bsGachaBack =
   document.getElementById(
@@ -9718,6 +9722,559 @@ const bsGachaConfirmCancel =
   document.getElementById(
     "bs-gacha-confirm-cancel"
   );
+
+const bsGachaLighting =
+  document.getElementById(
+    "bs-gacha-lighting"
+  );
+
+const bsGachaLightWhite =
+  bsGachaLighting
+    ? bsGachaLighting.querySelector(
+      ".bs-gacha-light-white"
+    )
+    : null;
+
+const bsGachaLightBlue =
+  bsGachaLighting
+    ? bsGachaLighting.querySelector(
+      ".bs-gacha-light-blue"
+    )
+    : null;
+
+const bsGachaLightRed =
+  bsGachaLighting
+    ? bsGachaLighting.querySelector(
+      ".bs-gacha-light-red"
+    )
+    : null;
+
+const bsGachaLightLegend =
+  bsGachaLighting
+    ? bsGachaLighting.querySelector(
+      ".bs-gacha-light-legend"
+    )
+    : null;
+
+const bsGachaLightFlash =
+  bsGachaLighting
+    ? bsGachaLighting.querySelector(
+      ".bs-gacha-light-flash"
+    )
+    : null;
+
+
+function getBsGachaHighestRarity(results) {
+
+  if (!Array.isArray(results)) {
+
+    return 0;
+
+  }
+
+  let highest = 0;
+
+  for (
+    let index = 0;
+    index < results.length;
+    index += 1
+  ) {
+
+    const rarity =
+      Number(
+        results[index] &&
+        results[index].rarity
+      );
+
+    if (
+      rarity >= 1 &&
+      rarity <= 4 &&
+      rarity > highest
+    ) {
+
+      highest = rarity;
+
+    }
+
+  }
+
+  return highest;
+
+}
+
+
+function waitBsGachaLighting(ms) {
+
+  return new Promise((resolve) => {
+
+    window.setTimeout(
+      resolve,
+      ms
+    );
+
+  });
+
+}
+
+
+function isBsGachaLightingToken(token) {
+
+  return token === bsGachaLightingToken;
+
+}
+
+
+function setBsGachaLightingPhase(phase) {
+
+  if (!bsGachaLighting) {
+
+    return;
+
+  }
+
+  if (phase) {
+
+    bsGachaLighting.dataset.phase =
+      phase;
+
+    return;
+
+  }
+
+  delete bsGachaLighting.dataset.phase;
+
+}
+
+
+function setBsGachaLight(element, opacity) {
+
+  if (!element) {
+
+    return;
+
+  }
+
+  element.style.opacity =
+    String(opacity);
+
+}
+
+
+function resetBsGachaLighting() {
+
+  setBsGachaLight(bsGachaLightWhite, 0);
+
+  setBsGachaLight(bsGachaLightBlue, 0);
+
+  setBsGachaLight(bsGachaLightRed, 0);
+
+  setBsGachaLight(bsGachaLightLegend, 0);
+
+  setBsGachaLight(bsGachaLightFlash, 0);
+
+  if (bsGachaLighting) {
+
+    bsGachaLighting.classList.remove(
+      "is-shake",
+      "is-strobe"
+    );
+
+  }
+
+  setBsGachaLightingPhase("");
+
+}
+
+
+function cancelBsGachaLighting() {
+
+  bsGachaLightingToken += 1;
+
+  bsGachaLightingActive = false;
+
+  resetBsGachaLighting();
+
+}
+
+
+function prefersBsGachaReducedMotion() {
+
+  return !!(
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+  );
+
+}
+
+
+async function dimBsGachaLighting(
+  token,
+  ms
+) {
+
+  setBsGachaLightingPhase("dim");
+
+  setBsGachaLight(bsGachaLightWhite, 0);
+
+  setBsGachaLight(bsGachaLightBlue, 0);
+
+  setBsGachaLight(bsGachaLightRed, 0);
+
+  setBsGachaLight(bsGachaLightLegend, 0);
+
+  setBsGachaLight(bsGachaLightFlash, 0);
+
+  await waitBsGachaLighting(ms);
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaWhiteLighting(token) {
+
+  setBsGachaLightingPhase("white");
+
+  setBsGachaLight(bsGachaLightWhite, 0.26);
+
+  await waitBsGachaLighting(240);
+
+  if (!isBsGachaLightingToken(token)) {
+
+    return false;
+
+  }
+
+  setBsGachaLight(bsGachaLightWhite, 0.58);
+
+  await waitBsGachaLighting(520);
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaBlueLighting(token) {
+
+  setBsGachaLightingPhase("blue");
+
+  setBsGachaLight(bsGachaLightWhite, 0);
+
+  setBsGachaLight(bsGachaLightBlue, 0.9);
+
+  await waitBsGachaLighting(680);
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaRedLighting(token) {
+
+  setBsGachaLightingPhase("red");
+
+  setBsGachaLight(bsGachaLightBlue, 0);
+
+  setBsGachaLight(bsGachaLightRed, 1);
+
+  if (
+    bsGachaLighting &&
+    !prefersBsGachaReducedMotion()
+  ) {
+
+    bsGachaLighting.classList.remove(
+      "is-shake"
+    );
+
+    void bsGachaLighting.offsetWidth;
+
+    bsGachaLighting.classList.add(
+      "is-shake"
+    );
+
+  }
+
+  await waitBsGachaLighting(160);
+
+  if (!isBsGachaLightingToken(token)) {
+
+    return false;
+
+  }
+
+  setBsGachaLight(bsGachaLightRed, 0.86);
+
+  await waitBsGachaLighting(620);
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaLegendStrobe(token) {
+
+  setBsGachaLightingPhase("strobe");
+
+  if (
+    !bsGachaLighting ||
+    prefersBsGachaReducedMotion()
+  ) {
+
+    setBsGachaLight(
+      bsGachaLightLegend,
+      0.62
+    );
+
+    await waitBsGachaLighting(280);
+
+    return isBsGachaLightingToken(token);
+
+  }
+
+  bsGachaLighting.classList.add(
+    "is-strobe"
+  );
+
+  const pulses = 3;
+
+  for (
+    let pulse = 0;
+    pulse < pulses;
+    pulse += 1
+  ) {
+
+    if (!isBsGachaLightingToken(token)) {
+
+      return false;
+
+    }
+
+    setBsGachaLight(
+      bsGachaLightLegend,
+      0.88
+    );
+
+    setBsGachaLight(
+      bsGachaLightFlash,
+      0.22
+    );
+
+    await waitBsGachaLighting(100);
+
+    if (!isBsGachaLightingToken(token)) {
+
+      return false;
+
+    }
+
+    setBsGachaLight(
+      bsGachaLightLegend,
+      0.18
+    );
+
+    setBsGachaLight(
+      bsGachaLightFlash,
+      0
+    );
+
+    await waitBsGachaLighting(120);
+
+  }
+
+  bsGachaLighting.classList.remove(
+    "is-strobe"
+  );
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaLegendLighting(token) {
+
+  const dimmed =
+    await dimBsGachaLighting(
+      token,
+      150
+    );
+
+  if (!dimmed) {
+
+    return false;
+
+  }
+
+  setBsGachaLightingPhase("warm");
+
+  setBsGachaLight(
+    bsGachaLightLegend,
+    0.84
+  );
+
+  await waitBsGachaLighting(340);
+
+  if (!isBsGachaLightingToken(token)) {
+
+    return false;
+
+  }
+
+  const strobed =
+    await playBsGachaLegendStrobe(token);
+
+  if (!strobed) {
+
+    return false;
+
+  }
+
+  setBsGachaLightingPhase("flash");
+
+  setBsGachaLight(bsGachaLightLegend, 0);
+
+  setBsGachaLight(bsGachaLightRed, 0);
+
+  setBsGachaLight(
+    bsGachaLightFlash,
+    prefersBsGachaReducedMotion()
+      ? 0.46
+      : 0.92
+  );
+
+  await waitBsGachaLighting(220);
+
+  if (!isBsGachaLightingToken(token)) {
+
+    return false;
+
+  }
+
+  setBsGachaLight(bsGachaLightFlash, 0);
+
+  await waitBsGachaLighting(280);
+
+  return isBsGachaLightingToken(token);
+
+}
+
+
+async function playBsGachaLighting(rarity) {
+
+  const level = Number(rarity);
+
+  if (
+    bsGachaLightingActive ||
+    !bsGachaLighting ||
+    level < 1 ||
+    level > 4
+  ) {
+
+    return;
+
+  }
+
+  bsGachaLightingActive = true;
+
+  const token =
+    bsGachaLightingToken + 1;
+
+  bsGachaLightingToken = token;
+
+  setBsGachaBusy(true);
+
+  resetBsGachaLighting();
+
+  try {
+
+    const showedWhite =
+      await playBsGachaWhiteLighting(token);
+
+    if (!showedWhite) {
+
+      return;
+
+    }
+
+    if (level >= 2) {
+
+      const dimmed =
+        await dimBsGachaLighting(
+          token,
+          160
+        );
+
+      if (!dimmed) {
+
+        return;
+
+      }
+
+      const showedBlue =
+        await playBsGachaBlueLighting(token);
+
+      if (!showedBlue) {
+
+        return;
+
+      }
+
+    }
+
+    if (level >= 3) {
+
+      const dimmed =
+        await dimBsGachaLighting(
+          token,
+          140
+        );
+
+      if (!dimmed) {
+
+        return;
+
+      }
+
+      const showedRed =
+        await playBsGachaRedLighting(token);
+
+      if (!showedRed) {
+
+        return;
+
+      }
+
+    }
+
+    if (level >= 4) {
+
+      await playBsGachaLegendLighting(token);
+
+      return;
+
+    }
+
+    await dimBsGachaLighting(
+      token,
+      280
+    );
+
+  } finally {
+
+    if (isBsGachaLightingToken(token)) {
+
+      resetBsGachaLighting();
+
+      bsGachaLightingActive = false;
+
+      setBsGachaBusy(false);
+
+    }
+
+  }
+
+}
 
 
 function getBsGachaScreenBanner() {
@@ -10410,9 +10967,35 @@ function handoffBsGachaPull(outcome) {
 
   closeBsGachaPrompt();
 
-  setBsGachaBusy(false);
-
   showBsGachaMessage("抽選完了");
+
+  const rarity =
+    getBsGachaHighestRarity(
+      outcome && outcome.results
+    );
+
+  if (
+    rarity >= 1 &&
+    !bsGachaLightingActive
+  ) {
+
+    playBsGachaLighting(rarity);
+
+    if (!bsGachaLightingActive) {
+
+      setBsGachaBusy(false);
+
+    }
+
+    return;
+
+  }
+
+  if (!bsGachaLightingActive) {
+
+    setBsGachaBusy(false);
+
+  }
 
 }
 
@@ -10522,6 +11105,8 @@ function openBsGacha() {
 
   }
 
+  cancelBsGachaLighting();
+
   isBsGachaBusy = false;
 
   closeBsGachaPrompt();
@@ -10546,6 +11131,8 @@ function closeBsGacha() {
     return;
 
   }
+
+  cancelBsGachaLighting();
 
   closeBsGachaPrompt();
 

@@ -1403,6 +1403,148 @@ h2 {
   background-position: center center;
 }
 
+.bs-gacha-lighting {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 1;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.bs-gacha-light {
+  position: absolute;
+
+  inset: 0;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  transition: opacity 240ms ease;
+}
+
+.bs-gacha-lighting.is-strobe .bs-gacha-light {
+  transition-duration: 80ms;
+}
+
+.bs-gacha-light-white {
+  background:
+    radial-gradient(
+      ellipse 68% 52% at 50% 16%,
+      rgba(255, 255, 255, 0.78) 0%,
+      rgba(255, 255, 255, 0.28) 38%,
+      transparent 72%
+    );
+}
+
+.bs-gacha-light-blue {
+  background:
+    linear-gradient(
+      118deg,
+      transparent 0%,
+      rgba(18, 42, 108, 0.72) 24%,
+      rgba(14, 32, 84, 0.28) 46%,
+      transparent 68%
+    ),
+    linear-gradient(
+      242deg,
+      transparent 0%,
+      rgba(16, 38, 102, 0.68) 26%,
+      rgba(12, 28, 74, 0.26) 48%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 42% 56% at 50% 42%,
+      rgba(24, 52, 118, 0.36),
+      transparent 72%
+    );
+}
+
+.bs-gacha-light-red {
+  background:
+    linear-gradient(
+      118deg,
+      transparent 0%,
+      rgba(132, 16, 26, 0.78) 22%,
+      rgba(84, 10, 16, 0.32) 48%,
+      transparent 70%
+    ),
+    linear-gradient(
+      242deg,
+      transparent 0%,
+      rgba(118, 14, 22, 0.72) 24%,
+      rgba(72, 8, 14, 0.3) 50%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 46% 58% at 50% 40%,
+      rgba(150, 20, 28, 0.46),
+      transparent 72%
+    );
+}
+
+.bs-gacha-light-legend {
+  background:
+    radial-gradient(
+      ellipse 56% 50% at 50% 24%,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 226, 168, 0.5) 28%,
+      rgba(226, 142, 58, 0.2) 48%,
+      transparent 74%
+    ),
+    linear-gradient(
+      104deg,
+      transparent 12%,
+      rgba(255, 196, 110, 0.16) 38%,
+      transparent 64%
+    ),
+    linear-gradient(
+      256deg,
+      transparent 12%,
+      rgba(255, 214, 150, 0.14) 40%,
+      transparent 66%
+    );
+}
+
+.bs-gacha-light-flash {
+  background:
+    radial-gradient(
+      ellipse 78% 70% at 50% 32%,
+      rgba(255, 255, 255, 0.98) 0%,
+      rgba(255, 255, 255, 0.62) 34%,
+      rgba(255, 255, 255, 0.18) 58%,
+      transparent 80%
+    );
+}
+
+.bs-gacha-lighting.is-shake {
+  animation: bs-gacha-light-shake 180ms linear;
+}
+
+@keyframes bs-gacha-light-shake {
+
+  0% {
+    transform: translate(0, 0);
+  }
+
+  30% {
+    transform: translate(1px, -1px);
+  }
+
+  60% {
+    transform: translate(-1px, 1px);
+  }
+
+  100% {
+    transform: translate(0, 0);
+  }
+
+}
+
 .bs-gacha-header {
   position: relative;
 
@@ -1441,7 +1583,7 @@ h2 {
 .bs-gacha-body {
   position: relative;
 
-  z-index: 1;
+  z-index: 3;
 
   flex: 1;
 
@@ -1780,6 +1922,14 @@ h2 {
       #2a2e38 0%,
       #16181e 100%
     );
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .bs-gacha-lighting.is-shake {
+    animation: none;
+  }
+
 }
 
 @media (max-height: 400px) {
