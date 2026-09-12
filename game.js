@@ -5281,6 +5281,77 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  saizen_kanri_ojisan: {
+
+    id: "saizen_kanri_ojisan",
+
+    name: "最前管理おじさん",
+
+    group: "ライブハウス民",
+
+    number: 5,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "saizen_kanri_ojisan"
+      ),
+
+    stats: {
+
+      hp: 600,
+
+      attack: 8,
+
+      attackInterval: 1500,
+
+      speed: 0.40,
+
+      range: 45,
+
+      yaniCost: 100,
+
+      deployCooldownMs: 1000
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
