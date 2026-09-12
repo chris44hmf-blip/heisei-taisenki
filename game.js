@@ -34,6 +34,11 @@ const doritikeGachaScreen =
     "doritike-gacha-screen"
   );
 
+const bsGachaScreen =
+  document.getElementById(
+    "bs-gacha-screen"
+  );
+
 const enhanceScreen =
   document.getElementById(
     "enhance-screen"
@@ -270,9 +275,7 @@ if (gachaLobbyBs) {
     "click",
     () => {
 
-      console.log(
-        "BACKSTAGEガチャ: coming soon"
-      );
+      openBsGacha();
 
     }
   );
@@ -7065,6 +7068,18 @@ function updateGyaraDisplay() {
 
   }
 
+  const bsGachaGyara =
+    document.getElementById(
+      "bs-gacha-gyara"
+    );
+
+  if (bsGachaGyara) {
+
+    bsGachaGyara.textContent =
+      String(gyara);
+
+  }
+
 }
 
 
@@ -7264,6 +7279,18 @@ function updateBsPassDisplay() {
   if (homeBsPass) {
 
     homeBsPass.textContent =
+      String(bsPass);
+
+  }
+
+  const bsGachaPass =
+    document.getElementById(
+      "bs-gacha-pass"
+    );
+
+  if (bsGachaPass) {
+
+    bsGachaPass.textContent =
       String(bsPass);
 
   }
@@ -9567,6 +9594,1145 @@ function executeBsGachaPull(
     results: plan.results
 
   };
+
+}
+
+
+/* =========================
+   BS GACHA SCREEN
+========================= */
+
+let isBsGachaBusy = false;
+
+let bsGachaPrompt = null;
+
+let bsGachaLastOutcome = null;
+
+
+const bsGachaBack =
+  document.getElementById(
+    "bs-gacha-back"
+  );
+
+const bsGachaTitle =
+  document.getElementById(
+    "bs-gacha-title"
+  );
+
+const bsGachaPassLabel =
+  document.getElementById(
+    "bs-gacha-pass"
+  );
+
+const bsGachaGyaraLabel =
+  document.getElementById(
+    "bs-gacha-gyara"
+  );
+
+const bsGachaMessage =
+  document.getElementById(
+    "bs-gacha-message"
+  );
+
+const bsGachaGuarantee =
+  document.getElementById(
+    "bs-gacha-guarantee"
+  );
+
+const bsGachaPull1 =
+  document.getElementById(
+    "bs-gacha-pull-1"
+  );
+
+const bsGachaPull10 =
+  document.getElementById(
+    "bs-gacha-pull-10"
+  );
+
+const bsGachaPull1Label =
+  document.getElementById(
+    "bs-gacha-pull-1-label"
+  );
+
+const bsGachaPull10Label =
+  document.getElementById(
+    "bs-gacha-pull-10-label"
+  );
+
+const bsGachaCost1 =
+  document.getElementById(
+    "bs-gacha-cost-1"
+  );
+
+const bsGachaCost10 =
+  document.getElementById(
+    "bs-gacha-cost-10"
+  );
+
+const bsGachaPromptEl =
+  document.getElementById(
+    "bs-gacha-prompt"
+  );
+
+const bsGachaPayStep =
+  document.getElementById(
+    "bs-gacha-pay-step"
+  );
+
+const bsGachaPayNote =
+  document.getElementById(
+    "bs-gacha-pay-note"
+  );
+
+const bsGachaPayPass =
+  document.getElementById(
+    "bs-gacha-pay-pass"
+  );
+
+const bsGachaPayGyara =
+  document.getElementById(
+    "bs-gacha-pay-gyara"
+  );
+
+const bsGachaPayCancel =
+  document.getElementById(
+    "bs-gacha-pay-cancel"
+  );
+
+const bsGachaConfirmStep =
+  document.getElementById(
+    "bs-gacha-confirm-step"
+  );
+
+const bsGachaConfirmText =
+  document.getElementById(
+    "bs-gacha-confirm-text"
+  );
+
+const bsGachaConfirmOk =
+  document.getElementById(
+    "bs-gacha-confirm-ok"
+  );
+
+const bsGachaConfirmCancel =
+  document.getElementById(
+    "bs-gacha-confirm-cancel"
+  );
+
+
+function getBsGachaScreenBanner() {
+
+  const enabled =
+    getEnabledBsGachaBanners();
+
+  if (enabled.length > 0) {
+
+    return enabled[0];
+
+  }
+
+  return getBsGachaBanner("normal");
+
+}
+
+
+function getBsGachaScreenMultiCount(
+  banner
+) {
+
+  const count =
+    Number(
+      banner &&
+      banner.costs &&
+      banner.costs.multiCount
+    );
+
+  if (
+    !Number.isInteger(count) ||
+    count <= 1
+  ) {
+
+    return null;
+
+  }
+
+  return count;
+
+}
+
+
+function formatBsGachaCostLine(
+  banner,
+  count
+) {
+
+  const passCost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      BS_GACHA_CURRENCY.BS_PASS
+    );
+
+  const gyaraCost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      BS_GACHA_CURRENCY.GYARA
+    );
+
+  return (
+    "PASS " +
+    (
+      passCost == null
+        ? "—"
+        : String(passCost)
+    ) +
+    " / ギャラ " +
+    (
+      gyaraCost == null
+        ? "—"
+        : String(gyaraCost)
+    )
+  );
+
+}
+
+
+function getBsGachaFailureMessage(
+  reason,
+  paymentType
+) {
+
+  if (reason === "invalid_banner") {
+
+    return "ガチャを開けません。";
+
+  }
+
+  if (reason === "disabled_banner") {
+
+    return "このガチャは現在利用できません。";
+
+  }
+
+  if (reason === "invalid_count") {
+
+    return "回数を選べません。";
+
+  }
+
+  if (reason === "invalid_payment") {
+
+    return "支払い方法を選べません。";
+
+  }
+
+  if (reason === "insufficient_currency") {
+
+    if (
+      paymentType ===
+      BS_GACHA_CURRENCY.BS_PASS
+    ) {
+
+      return "BS PASSが足りません。";
+
+    }
+
+    if (
+      paymentType ===
+      BS_GACHA_CURRENCY.GYARA
+    ) {
+
+      return "ギャラが足りません。";
+
+    }
+
+    return "通貨が足りません。";
+
+  }
+
+  if (reason === "empty_pool") {
+
+    return "現在、引けるキャラがいません。";
+
+  }
+
+  if (reason === "guarantee_unavailable") {
+
+    return "現在は★3以上の候補がいないため、10連は引けません。";
+
+  }
+
+  return "抽選に失敗しました。";
+
+}
+
+
+function clearBsGachaMessage() {
+
+  if (!bsGachaMessage) {
+
+    return;
+
+  }
+
+  bsGachaMessage.hidden = true;
+
+  bsGachaMessage.textContent = "";
+
+}
+
+
+function showBsGachaMessage(text) {
+
+  if (!bsGachaMessage) {
+
+    return;
+
+  }
+
+  bsGachaMessage.textContent = text;
+
+  bsGachaMessage.hidden = false;
+
+}
+
+
+function isBsGachaPromptOpen() {
+
+  return !!(
+    bsGachaPromptEl &&
+    bsGachaPromptEl.hidden !== true
+  );
+
+}
+
+
+function closeBsGachaPrompt() {
+
+  bsGachaPrompt = null;
+
+  if (bsGachaPromptEl) {
+
+    bsGachaPromptEl.hidden = true;
+
+  }
+
+  if (bsGachaPayStep) {
+
+    bsGachaPayStep.hidden = false;
+
+  }
+
+  if (bsGachaConfirmStep) {
+
+    bsGachaConfirmStep.hidden = true;
+
+  }
+
+}
+
+
+function setBsGachaPayButton(
+  button,
+  label,
+  cost,
+  balance
+) {
+
+  if (!button) {
+
+    return;
+
+  }
+
+  if (cost == null) {
+
+    button.textContent = label;
+
+    button.disabled = true;
+
+    return;
+
+  }
+
+  button.textContent =
+    label + " " + String(cost);
+
+  button.disabled =
+    isBsGachaBusy ||
+    balance < cost;
+
+}
+
+
+function applyBsGachaPaymentAvailability() {
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  const count =
+    bsGachaPrompt &&
+    bsGachaPrompt.count;
+
+  const passCost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      BS_GACHA_CURRENCY.BS_PASS
+    );
+
+  const gyaraCost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      BS_GACHA_CURRENCY.GYARA
+    );
+
+  setBsGachaPayButton(
+    bsGachaPayPass,
+    "BS PASS",
+    passCost,
+    getBsPass()
+  );
+
+  setBsGachaPayButton(
+    bsGachaPayGyara,
+    "ギャラ",
+    gyaraCost,
+    getGyara()
+  );
+
+  if (bsGachaPayNote) {
+
+    bsGachaPayNote.textContent =
+      "所持 🎟 " +
+      String(getBsPass()) +
+      " / 💰 " +
+      String(getGyara());
+
+  }
+
+  if (bsGachaPayCancel) {
+
+    bsGachaPayCancel.disabled =
+      isBsGachaBusy;
+
+  }
+
+  if (bsGachaConfirmOk) {
+
+    bsGachaConfirmOk.disabled =
+      isBsGachaBusy;
+
+  }
+
+  if (bsGachaConfirmCancel) {
+
+    bsGachaConfirmCancel.disabled =
+      isBsGachaBusy;
+
+  }
+
+}
+
+
+function syncBsGachaControls() {
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  const bannerOff =
+    !banner ||
+    banner.enabled !== true;
+
+  const multiCount =
+    getBsGachaScreenMultiCount(banner);
+
+  if (bsGachaPull1) {
+
+    bsGachaPull1.disabled =
+      isBsGachaBusy ||
+      bannerOff;
+
+  }
+
+  if (bsGachaPull10) {
+
+    bsGachaPull10.disabled =
+      isBsGachaBusy ||
+      bannerOff ||
+      multiCount == null;
+
+  }
+
+  if (bsGachaBack) {
+
+    bsGachaBack.disabled =
+      isBsGachaBusy;
+
+  }
+
+  applyBsGachaPaymentAvailability();
+
+}
+
+
+function setBsGachaBusy(busy) {
+
+  isBsGachaBusy = !!busy;
+
+  syncBsGachaControls();
+
+}
+
+
+function renderBsGachaScreen() {
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  const multiCount =
+    getBsGachaScreenMultiCount(banner);
+
+  if (bsGachaTitle) {
+
+    bsGachaTitle.textContent =
+      banner && banner.title
+        ? banner.title
+        : "";
+
+  }
+
+  if (bsGachaPull1Label) {
+
+    bsGachaPull1Label.textContent =
+      "1回引く";
+
+  }
+
+  if (bsGachaPull10Label) {
+
+    bsGachaPull10Label.textContent =
+      multiCount == null
+        ? ""
+        : String(multiCount) + "回引く";
+
+  }
+
+  if (bsGachaCost1) {
+
+    bsGachaCost1.textContent =
+      banner
+        ? formatBsGachaCostLine(
+          banner,
+          1
+        )
+        : "";
+
+  }
+
+  if (bsGachaCost10) {
+
+    bsGachaCost10.textContent =
+      banner && multiCount != null
+        ? formatBsGachaCostLine(
+          banner,
+          multiCount
+        )
+        : "";
+
+  }
+
+  if (bsGachaGuarantee) {
+
+    const guarantee =
+      banner &&
+      banner.guarantee;
+
+    const minRarity =
+      guarantee &&
+      getBsGachaRarityStar(
+        guarantee.minRarity
+      );
+
+    if (
+      guarantee &&
+      guarantee.enabled === true &&
+      multiCount != null &&
+      minRarity != null
+    ) {
+
+      bsGachaGuarantee.textContent =
+        String(multiCount) +
+        "連の最後の1枠は★" +
+        String(minRarity) +
+        "以上";
+
+    } else {
+
+      bsGachaGuarantee.textContent =
+        "";
+
+    }
+
+  }
+
+  if (!banner) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        "invalid_banner"
+      )
+    );
+
+  } else if (banner.enabled !== true) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        "disabled_banner"
+      )
+    );
+
+  }
+
+  syncBsGachaControls();
+
+}
+
+
+function openBsGachaPayment(count) {
+
+  if (
+    isBsGachaBusy ||
+    !bsGachaPromptEl
+  ) {
+
+    return;
+
+  }
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  if (
+    !banner ||
+    banner.enabled !== true
+  ) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        banner
+          ? "disabled_banner"
+          : "invalid_banner"
+      )
+    );
+
+    return;
+
+  }
+
+  const multiCount =
+    getBsGachaScreenMultiCount(banner);
+
+  if (
+    count !== 1 &&
+    count !== multiCount
+  ) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        "invalid_count"
+      )
+    );
+
+    return;
+
+  }
+
+  bsGachaPrompt = {
+
+    count: count,
+
+    paymentType: null
+
+  };
+
+  if (bsGachaPayStep) {
+
+    bsGachaPayStep.hidden = false;
+
+  }
+
+  if (bsGachaConfirmStep) {
+
+    bsGachaConfirmStep.hidden = true;
+
+  }
+
+  applyBsGachaPaymentAvailability();
+
+  bsGachaPromptEl.hidden = false;
+
+}
+
+
+function buildBsGachaConfirmText(
+  count,
+  paymentType,
+  cost
+) {
+
+  if (
+    paymentType ===
+    BS_GACHA_CURRENCY.BS_PASS
+  ) {
+
+    return (
+      "BS PASSを" +
+      String(cost) +
+      "枚使って" +
+      String(count) +
+      "回引きますか？"
+    );
+
+  }
+
+  return (
+    "ギャラを" +
+    String(cost) +
+    "使って" +
+    String(count) +
+    "回引きますか？"
+  );
+
+}
+
+
+function openBsGachaConfirm(
+  count,
+  paymentType
+) {
+
+  if (
+    isBsGachaBusy ||
+    !bsGachaPrompt ||
+    bsGachaPrompt.count !== count
+  ) {
+
+    return;
+
+  }
+
+  if (
+    paymentType !==
+      BS_GACHA_CURRENCY.BS_PASS &&
+    paymentType !==
+      BS_GACHA_CURRENCY.GYARA
+  ) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        "invalid_payment",
+        paymentType
+      )
+    );
+
+    return;
+
+  }
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  const cost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      paymentType
+    );
+
+  if (cost == null) {
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        "invalid_payment",
+        paymentType
+      )
+    );
+
+    return;
+
+  }
+
+  bsGachaPrompt.paymentType =
+    paymentType;
+
+  if (bsGachaConfirmText) {
+
+    bsGachaConfirmText.textContent =
+      buildBsGachaConfirmText(
+        count,
+        paymentType,
+        cost
+      );
+
+  }
+
+  if (bsGachaPayStep) {
+
+    bsGachaPayStep.hidden = true;
+
+  }
+
+  if (bsGachaConfirmStep) {
+
+    bsGachaConfirmStep.hidden = false;
+
+  }
+
+  if (bsGachaPromptEl) {
+
+    bsGachaPromptEl.hidden = false;
+
+  }
+
+}
+
+
+function handoffBsGachaPull(outcome) {
+
+  bsGachaLastOutcome = outcome;
+
+  updateBsPassDisplay();
+
+  updateGyaraDisplay();
+
+  closeBsGachaPrompt();
+
+  setBsGachaBusy(false);
+
+  showBsGachaMessage("抽選完了");
+
+}
+
+
+function confirmBsGachaPull() {
+
+  if (isBsGachaBusy) {
+
+    return;
+
+  }
+
+  const prompt = bsGachaPrompt;
+
+  if (
+    !prompt ||
+    !prompt.paymentType
+  ) {
+
+    return;
+
+  }
+
+  const banner =
+    getBsGachaScreenBanner();
+
+  const count = prompt.count;
+
+  const paymentType =
+    prompt.paymentType;
+
+  bsGachaPrompt = null;
+
+  if (
+    !banner ||
+    banner.enabled !== true
+  ) {
+
+    closeBsGachaPrompt();
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        banner
+          ? "disabled_banner"
+          : "invalid_banner",
+        paymentType
+      )
+    );
+
+    return;
+
+  }
+
+  setBsGachaBusy(true);
+
+  let outcome = null;
+
+  try {
+
+    outcome =
+      executeBsGachaPull(
+        banner.id,
+        count,
+        paymentType
+      );
+
+  } catch (error) {
+
+    outcome = null;
+
+  }
+
+  if (
+    !outcome ||
+    outcome.ok !== true
+  ) {
+
+    closeBsGachaPrompt();
+
+    showBsGachaMessage(
+      getBsGachaFailureMessage(
+        outcome && outcome.reason,
+        paymentType
+      )
+    );
+
+    updateBsPassDisplay();
+
+    updateGyaraDisplay();
+
+    setBsGachaBusy(false);
+
+    return;
+
+  }
+
+  handoffBsGachaPull(outcome);
+
+}
+
+
+function openBsGacha() {
+
+  if (!bsGachaScreen) {
+
+    return;
+
+  }
+
+  isBsGachaBusy = false;
+
+  closeBsGachaPrompt();
+
+  clearBsGachaMessage();
+
+  renderBsGachaScreen();
+
+  updateBsPassDisplay();
+
+  updateGyaraDisplay();
+
+  showScreen(bsGachaScreen);
+
+}
+
+
+function closeBsGacha() {
+
+  if (isBsGachaBusy) {
+
+    return;
+
+  }
+
+  closeBsGachaPrompt();
+
+  clearBsGachaMessage();
+
+  openGachaLobby();
+
+}
+
+
+function handleBsGachaBack() {
+
+  if (isBsGachaBusy) {
+
+    return;
+
+  }
+
+  if (isBsGachaPromptOpen()) {
+
+    closeBsGachaPrompt();
+
+    return;
+
+  }
+
+  closeBsGacha();
+
+}
+
+
+if (bsGachaBack) {
+
+  bsGachaBack.addEventListener(
+    "click",
+    () => {
+
+      handleBsGachaBack();
+
+    }
+  );
+
+}
+
+
+if (bsGachaPull1) {
+
+  bsGachaPull1.addEventListener(
+    "click",
+    () => {
+
+      openBsGachaPayment(1);
+
+    }
+  );
+
+}
+
+
+if (bsGachaPull10) {
+
+  bsGachaPull10.addEventListener(
+    "click",
+    () => {
+
+      const banner =
+        getBsGachaScreenBanner();
+
+      openBsGachaPayment(
+        getBsGachaScreenMultiCount(
+          banner
+        )
+      );
+
+    }
+  );
+
+}
+
+
+if (bsGachaPayPass) {
+
+  bsGachaPayPass.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !bsGachaPrompt ||
+        bsGachaPayPass.disabled
+      ) {
+
+        return;
+
+      }
+
+      openBsGachaConfirm(
+        bsGachaPrompt.count,
+        BS_GACHA_CURRENCY.BS_PASS
+      );
+
+    }
+  );
+
+}
+
+
+if (bsGachaPayGyara) {
+
+  bsGachaPayGyara.addEventListener(
+    "click",
+    () => {
+
+      if (
+        !bsGachaPrompt ||
+        bsGachaPayGyara.disabled
+      ) {
+
+        return;
+
+      }
+
+      openBsGachaConfirm(
+        bsGachaPrompt.count,
+        BS_GACHA_CURRENCY.GYARA
+      );
+
+    }
+  );
+
+}
+
+
+if (bsGachaPayCancel) {
+
+  bsGachaPayCancel.addEventListener(
+    "click",
+    () => {
+
+      if (isBsGachaBusy) {
+
+        return;
+
+      }
+
+      closeBsGachaPrompt();
+
+    }
+  );
+
+}
+
+
+if (bsGachaConfirmOk) {
+
+  bsGachaConfirmOk.addEventListener(
+    "click",
+    () => {
+
+      confirmBsGachaPull();
+
+    }
+  );
+
+}
+
+
+if (bsGachaConfirmCancel) {
+
+  bsGachaConfirmCancel.addEventListener(
+    "click",
+    () => {
+
+      if (
+        isBsGachaBusy ||
+        !bsGachaPrompt
+      ) {
+
+        return;
+
+      }
+
+      openBsGachaPayment(
+        bsGachaPrompt.count
+      );
+
+    }
+  );
 
 }
 

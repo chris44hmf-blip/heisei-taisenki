@@ -75,6 +75,14 @@ h3,
 .doritike-gacha-tickets,
 .doritike-gacha-desc,
 .doritike-gacha-message,
+.bs-gacha-balance,
+.bs-gacha-guarantee,
+.bs-gacha-message,
+.bs-gacha-pull,
+.bs-gacha-prompt-title,
+.bs-gacha-pay-note,
+.bs-gacha-prompt-button,
+.bs-gacha-confirm-text,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,
@@ -1360,6 +1368,414 @@ h2 {
   .doritike-gacha-pull,
   .doritike-gacha-result-back {
     min-height: clamp(44px, 12vh, 58px);
+  }
+
+}
+
+
+/* =========================
+   BS GACHA
+========================= */
+
+#bs-gacha-screen {
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background:
+    linear-gradient(
+      to bottom,
+      #1a1c22 0%,
+      #101216 52%,
+      #07080a 100%
+    );
+}
+
+.bs-gacha-header {
+  position: relative;
+
+  z-index: 6;
+
+  height: auto;
+
+  min-height: 52px;
+
+  padding-top:
+    max(4px, env(safe-area-inset-top, 0px));
+
+  padding-left:
+    max(3vw, env(safe-area-inset-left, 0px));
+
+  padding-right:
+    max(3vw, env(safe-area-inset-right, 0px));
+
+  background: #0c0d11;
+
+  border-bottom-color: #3d4250;
+}
+
+.bs-gacha-header h3 {
+  font-size: clamp(16px, 2.6vw, 30px);
+
+  line-height: 1.15;
+}
+
+#bs-gacha-back {
+  min-height: 44px;
+
+  box-sizing: border-box;
+}
+
+.bs-gacha-body {
+  position: relative;
+
+  flex: 1;
+
+  min-height: 0;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow-x: hidden;
+
+  overflow-y: auto;
+
+  padding:
+    max(8px, env(safe-area-inset-top, 0px))
+    max(4vw, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(4vw, env(safe-area-inset-left, 0px));
+
+  box-sizing: border-box;
+}
+
+.bs-gacha-message {
+  flex: 0 0 auto;
+
+  margin: 0 0 clamp(6px, 1vh, 10px);
+
+  min-height: 1.3em;
+
+  color: #d7c4a2;
+
+  font-size: clamp(12px, 1.7vw, 15px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.35;
+
+  text-align: center;
+}
+
+.bs-gacha-message[hidden] {
+  display: none;
+}
+
+.bs-gacha-main {
+  flex: 1 0 auto;
+
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: clamp(8px, 1.8vh, 16px);
+
+  width: min(100%, 560px);
+
+  margin: 0 auto;
+
+  padding:
+    clamp(12px, 2.4vh, 22px)
+    clamp(12px, 2.4vw, 20px);
+
+  border: 2px solid #4a5160;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #232833 0%,
+      #141820 58%,
+      #0c0e13 100%
+    );
+
+  box-sizing: border-box;
+
+  text-align: center;
+}
+
+.bs-gacha-balances {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  gap: clamp(8px, 2vw, 18px);
+
+  width: 100%;
+}
+
+.bs-gacha-balance {
+  margin: 0;
+
+  min-width: 0;
+
+  color: #e7ebf2;
+
+  font-size: clamp(16px, 2.8vw, 26px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.2;
+}
+
+.bs-gacha-guarantee {
+  margin: 0;
+
+  max-width: 100%;
+
+  color: #b7c0d0;
+
+  font-size: clamp(12px, 1.8vw, 16px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.35;
+
+  overflow-wrap: anywhere;
+}
+
+.bs-gacha-actions,
+.bs-gacha-prompt-actions {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  align-items: stretch;
+
+  justify-content: center;
+
+  gap: clamp(8px, 1.6vw, 14px);
+
+  width: 100%;
+}
+
+.bs-gacha-pull,
+.bs-gacha-prompt-button {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 4px;
+
+  min-width: min(100%, 148px);
+
+  min-height: 44px;
+
+  padding:
+    clamp(8px, 1.4vh, 12px)
+    clamp(10px, 1.8vw, 16px);
+
+  border: 2px solid #667084;
+
+  border-radius: 4px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #323846 0%,
+      #1a1e28 100%
+    );
+
+  color: #eef1f6;
+
+  font-size: clamp(14px, 2vw, 18px);
+
+  letter-spacing: 0.05em;
+
+  line-height: 1.25;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  box-sizing: border-box;
+}
+
+.bs-gacha-pull {
+  min-height: clamp(48px, 10vh, 72px);
+}
+
+.bs-gacha-pull:active,
+.bs-gacha-prompt-button:active {
+  transform: scale(0.98);
+
+  filter: brightness(1.08);
+}
+
+.bs-gacha-pull:disabled,
+.bs-gacha-prompt-button:disabled {
+  opacity: 0.45;
+
+  cursor: default;
+
+  transform: none;
+
+  filter: none;
+}
+
+.bs-gacha-pull-label {
+  font-weight: 700;
+}
+
+.bs-gacha-pull-cost {
+  color: #c5cedb;
+
+  font-size: clamp(11px, 1.5vw, 13px);
+
+  letter-spacing: 0.03em;
+
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
+}
+
+.bs-gacha-prompt {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 5;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding:
+    max(8px, env(safe-area-inset-top, 0px))
+    max(4vw, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(4vw, env(safe-area-inset-left, 0px));
+
+  background: rgba(4, 6, 10, 0.72);
+
+  box-sizing: border-box;
+}
+
+.bs-gacha-prompt[hidden] {
+  display: none;
+}
+
+.bs-gacha-prompt-panel {
+  width: min(100%, 420px);
+
+  max-height: 100%;
+
+  overflow: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: clamp(8px, 1.6vh, 12px);
+
+  padding:
+    clamp(12px, 2vh, 18px)
+    clamp(12px, 2vw, 16px);
+
+  border: 2px solid #667084;
+
+  border-radius: 6px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2a303c 0%,
+      #141820 100%
+    );
+
+  box-sizing: border-box;
+}
+
+.bs-gacha-prompt-step[hidden] {
+  display: none;
+}
+
+.bs-gacha-prompt-title,
+.bs-gacha-confirm-text,
+.bs-gacha-pay-note {
+  margin: 0;
+
+  text-align: center;
+
+  overflow-wrap: anywhere;
+}
+
+.bs-gacha-prompt-title {
+  color: #f2f4f8;
+
+  font-size: clamp(16px, 2.4vw, 22px);
+
+  letter-spacing: 0.12em;
+}
+
+.bs-gacha-pay-note,
+.bs-gacha-confirm-text {
+  color: #d5dbe6;
+
+  font-size: clamp(13px, 1.9vw, 17px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.45;
+}
+
+.bs-gacha-prompt-cancel {
+  border-color: #555d6c;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2a2e38 0%,
+      #16181e 100%
+    );
+}
+
+@media (max-height: 400px) {
+
+  .bs-gacha-header {
+    min-height: 44px;
+  }
+
+  .bs-gacha-main {
+    gap: 6px;
+
+    padding:
+      8px
+      10px;
+  }
+
+  .bs-gacha-pull {
+    min-height: 44px;
   }
 
 }
@@ -6463,6 +6879,14 @@ h3,
 .doritike-gacha-tickets,
 .doritike-gacha-desc,
 .doritike-gacha-message,
+.bs-gacha-balance,
+.bs-gacha-guarantee,
+.bs-gacha-message,
+.bs-gacha-pull,
+.bs-gacha-prompt-title,
+.bs-gacha-pay-note,
+.bs-gacha-prompt-button,
+.bs-gacha-confirm-text,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,

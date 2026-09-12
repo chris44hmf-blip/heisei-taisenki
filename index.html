@@ -527,6 +527,184 @@
 
 </section>
 
+<section
+  id="bs-gacha-screen"
+  class="screen"
+>
+
+  <header class="training-header bs-gacha-header">
+
+    <button
+      id="bs-gacha-back"
+      class="back-button"
+      type="button"
+    >
+      ← 戻る
+    </button>
+
+    <div>
+      <h3 id="bs-gacha-title"></h3>
+      <p>── BACKSTAGE ──</p>
+    </div>
+
+    <div></div>
+
+  </header>
+
+  <div class="bs-gacha-body">
+
+    <p
+      id="bs-gacha-message"
+      class="bs-gacha-message"
+      hidden
+    ></p>
+
+    <div class="bs-gacha-main">
+
+      <div class="bs-gacha-balances">
+
+        <p class="bs-gacha-balance">
+          🎟 ×<span id="bs-gacha-pass">0</span>
+        </p>
+
+        <p class="bs-gacha-balance">
+          💰 ×<span id="bs-gacha-gyara">0</span>
+        </p>
+
+      </div>
+
+      <p
+        id="bs-gacha-guarantee"
+        class="bs-gacha-guarantee"
+      ></p>
+
+      <div class="bs-gacha-actions">
+
+        <button
+          id="bs-gacha-pull-1"
+          class="bs-gacha-pull"
+          type="button"
+        >
+          <span
+            id="bs-gacha-pull-1-label"
+            class="bs-gacha-pull-label"
+          ></span>
+          <small
+            id="bs-gacha-cost-1"
+            class="bs-gacha-pull-cost"
+          ></small>
+        </button>
+
+        <button
+          id="bs-gacha-pull-10"
+          class="bs-gacha-pull"
+          type="button"
+        >
+          <span
+            id="bs-gacha-pull-10-label"
+            class="bs-gacha-pull-label"
+          ></span>
+          <small
+            id="bs-gacha-cost-10"
+            class="bs-gacha-pull-cost"
+          ></small>
+        </button>
+
+      </div>
+
+    </div>
+
+    <div
+      id="bs-gacha-prompt"
+      class="bs-gacha-prompt"
+      role="dialog"
+      aria-modal="true"
+      hidden
+    >
+
+      <div class="bs-gacha-prompt-panel">
+
+        <div
+          id="bs-gacha-pay-step"
+          class="bs-gacha-prompt-step"
+        >
+
+          <p class="bs-gacha-prompt-title">
+            支払い方法
+          </p>
+
+          <p
+            id="bs-gacha-pay-note"
+            class="bs-gacha-pay-note"
+          ></p>
+
+          <div class="bs-gacha-prompt-actions">
+
+            <button
+              id="bs-gacha-pay-pass"
+              class="bs-gacha-prompt-button"
+              type="button"
+            ></button>
+
+            <button
+              id="bs-gacha-pay-gyara"
+              class="bs-gacha-prompt-button"
+              type="button"
+            ></button>
+
+            <button
+              id="bs-gacha-pay-cancel"
+              class="bs-gacha-prompt-button bs-gacha-prompt-cancel"
+              type="button"
+            >
+              キャンセル
+            </button>
+
+          </div>
+
+        </div>
+
+        <div
+          id="bs-gacha-confirm-step"
+          class="bs-gacha-prompt-step"
+          hidden
+        >
+
+          <p
+            id="bs-gacha-confirm-text"
+            class="bs-gacha-confirm-text"
+          ></p>
+
+          <div class="bs-gacha-prompt-actions">
+
+            <button
+              id="bs-gacha-confirm-ok"
+              class="bs-gacha-prompt-button"
+              type="button"
+            >
+              引く
+            </button>
+
+            <button
+              id="bs-gacha-confirm-cancel"
+              class="bs-gacha-prompt-button bs-gacha-prompt-cancel"
+              type="button"
+            >
+              戻る
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
 <section id="enhance-screen" class="screen">
 
   <header class="training-header">
