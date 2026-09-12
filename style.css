@@ -2874,31 +2874,40 @@ h2 {
 
 
 /* =========================
-   DORITIKE GACHA ANIMATION
+   DORITIKE GACHA PRESENTATION
+   Canva scene: images/gacha/doritike_counter_bg.png
 ========================= */
 
+#doritike-gacha-screen {
+  overflow: hidden;
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-header,
+#doritike-gacha-screen.is-presenting .doritike-gacha-main,
+#doritike-gacha-screen.is-presenting .doritike-gacha-message {
+  visibility: hidden;
+
+  pointer-events: none;
+}
+
 .doritike-gacha-animation {
-  flex: 1;
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 4;
 
   min-height: 0;
 
-  display: flex;
+  overflow: hidden;
 
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: clamp(6px, 1.2vh, 10px);
-
-  width: 100%;
+  background: #070605;
 
   user-select: none;
 
   -webkit-user-select: none;
 
-  cursor: pointer;
+  cursor: default;
 
   touch-action: manipulation;
 }
@@ -2907,623 +2916,548 @@ h2 {
   display: none;
 }
 
-.doritike-anim-stage {
-  position: relative;
-
-  width: min(100%, 520px);
-
-  height: min(58vh, 280px);
-
-  min-height: 180px;
-
-  overflow: hidden;
-
-  border: 3px solid #3a3428;
-
-  background: #12100c;
-
-  box-sizing: border-box;
-}
-
-.doritike-anim-counter {
-  position: absolute;
-
-  left: 8%;
-
-  right: 8%;
-
-  bottom: 18%;
-
-  height: 42%;
-}
-
-.doritike-anim-counter-top {
-  position: absolute;
-
-  left: 0;
-
-  right: 0;
-
-  top: 0;
-
-  height: 18%;
-
-  background: #5a4a2e;
-
-  border-bottom: 3px solid #2a2214;
-}
-
-.doritike-anim-counter-face {
-  position: absolute;
-
-  left: 0;
-
-  right: 0;
-
-  top: 18%;
-
-  height: 34%;
-
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      #3a3020 0 6px,
-      #2e2618 6px 12px
-    );
-
-  border-bottom: 3px solid #1a150e;
-}
-
-.doritike-anim-under {
-  position: absolute;
-
-  left: 6%;
-
-  right: 6%;
-
-  top: 52%;
-
-  bottom: 0;
-
-  background: #0a0907;
-
-  border: 2px solid #1f1a12;
-
-  overflow: hidden;
-}
-
-.doritike-anim-shadow {
-  position: absolute;
-
-  left: 42%;
-
-  top: 28%;
-
-  width: 18px;
-
-  height: 12px;
-
-  background: #1c1810;
-
-  border: 2px solid #0f0d09;
-
-  opacity: 0;
-
-  transform: translateX(0);
-}
-
-.doritike-anim-rummage-text {
-  position: absolute;
-
-  left: 0;
-
-  right: 0;
-
-  bottom: 8%;
-
-  color: #8a7a55;
-
-  font-size: clamp(10px, 1.6vw, 13px);
-
-  letter-spacing: 0.12em;
-
-  text-align: center;
-
-  opacity: 0;
-}
-
-.doritike-anim-ticket {
-  position: absolute;
-
-  left: 18%;
-
-  bottom: 52%;
-
-  width: 34px;
-
-  height: 20px;
-
-  opacity: 0;
-
-  transform: translate(0, 0);
-
-  z-index: 3;
-}
-
-.doritike-anim-ticket-body {
+.doritike-scene,
+.doritike-scene-bg,
+.doritike-scene-box,
+.doritike-scene-hand,
+.doritike-scene-ticket,
+.doritike-scene-flash,
+.doritike-scene-spot {
   position: absolute;
 
   inset: 0;
-
-  background: #c8b878;
-
-  border: 2px solid #3a3420;
-
-  box-shadow:
-    inset 0 0 0 2px #e4d9a4;
-}
-
-.doritike-anim-ticket-stripe {
-  position: absolute;
-
-  left: 4px;
-
-  right: 4px;
-
-  top: 6px;
-
-  height: 4px;
-
-  background: #6a5530;
-
-  border: 1px solid #2a2214;
-}
-
-.doritike-anim-ticket-stack,
-.doritike-anim-ticket-stack-b {
-  display: none;
-
-  position: absolute;
-
-  inset: 0;
-
-  background: #b8a868;
-
-  border: 2px solid #3a3420;
-
-  z-index: -1;
-}
-
-.doritike-gacha-animation.is-x10 .doritike-anim-ticket {
-  width: 40px;
-
-  height: 24px;
-}
-
-.doritike-gacha-animation.is-x10 .doritike-anim-ticket-stack {
-  display: block;
-
-  transform: translate(3px, -3px);
-}
-
-.doritike-gacha-animation.is-x10 .doritike-anim-ticket-stack-b {
-  display: block;
-
-  transform: translate(6px, -6px);
-
-  background: #a89858;
-}
-
-.doritike-anim-hand {
-  position: absolute;
-
-  right: 10%;
-
-  bottom: 48%;
-
-  width: 36px;
-
-  height: 28px;
-
-  opacity: 0;
-
-  transform: translateX(28px);
-
-  z-index: 4;
-}
-
-.doritike-anim-hand-arm {
-  position: absolute;
-
-  right: 0;
-
-  top: 8px;
-
-  width: 22px;
-
-  height: 10px;
-
-  background: #4a4030;
-
-  border: 2px solid #1a1610;
-}
-
-.doritike-anim-hand-palm {
-  position: absolute;
-
-  left: 0;
-
-  top: 4px;
-
-  width: 16px;
-
-  height: 14px;
-
-  background: #5a4e3a;
-
-  border: 2px solid #1a1610;
-}
-
-.doritike-anim-hand-finger,
-.doritike-anim-hand-finger-b {
-  position: absolute;
-
-  left: -4px;
-
-  top: 2px;
-
-  width: 8px;
-
-  height: 6px;
-
-  background: #5a4e3a;
-
-  border: 2px solid #1a1610;
-}
-
-.doritike-anim-hand-finger-b {
-  top: 12px;
-}
-
-.doritike-anim-reward {
-  position: absolute;
-
-  left: 46%;
-
-  bottom: 52%;
-
-  opacity: 0;
-
-  transform: translateY(12px);
-
-  z-index: 3;
 
   pointer-events: none;
 }
 
-.doritike-anim-reward-multi {
-  left: 40%;
+.doritike-scene-bg {
+  background:
+    url("images/gacha/doritike_counter_bg.png")
+    center 42% / cover
+    no-repeat;
 
-  display: none;
+  transform-origin: 50% 42%;
+}
+
+.doritike-scene-box {
+  inset: auto;
+
+  left: 13%;
+
+  top: 58%;
+
+  width: 16%;
+
+  height: 18%;
+
+  border-radius: 4px;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0, 0, 0, 0.28) 0%,
+      rgba(0, 0, 0, 0) 72%
+    );
+
+  opacity: 0;
+}
+
+.doritike-scene-hand {
+  inset: auto;
+
+  left: 44%;
+
+  top: 64%;
+
+  width: 64px;
+
+  height: 14px;
+
+  border-radius: 8px 3px 3px 8px;
+
+  background: #6d5c4c;
+
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.35);
+
+  opacity: 0;
+
+  transform: translate(8px, -4px);
+}
+
+.doritike-scene-hand::before {
+  content: "";
+
+  position: absolute;
+
+  left: -10px;
+
+  top: 2px;
+
+  width: 14px;
+
+  height: 12px;
+
+  border-radius: 4px;
+
+  background: #4a4036;
+}
+
+.doritike-scene-ticket {
+  inset: auto;
+
+  left: 42%;
+
+  bottom: 8%;
 
   width: 72px;
 
-  height: 28px;
-}
-
-.doritike-gacha-animation.is-x10 .doritike-anim-reward-single {
-  display: none;
-}
-
-.doritike-gacha-animation.is-x10 .doritike-anim-reward-multi {
-  display: block;
-}
-
-.doritike-anim-parcel {
-  display: block;
-
-  width: 22px;
-
-  height: 18px;
-
-  background: #6a5a38;
-
-  border: 2px solid #1e1810;
-
-  box-shadow:
-    inset 0 0 0 2px #8a7448;
-}
-
-.doritike-anim-parcel-b,
-.doritike-anim-parcel-c {
-  position: absolute;
-
-  top: 0;
-}
-
-.doritike-anim-parcel-b {
-  left: 20px;
-
-  background: #5a4a30;
-}
-
-.doritike-anim-parcel-c {
-  left: 40px;
-
-  top: 4px;
-
-  background: #7a6840;
-}
-
-.doritike-anim-line-box {
-  position: absolute;
-
-  left: 6%;
-
-  right: 6%;
-
-  bottom: 4%;
-
-  min-height: 34px;
-
-  padding: 6px 8px;
-
-  border: 3px solid #d8d0b8;
-
-  background: #10100c;
-
-  box-shadow:
-    inset 0 0 0 2px #3a3828;
+  height: 36px;
 
   opacity: 0;
+
+  transform: translateY(16px);
+}
+
+.doritike-scene-ticket-card {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 1px solid #6a5a34;
+
+  border-radius: 3px;
+
+  background: #d7c48a;
+
+  color: #2a2418;
+
+  font-size: 9px;
+
+  letter-spacing: 0.12em;
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.28);
+}
+
+.doritike-scene-ticket-card.is-back,
+.doritike-scene-ticket-card.is-mid {
+  display: none;
+
+  background: #c2ae78;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-scene-ticket-card.is-mid,
+.doritike-gacha-animation.is-x10 .doritike-scene-ticket-card.is-back {
+  display: flex;
+}
+
+.doritike-gacha-animation.is-x10 .doritike-scene-ticket-card.is-mid {
+  transform: translate(4px, -4px);
+}
+
+.doritike-gacha-animation.is-x10 .doritike-scene-ticket-card.is-back {
+  transform: translate(8px, -8px);
+
+  background: #b39d68;
+}
+
+.doritike-scene-rummage {
+  position: absolute;
+
+  left: 17%;
+
+  top: 63%;
+
+  margin: 0;
+
+  color: rgba(232, 214, 170, 0.88);
+
+  font-size: 12px;
+
+  letter-spacing: 0.16em;
+
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.doritike-scene-flash,
+.doritike-scene-spot {
+  opacity: 0;
+}
+
+.doritike-scene-line {
+  position: absolute;
+
+  left: max(12px, env(safe-area-inset-left, 0px));
+
+  top: max(10px, env(safe-area-inset-top, 0px));
+
+  z-index: 6;
+
+  width: min(240px, 36%);
+
+  margin: 0;
+
+  padding: 7px 10px;
+
+  border: 1px solid rgba(232, 220, 190, 0.28);
+
+  border-radius: 3px;
+
+  background: rgba(12, 10, 8, 0.72);
+
+  color: #f3ecdc;
+
+  font-size: clamp(12px, 1.7vw, 15px);
+
+  letter-spacing: 0.06em;
+
+  line-height: 1.35;
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  box-sizing: border-box;
+}
+
+.doritike-scene-tap {
+  position: absolute;
+
+  left: max(14px, env(safe-area-inset-left, 0px));
+
+  bottom: max(14px, env(safe-area-inset-bottom, 0px));
+
+  z-index: 7;
+
+  margin: 0;
+
+  color: rgba(243, 236, 220, 0.78);
+
+  font-size: 11px;
+
+  letter-spacing: 0.14em;
+
+  opacity: 0;
+
+  pointer-events: none;
+}
+
+.doritike-gacha-animation.phase-line .doritike-scene-ticket,
+#doritike-gacha-screen.is-ready .doritike-scene-ticket,
+.doritike-gacha-animation.phase-line .doritike-scene-hand,
+#doritike-gacha-screen.is-ready .doritike-scene-hand,
+#doritike-gacha-screen.is-ready .doritike-scene-rummage {
+  opacity: 0;
+}
+
+#doritike-gacha-screen.is-ready .doritike-scene-tap,
+.doritike-gacha-animation.phase-line .doritike-scene-line,
+#doritike-gacha-screen.is-ready .doritike-scene-line {
+  opacity: 1;
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result {
+  position: absolute;
+
+  left: 0;
+
+  right: 0;
+
+  top: 48%;
+
+  bottom: 0;
 
   z-index: 5;
 
-  box-sizing: border-box;
-}
+  display: flex;
 
-.doritike-anim-line-text {
-  margin: 0;
+  flex-direction: column;
 
-  color: #f2eee0;
+  justify-content: flex-end;
 
-  font-size: clamp(13px, 2.1vw, 17px);
+  gap: 6px;
 
-  letter-spacing: 0.06em;
+  padding:
+    0
+    max(12px, env(safe-area-inset-right, 0px))
+    max(8px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px));
 
-  line-height: 1.35;
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.34) 0%,
+      rgba(0, 0, 0, 0.08) 46%,
+      rgba(0, 0, 0, 0) 100%
+    );
 
-  white-space: pre-wrap;
-}
-
-.doritike-anim-skip {
-  flex: 0 0 auto;
-
-  color: #9a9078;
-
-  font-size: clamp(10px, 1.5vw, 12px);
-
-  letter-spacing: 0.14em;
-}
-
-.doritike-gacha-result-line {
-  flex: 0 0 auto;
-
-  width: min(100%, 560px);
-
-  margin: 0 auto clamp(6px, 1vh, 10px);
-
-  padding: 6px 8px;
-
-  border: 3px solid #d8d0b8;
-
-  background: #10100c;
-
-  box-shadow:
-    inset 0 0 0 2px #3a3828;
-
-  color: #f2eee0;
-
-  font-size: clamp(12px, 1.9vw, 15px);
-
-  letter-spacing: 0.06em;
-
-  line-height: 1.35;
+  pointer-events: none;
 
   box-sizing: border-box;
 }
 
-.doritike-gacha-result-line[hidden] {
+#doritike-gacha-screen.is-presenting .doritike-gacha-result[hidden] {
   display: none;
 }
 
-/* phase visibility / stepped motion */
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-line {
+  display: none;
+}
 
-.doritike-gacha-animation.phase-ticket-in .doritike-anim-ticket {
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-list {
+  pointer-events: none;
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-actions {
+  pointer-events: auto;
+}
+
+#doritike-gacha-screen.is-presenting:not(.is-ready) .doritike-gacha-result-actions {
+  visibility: hidden;
+
+  pointer-events: none;
+}
+
+#doritike-gacha-screen.is-presenting:not(.is-x10) .doritike-gacha-result-list {
+  display: flex;
+
+  flex-direction: row;
+
+  justify-content: center;
+
+  align-items: flex-end;
+
+  width: 100%;
+
+  margin: 0 auto 4px;
+
+  padding: 0;
+
+  overflow: hidden;
+}
+
+#doritike-gacha-screen.is-presenting:not(.is-x10) .doritike-gacha-result-item {
+  width: min(300px, 54%);
+
+  min-height: 74px;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  font-size: clamp(16px, 2.3vw, 22px);
+
+  background: rgba(14, 11, 8, 0.84);
+
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.32);
+}
+
+#doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-list {
+  display: grid;
+
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+
+  gap: 4px;
+
+  width: 100%;
+
+  max-height: none;
+
+  margin: 0;
+
+  padding: 0;
+
+  overflow: hidden;
+}
+
+#doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-item {
+  min-width: 0;
+
+  flex-direction: column;
+
+  align-items: flex-start;
+
+  gap: 1px;
+
+  padding: 4px 5px;
+
+  font-size: 11px;
+
+  line-height: 1.25;
+
+  background: rgba(14, 11, 8, 0.86);
+}
+
+#doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-name,
+#doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-amount,
+#doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-jackpot {
+  width: 100%;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-actions {
+  justify-content: flex-end;
+
+  padding-top: 0;
+
+  padding-bottom: 2px;
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-item.is-good {
+  box-shadow:
+    0 0 16px rgba(255, 255, 255, 0.22);
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-item.is-jackpot .doritike-gacha-result-amount {
+  color: #f0c56a;
+
+  text-shadow:
+    0 0 8px rgba(240, 180, 70, 0.55);
+}
+
+#doritike-gacha-screen.is-presenting .doritike-gacha-result-item.is-encore {
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 0 18px rgba(255, 255, 255, 0.16);
+}
+
+.doritike-gacha-animation.phase-ticket .doritike-scene-ticket,
+.doritike-gacha-animation.phase-look .doritike-scene-ticket,
+.doritike-gacha-animation.phase-hand .doritike-scene-ticket {
   opacity: 1;
-
-  animation:
-    doritike-ticket-pop 180ms steps(3, end) both;
 }
 
-.doritike-gacha-animation.phase-ticket-move .doritike-anim-ticket {
-  opacity: 1;
-
-  animation:
-    doritike-ticket-move 280ms steps(4, end) both;
+.doritike-gacha-animation.phase-ticket .doritike-scene-ticket {
+  animation: doritike-ticket-in 380ms ease-out both;
 }
 
-.doritike-gacha-animation.is-x10.phase-ticket-move .doritike-anim-ticket {
-  animation-name: doritike-ticket-move-x10;
+.doritike-gacha-animation.phase-look .doritike-scene-bg {
+  animation: doritike-look 320ms ease-out both;
 }
 
-.doritike-gacha-animation.phase-hand .doritike-anim-ticket {
-  opacity: 1;
-
-  transform: translate(42%, -8%);
+.doritike-gacha-animation.phase-look .doritike-scene-ticket {
+  transform: translate(-8%, -42%);
 }
 
-.doritike-gacha-animation.is-x10.phase-hand .doritike-anim-ticket {
-  transform: translate(36%, -6%);
-}
-
-.doritike-gacha-animation.phase-hand .doritike-anim-hand {
-  opacity: 1;
-
-  animation:
-    doritike-hand-in 220ms steps(3, end) both;
-}
-
-.doritike-gacha-animation.phase-take .doritike-anim-ticket {
+.doritike-gacha-animation.phase-hand .doritike-scene-ticket {
   opacity: 0;
 }
 
-.doritike-gacha-animation.phase-take .doritike-anim-hand {
+.doritike-gacha-animation.phase-hand .doritike-scene-hand,
+.doritike-gacha-animation.phase-rummage .doritike-scene-hand,
+.doritike-gacha-animation.phase-rummage-b .doritike-scene-hand,
+.doritike-gacha-animation.phase-hold .doritike-scene-hand {
+  opacity: 0.95;
+}
+
+.doritike-gacha-animation.phase-rummage .doritike-scene-hand,
+.doritike-gacha-animation.phase-rummage-b .doritike-scene-hand,
+.doritike-gacha-animation.phase-hold .doritike-scene-hand {
+  transform: translate(-110px, 6px);
+}
+
+.doritike-gacha-animation.phase-hand .doritike-scene-hand {
+  animation: doritike-hand-down 280ms ease-out both;
+}
+
+.doritike-gacha-animation.phase-rummage .doritike-scene-bg,
+.doritike-gacha-animation.phase-rummage-b .doritike-scene-bg {
+  animation: doritike-rummage 420ms ease-in-out infinite;
+}
+
+.doritike-gacha-animation.phase-rummage .doritike-scene-box,
+.doritike-gacha-animation.phase-rummage-b .doritike-scene-box {
   opacity: 1;
 
-  animation:
-    doritike-hand-out 220ms steps(3, end) both;
+  animation: doritike-box 280ms ease-in-out infinite;
 }
 
-.doritike-gacha-animation.phase-rummage .doritike-anim-shadow {
+.doritike-gacha-animation.phase-rummage .doritike-scene-rummage,
+.doritike-gacha-animation.phase-rummage-b .doritike-scene-rummage {
   opacity: 1;
-
-  animation:
-    doritike-rummage 420ms steps(4, end) infinite;
 }
 
-.doritike-gacha-animation.phase-rummage .doritike-anim-rummage-text {
-  opacity: 1;
-
-  animation:
-    doritike-rummage-blink 360ms steps(2, end) infinite;
-}
-
-.doritike-gacha-animation.is-x10.phase-rummage .doritike-anim-shadow {
-  animation-duration: 480ms;
-}
-
-.doritike-gacha-animation.phase-reward .doritike-anim-reward {
-  opacity: 1;
-
-  animation:
-    doritike-reward-drop 240ms steps(3, end) both;
-}
-
-.doritike-gacha-animation.phase-reward .doritike-anim-shadow,
-.doritike-gacha-animation.phase-reward .doritike-anim-rummage-text {
-  opacity: 0;
-
+.doritike-gacha-animation.phase-hold .doritike-scene-bg,
+.doritike-gacha-animation.phase-hold .doritike-scene-box,
+.doritike-gacha-animation.phase-hold .doritike-scene-rummage {
   animation: none;
 }
 
-.doritike-gacha-animation.phase-line .doritike-anim-reward {
-  opacity: 1;
-
-  transform: translateY(0);
+.doritike-gacha-animation.phase-hold .doritike-scene-rummage {
+  opacity: 0.35;
 }
 
-.doritike-gacha-animation.phase-line .doritike-anim-line-box {
-  opacity: 1;
+.doritike-gacha-animation.phase-return .doritike-scene-hand {
+  opacity: 0;
 
-  animation:
-    doritike-line-pop 160ms steps(2, end) both;
+  animation: doritike-hand-back 220ms ease-in both;
 }
 
-@keyframes doritike-ticket-pop {
+.doritike-gacha-animation.is-x10.phase-rummage .doritike-scene-bg,
+.doritike-gacha-animation.is-x10.phase-rummage-b .doritike-scene-bg {
+  animation-duration: 520ms;
+}
+
+#doritike-gacha-screen.is-tone-good .doritike-scene-flash {
+  background:
+    radial-gradient(
+      ellipse 28% 36% at 50% 68%,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0) 72%
+    );
+
+  animation: doritike-pop 280ms ease-out both;
+}
+
+#doritike-gacha-screen.is-tone-jackpot .doritike-scene-flash {
+  background:
+    radial-gradient(
+      ellipse 30% 38% at 50% 68%,
+      rgba(255, 196, 110, 0.4) 0%,
+      rgba(255, 196, 110, 0) 74%
+    );
+
+  animation: doritike-pop 320ms ease-out both;
+}
+
+#doritike-gacha-screen.is-tone-encore .doritike-scene-spot {
+  background:
+    radial-gradient(
+      ellipse 16% 28% at 50% 64%,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
+
+  animation: doritike-pop 420ms ease-out both;
+}
+
+@keyframes doritike-ticket-in {
   0% {
     opacity: 0;
-    transform: translate(0, 8px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes doritike-ticket-move {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(42%, -8%);
-  }
-}
-
-@keyframes doritike-ticket-move-x10 {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  100% {
-    transform: translate(36%, -6%);
-  }
-}
-
-@keyframes doritike-hand-in {
-  0% {
-    opacity: 0;
-    transform: translateX(28px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes doritike-hand-out {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(28px);
-  }
-}
-
-@keyframes doritike-rummage {
-  0% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-3px);
-  }
-
-  50% {
-    transform: translateX(2px);
-  }
-
-  75% {
-    transform: translateX(-2px);
-  }
-
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes doritike-rummage-blink {
-  0%,
-  49% {
-    opacity: 1;
-  }
-
-  50%,
-  100% {
-    opacity: 0.35;
-  }
-}
-
-@keyframes doritike-reward-drop {
-  0% {
-    opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(18px);
   }
 
   100% {
@@ -3532,58 +3466,135 @@ h2 {
   }
 }
 
-@keyframes doritike-line-pop {
+@keyframes doritike-look {
+  0% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1.035);
+  }
+}
+
+@keyframes doritike-hand-down {
+  0% {
+    opacity: 0;
+    transform: translate(18px, -8px);
+  }
+
+  100% {
+    opacity: 0.92;
+    transform: translate(-22%, 8px);
+  }
+}
+
+@keyframes doritike-hand-back {
+  0% {
+    opacity: 0.92;
+    transform: translate(-22%, 8px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(12px, -10px);
+  }
+}
+
+@keyframes doritike-rummage {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(2px);
+  }
+}
+
+@keyframes doritike-box {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  50% {
+    transform: translateX(-5px);
+  }
+}
+
+@keyframes doritike-pop {
   0% {
     opacity: 0;
   }
 
-  100% {
+  35% {
     opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
-@media (max-height: 380px) {
+@media (max-height: 400px) {
 
-  .doritike-anim-stage {
-    height: min(54vh, 210px);
+  .doritike-scene-line {
+    width: min(200px, 34%);
 
-    min-height: 150px;
+    padding: 4px 7px;
+
+    font-size: 11px;
   }
 
-  .doritike-anim-line-box {
-    min-height: 28px;
+  #doritike-gacha-screen.is-presenting:not(.is-x10) .doritike-gacha-result-item {
+    min-height: 56px;
 
-    padding: 4px 6px;
+    font-size: 15px;
+  }
+
+  #doritike-gacha-screen.is-presenting.is-x10 .doritike-gacha-result-item {
+    padding: 3px 4px;
+
+    font-size: 10px;
+  }
+
+  .doritike-scene-tap {
+    bottom: max(8px, env(safe-area-inset-bottom, 0px));
+
+    font-size: 10px;
   }
 
 }
 
 @media (prefers-reduced-motion: reduce) {
 
-  .doritike-gacha-animation.phase-ticket-in .doritike-anim-ticket,
-  .doritike-gacha-animation.phase-ticket-move .doritike-anim-ticket,
-  .doritike-gacha-animation.phase-hand .doritike-anim-hand,
-  .doritike-gacha-animation.phase-take .doritike-anim-hand,
-  .doritike-gacha-animation.phase-rummage .doritike-anim-shadow,
-  .doritike-gacha-animation.phase-rummage .doritike-anim-rummage-text,
-  .doritike-gacha-animation.phase-reward .doritike-anim-reward,
-  .doritike-gacha-animation.phase-line .doritike-anim-line-box {
-    animation-duration: 1ms !important;
-
-    animation-iteration-count: 1 !important;
+  .doritike-gacha-animation.phase-ticket .doritike-scene-ticket,
+  .doritike-gacha-animation.phase-look .doritike-scene-bg,
+  .doritike-gacha-animation.phase-hand .doritike-scene-hand,
+  .doritike-gacha-animation.phase-rummage .doritike-scene-bg,
+  .doritike-gacha-animation.phase-rummage-b .doritike-scene-bg,
+  .doritike-gacha-animation.phase-rummage .doritike-scene-box,
+  .doritike-gacha-animation.phase-rummage-b .doritike-scene-box,
+  .doritike-gacha-animation.phase-return .doritike-scene-hand,
+  #doritike-gacha-screen.is-tone-good .doritike-scene-flash,
+  #doritike-gacha-screen.is-tone-jackpot .doritike-scene-flash,
+  #doritike-gacha-screen.is-tone-encore .doritike-scene-spot {
+    animation: none !important;
   }
 
-  .doritike-gacha-animation.phase-hand .doritike-anim-ticket,
-  .doritike-gacha-animation.is-x10.phase-hand .doritike-anim-ticket {
-    transform: translate(30%, 0);
-  }
-
-  .doritike-gacha-animation.phase-rummage .doritike-anim-shadow {
+  .doritike-gacha-animation.phase-look .doritike-scene-bg,
+  .doritike-gacha-animation.phase-rummage .doritike-scene-bg,
+  .doritike-gacha-animation.phase-rummage-b .doritike-scene-bg {
     transform: none;
   }
 
-}
+  #doritike-gacha-screen.is-tone-good .doritike-scene-flash,
+  #doritike-gacha-screen.is-tone-jackpot .doritike-scene-flash,
+  #doritike-gacha-screen.is-tone-encore .doritike-scene-spot {
+    opacity: 0.12;
+  }
 
+}
 
 #enhance-screen,
 #evolve-screen {

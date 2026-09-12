@@ -5,7 +5,7 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, user-scalable=no"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
   >
 
   <title>平成大戦期</title>
@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=bs-polish-1">
+  <link rel="stylesheet" href="style.css?v=doritike-counter-4">
 </head>
 
 <body>
@@ -422,65 +422,37 @@
       hidden
     >
 
-      <div class="doritike-anim-stage">
+      <div class="doritike-scene" aria-hidden="true">
 
-        <div class="doritike-anim-counter" aria-hidden="true">
-          <div class="doritike-anim-counter-top"></div>
-          <div class="doritike-anim-counter-face"></div>
-          <div class="doritike-anim-under">
-            <div class="doritike-anim-shadow"></div>
-            <div class="doritike-anim-rummage-text">ｺﾞｿｺﾞｿ…</div>
-          </div>
+        <div class="doritike-scene-bg"></div>
+
+        <div class="doritike-scene-box"></div>
+
+        <div class="doritike-scene-hand"></div>
+
+        <div class="doritike-scene-ticket">
+          <span class="doritike-scene-ticket-card is-back"></span>
+          <span class="doritike-scene-ticket-card is-mid"></span>
+          <span class="doritike-scene-ticket-card">DORITIKE</span>
         </div>
 
-        <div
-          class="doritike-anim-ticket"
-          aria-hidden="true"
-        >
-          <span class="doritike-anim-ticket-body"></span>
-          <span class="doritike-anim-ticket-stripe"></span>
-          <span class="doritike-anim-ticket-stack"></span>
-          <span class="doritike-anim-ticket-stack doritike-anim-ticket-stack-b"></span>
-        </div>
+        <p
+          id="doritike-gacha-rummage"
+          class="doritike-scene-rummage"
+        ></p>
 
-        <div
-          class="doritike-anim-hand"
-          aria-hidden="true"
-        >
-          <span class="doritike-anim-hand-arm"></span>
-          <span class="doritike-anim-hand-palm"></span>
-          <span class="doritike-anim-hand-finger"></span>
-          <span class="doritike-anim-hand-finger doritike-anim-hand-finger-b"></span>
-        </div>
+        <div class="doritike-scene-flash"></div>
 
-        <div
-          class="doritike-anim-reward doritike-anim-reward-single"
-          aria-hidden="true"
-        >
-          <span class="doritike-anim-parcel"></span>
-        </div>
-
-        <div
-          class="doritike-anim-reward doritike-anim-reward-multi"
-          aria-hidden="true"
-        >
-          <span class="doritike-anim-parcel"></span>
-          <span class="doritike-anim-parcel doritike-anim-parcel-b"></span>
-          <span class="doritike-anim-parcel doritike-anim-parcel-c"></span>
-        </div>
-
-        <div class="doritike-anim-line-box">
-          <p
-            id="doritike-gacha-clerk-line"
-            class="doritike-anim-line-text"
-          ></p>
-        </div>
+        <div class="doritike-scene-spot"></div>
 
       </div>
 
-      <div class="doritike-anim-skip">
-        ▶ TAP TO SKIP
-      </div>
+      <p
+        id="doritike-gacha-clerk-line"
+        class="doritike-scene-line"
+      ></p>
+
+      <p class="doritike-scene-tap">タップして続ける</p>
 
     </div>
 
@@ -2084,7 +2056,7 @@
   </div>
 
 
-  <script src="game.js?v=bs-polish-1"></script>
+  <script src="game.js?v=doritike-counter-4"></script>
 
 </body>
 </html>
