@@ -8875,6 +8875,703 @@ function getBsGachaPool(bannerId) {
 
 
 /* =========================
+   BS GACHA PULL
+========================= */
+
+function createBsGachaPullFailure(
+  reason
+) {
+
+  return {
+
+    ok: false,
+
+    reason: reason,
+
+    results: []
+
+  };
+
+}
+
+
+function getBsGachaPullCost(
+  banner,
+  count,
+  paymentType
+) {
+
+  if (
+    !banner ||
+    typeof banner !== "object" ||
+    !banner.costs ||
+    typeof banner.costs !== "object"
+  ) {
+
+    return null;
+
+  }
+
+  if (
+    paymentType !==
+      BS_GACHA_CURRENCY.BS_PASS &&
+    paymentType !==
+      BS_GACHA_CURRENCY.GYARA
+  ) {
+
+    return null;
+
+  }
+
+  let table = null;
+
+  if (count === 1) {
+
+    table = banner.costs.single;
+
+  } else if (
+    count ===
+    Number(banner.costs.multiCount)
+  ) {
+
+    table = banner.costs.multi;
+
+  }
+
+  if (!Array.isArray(table)) {
+
+    return null;
+
+  }
+
+  let amount = null;
+
+  table.forEach((entry) => {
+
+    if (
+      amount !== null ||
+      !entry ||
+      entry.currency !== paymentType
+    ) {
+
+      return;
+
+    }
+
+    const nextAmount =
+      Number(entry.amount);
+
+    if (
+      !Number.isInteger(nextAmount) ||
+      nextAmount <= 0
+    ) {
+
+      return;
+
+    }
+
+    amount = nextAmount;
+
+  });
+
+  return amount;
+
+}
+
+
+function getExecutableBsGachaRates(
+  rates,
+  poolByRarity
+) {
+
+  if (
+    !Array.isArray(rates) ||
+    !poolByRarity ||
+    typeof poolByRarity !== "object"
+  ) {
+
+    return [];
+
+  }
+
+  const executable = [];
+
+  rates.forEach((entry) => {
+
+    if (!entry) {
+
+      return;
+
+    }
+
+    const rarity =
+      getBsGachaRarityStar(
+        entry.rarity
+      );
+
+    if (rarity == null) {
+
+      return;
+
+    }
+
+    const bucket =
+      poolByRarity[rarity];
+
+    if (
+      !Array.isArray(bucket) ||
+      bucket.length === 0
+    ) {
+
+      return;
+
+    }
+
+    const weight =
+      Number(entry.weight);
+
+    if (
+      !Number.isFinite(weight) ||
+      weight <= 0
+    ) {
+
+      return;
+
+    }
+
+    executable.push({
+
+      value: rarity,
+
+      weight: weight
+
+    });
+
+  });
+
+  return executable;
+
+}
+
+
+function bsGachaPullUsesGuarantee(
+  banner,
+  count,
+  index
+) {
+
+  if (
+    !banner ||
+    !banner.guarantee ||
+    banner.guarantee.enabled !== true ||
+    !banner.costs
+  ) {
+
+    return false;
+
+  }
+
+  const multiCount =
+    Number(banner.costs.multiCount);
+
+  if (
+    !Number.isInteger(multiCount) ||
+    multiCount <= 1 ||
+    count !== multiCount
+  ) {
+
+    return false;
+
+  }
+
+  return index === count - 1;
+
+}
+
+
+function rollBsGachaCharacter(
+  banner,
+  pool,
+  useGuarantee
+) {
+
+  if (
+    !banner ||
+    !pool ||
+    !pool.byRarity
+  ) {
+
+    return null;
+
+  }
+
+  const rates =
+    useGuarantee
+      ? banner.guarantee &&
+        banner.guarantee.rates
+      : banner.rates;
+
+  const executable =
+    getExecutableBsGachaRates(
+      rates,
+      pool.byRarity
+    );
+
+  if (executable.length === 0) {
+
+    return null;
+
+  }
+
+  const rarity =
+    pickWeightedValue(executable);
+
+  if (
+    getBsGachaRarityStar(rarity) ==
+      null
+  ) {
+
+    return null;
+
+  }
+
+  const bucket =
+    pool.byRarity[rarity];
+
+  if (
+    !Array.isArray(bucket) ||
+    bucket.length === 0
+  ) {
+
+    return null;
+
+  }
+
+  const characterId =
+    pickEqualValue(bucket);
+
+  if (
+    typeof characterId !== "string" ||
+    !CHARACTERS[characterId]
+  ) {
+
+    return null;
+
+  }
+
+  const characterRarity =
+    getBsGachaRarityStar(
+      CHARACTERS[characterId]
+    );
+
+  if (characterRarity !== rarity) {
+
+    return null;
+
+  }
+
+  return {
+
+    characterId: characterId,
+
+    rarity: rarity
+
+  };
+
+}
+
+
+function planBsGachaPull(
+  banner,
+  pool,
+  count
+) {
+
+  if (
+    !banner ||
+    !pool ||
+    !pool.byRarity ||
+    (count !== 1 && count !== 10)
+  ) {
+
+    return createBsGachaPullFailure(
+      "empty_pool"
+    );
+
+  }
+
+  const needsGuarantee =
+    bsGachaPullUsesGuarantee(
+      banner,
+      count,
+      count - 1
+    );
+
+  if (needsGuarantee) {
+
+    const guaranteeRates =
+      getExecutableBsGachaRates(
+        banner.guarantee &&
+          banner.guarantee.rates,
+        pool.byRarity
+      );
+
+    if (guaranteeRates.length === 0) {
+
+      return createBsGachaPullFailure(
+        "guarantee_unavailable"
+      );
+
+    }
+
+  }
+
+  const needsNormal =
+    count > (needsGuarantee ? 1 : 0);
+
+  if (needsNormal) {
+
+    const normalRates =
+      getExecutableBsGachaRates(
+        banner.rates,
+        pool.byRarity
+      );
+
+    if (normalRates.length === 0) {
+
+      return createBsGachaPullFailure(
+        "empty_pool"
+      );
+
+    }
+
+  }
+
+  const plannedOwned = {};
+
+  Object.keys(ownedCharacters).forEach(
+    (characterId) => {
+
+      if (ownedCharacters[characterId]) {
+
+        plannedOwned[characterId] =
+          true;
+
+      }
+
+    }
+  );
+
+  const results = [];
+
+  let index = 0;
+
+  while (index < count) {
+
+    const useGuarantee =
+      bsGachaPullUsesGuarantee(
+        banner,
+        count,
+        index
+      );
+
+    const roll =
+      rollBsGachaCharacter(
+        banner,
+        pool,
+        useGuarantee
+      );
+
+    if (
+      !roll ||
+      !CHARACTERS[roll.characterId] ||
+      getBsGachaRarityStar(
+        roll.rarity
+      ) == null
+    ) {
+
+      return createBsGachaPullFailure(
+        useGuarantee
+          ? "guarantee_unavailable"
+          : "empty_pool"
+      );
+
+    }
+
+    const alreadyOwned =
+      plannedOwned[roll.characterId] ===
+      true;
+
+    let fragmentAmount = 0;
+
+    if (alreadyOwned) {
+
+      fragmentAmount =
+        getPlusEnhanceFragmentCost(
+          roll.characterId
+        );
+
+      if (
+        !Number.isInteger(
+          fragmentAmount
+        ) ||
+        fragmentAmount <= 0
+      ) {
+
+        return createBsGachaPullFailure(
+          useGuarantee
+            ? "guarantee_unavailable"
+            : "empty_pool"
+        );
+
+      }
+
+    }
+
+    results.push({
+
+      characterId: roll.characterId,
+
+      rarity: roll.rarity,
+
+      isNew: !alreadyOwned,
+
+      fragmentAmount: fragmentAmount
+
+    });
+
+    plannedOwned[roll.characterId] =
+      true;
+
+    index += 1;
+
+  }
+
+  return {
+
+    ok: true,
+
+    reason: null,
+
+    results: results
+
+  };
+
+}
+
+
+function grantBsGachaPullResults(
+  results
+) {
+
+  results.forEach((result) => {
+
+    if (result.isNew) {
+
+      unlockCharacter(
+        result.characterId
+      );
+
+      return;
+
+    }
+
+    addCharacterFragments(
+      result.characterId,
+      result.fragmentAmount
+    );
+
+  });
+
+}
+
+
+function executeBsGachaPull(
+  bannerId,
+  count,
+  paymentType
+) {
+
+  const banner =
+    getBsGachaBanner(bannerId);
+
+  if (!banner) {
+
+    return createBsGachaPullFailure(
+      "invalid_banner"
+    );
+
+  }
+
+  if (banner.enabled !== true) {
+
+    return createBsGachaPullFailure(
+      "disabled_banner"
+    );
+
+  }
+
+  if (count !== 1 && count !== 10) {
+
+    return createBsGachaPullFailure(
+      "invalid_count"
+    );
+
+  }
+
+  if (
+    paymentType !==
+      BS_GACHA_CURRENCY.BS_PASS &&
+    paymentType !==
+      BS_GACHA_CURRENCY.GYARA
+  ) {
+
+    return createBsGachaPullFailure(
+      "invalid_payment"
+    );
+
+  }
+
+  const cost =
+    getBsGachaPullCost(
+      banner,
+      count,
+      paymentType
+    );
+
+  if (cost == null) {
+
+    return createBsGachaPullFailure(
+      "invalid_payment"
+    );
+
+  }
+
+  const balance =
+    paymentType ===
+    BS_GACHA_CURRENCY.BS_PASS
+      ? getBsPass()
+      : getGyara();
+
+  if (balance < cost) {
+
+    return createBsGachaPullFailure(
+      "insufficient_currency"
+    );
+
+  }
+
+  const pool =
+    getBsGachaPool(banner.id);
+
+  const plan =
+    planBsGachaPull(
+      banner,
+      pool,
+      count
+    );
+
+  if (!plan.ok) {
+
+    return plan;
+
+  }
+
+  let valid = true;
+
+  plan.results.forEach((result) => {
+
+    if (!valid) {
+
+      return;
+
+    }
+
+    const character =
+      CHARACTERS[result.characterId];
+
+    if (
+      !character ||
+      result.rarity !==
+        getBsGachaRarityStar(
+          character
+        )
+    ) {
+
+      valid = false;
+
+      return;
+
+    }
+
+    if (result.isNew) {
+
+      if (result.fragmentAmount !== 0) {
+
+        valid = false;
+
+      }
+
+      return;
+
+    }
+
+    if (
+      result.fragmentAmount !==
+      getPlusEnhanceFragmentCost(
+        result.characterId
+      )
+    ) {
+
+      valid = false;
+
+    }
+
+  });
+
+  if (
+    !valid ||
+    plan.results.length !== count
+  ) {
+
+    return createBsGachaPullFailure(
+      "empty_pool"
+    );
+
+  }
+
+  const spent =
+    paymentType ===
+    BS_GACHA_CURRENCY.BS_PASS
+      ? spendBsPass(cost)
+      : spendGyara(cost);
+
+  if (!spent) {
+
+    return createBsGachaPullFailure(
+      "insufficient_currency"
+    );
+
+  }
+
+  grantBsGachaPullResults(
+    plan.results
+  );
+
+  return {
+
+    ok: true,
+
+    reason: null,
+
+    results: plan.results
+
+  };
+
+}
+
+
+/* =========================
    DORITIKE GACHA SCREEN
 ========================= */
 
