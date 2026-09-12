@@ -5097,6 +5097,22 @@ h2 {
   filter: grayscale(1);
 }
 
+.year-node.is-cleared small {
+  color: white;
+
+  letter-spacing: 0.08em;
+}
+
+.year-node.is-current .year-circle {
+  border-color: white;
+}
+
+#stage-start-button:disabled {
+  opacity: 0.4;
+
+  cursor: default;
+}
+
 
 /* =========================
    STAGE DETAIL

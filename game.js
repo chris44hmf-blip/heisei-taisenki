@@ -159,6 +159,8 @@ menuButtons.forEach((button) => {
 
       if (menu === "sortie") {
 
+        renderStageSelect();
+
         showScreen(timelineScreen);
 
         return;
@@ -443,86 +445,6 @@ formationFilterButtons.forEach((button) => {
 });
 
 
-const yearNodes =
-  document.querySelectorAll(
-    ".year-node.unlocked"
-  );
-
-
-yearNodes.forEach((node) => {
-
-  node.addEventListener(
-    "click",
-    () => {
-
-      document
-        .querySelectorAll(".year-node")
-        .forEach((item) => {
-
-          item.classList.remove(
-            "selected"
-          );
-
-        });
-
-
-      node.classList.add(
-        "selected"
-      );
-
-
-      const year =
-        node.dataset.year;
-
-      const title =
-        node.dataset.title;
-
-      const stamina =
-        node.dataset.stamina;
-
-
-      if (year === "1") {
-
-        setCurrentStageId(1);
-
-      }
-
-
-      const selectedStage =
-        year === "1"
-          ? STAGES[1]
-          : null;
-
-
-      document.getElementById(
-        "stage-year"
-      ).textContent =
-        selectedStage
-          ? formatHeiseiYear(
-              selectedStage.year
-            )
-          : `平成${year === "1" ? "元" : year}年`;
-
-
-      document.getElementById(
-        "stage-title"
-      ).textContent =
-        selectedStage
-          ? selectedStage.title
-          : title;
-
-
-      document.getElementById(
-        "stage-cost"
-      ).textContent =
-        stamina;
-
-    }
-  );
-
-});
-
-
 /* =========================
    BATTLE ELEMENT
 ========================= */
@@ -754,14 +676,8 @@ function applyTimelineStageDetail(stage) {
 
   if (label) {
 
-    const code =
-      String(stage.id).padStart(
-        2,
-        "0"
-      );
-
     label.textContent =
-      `STAGE ${code}`;
+      formatStageCode(stage.id);
 
   }
 
@@ -851,7 +767,669 @@ function formatStageClearAlert(stage) {
 }
 
 
-applyTimelineStageDetail(STAGES[1]);
+const STAGE_PROGRESS_KEY =
+  "stageProgress";
+
+
+let stageProgress = {
+  highestClearedStage: 0
+};
+
+
+function formatStageCode(stageId) {
+
+  const value =
+    Number(stageId);
+
+
+  if (
+    !Number.isFinite(value) ||
+    value < 1
+  ) {
+
+    return "STAGE --";
+
+  }
+
+
+  return (
+    "STAGE " +
+    String(
+      Math.floor(value)
+    ).padStart(2, "0")
+  );
+
+}
+
+
+function sanitizeStageProgress(value) {
+
+  if (
+    !value ||
+    typeof value !== "object" ||
+    Array.isArray(value)
+  ) {
+
+    return {
+      highestClearedStage: 0
+    };
+
+  }
+
+
+  const number =
+    Number(value.highestClearedStage);
+
+
+  if (
+    !Number.isFinite(number) ||
+    number < 0
+  ) {
+
+    return {
+      highestClearedStage: 0
+    };
+
+  }
+
+
+  return {
+    highestClearedStage:
+      Math.floor(number)
+  };
+
+}
+
+
+function saveStageProgress() {
+
+  localStorage.setItem(
+    STAGE_PROGRESS_KEY,
+    JSON.stringify(stageProgress)
+  );
+
+}
+
+
+function loadStageProgress() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        STAGE_PROGRESS_KEY
+      );
+
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return {
+        highestClearedStage: 0
+      };
+
+    }
+
+
+    return sanitizeStageProgress(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+
+  return {
+    highestClearedStage: 0
+  };
+
+}
+
+
+function getStageProgress() {
+
+  return {
+    highestClearedStage:
+      stageProgress.highestClearedStage
+  };
+
+}
+
+
+function getHighestClearedStage() {
+
+  return stageProgress.highestClearedStage;
+
+}
+
+
+function setHighestClearedStage(stageId) {
+
+  const number =
+    Number(stageId);
+
+
+  if (
+    !Number.isFinite(number) ||
+    number < 0
+  ) {
+
+    stageProgress = {
+      highestClearedStage: 0
+    };
+
+  } else {
+
+    stageProgress = {
+      highestClearedStage:
+        Math.floor(number)
+    };
+
+  }
+
+
+  saveStageProgress();
+
+
+  return stageProgress.highestClearedStage;
+
+}
+
+
+function hasStage(stageId) {
+
+  return Object.prototype
+    .hasOwnProperty.call(
+      STAGES,
+      stageId
+    );
+
+}
+
+
+function isStagePlayable(stageId) {
+
+  const id =
+    Number(stageId);
+
+
+  if (
+    !Number.isInteger(id) ||
+    id < 1 ||
+    !hasStage(id)
+  ) {
+
+    return false;
+
+  }
+
+
+  if (id === 1) {
+
+    return true;
+
+  }
+
+
+  if (!hasStage(id - 1)) {
+
+    return false;
+
+  }
+
+
+  return (
+    getHighestClearedStage() >=
+    id - 1
+  );
+
+}
+
+
+function getStageNodeState(stageId) {
+
+  if (!isStagePlayable(stageId)) {
+
+    return "locked";
+
+  }
+
+
+  const highest =
+    getHighestClearedStage();
+
+
+  if (stageId <= highest) {
+
+    return "cleared";
+
+  }
+
+
+  if (stageId === highest + 1) {
+
+    return "current";
+
+  }
+
+
+  return "locked";
+
+}
+
+
+function markStageCleared(stageId) {
+
+  const previousHighest =
+    getHighestClearedStage();
+
+  const id =
+    Number(stageId);
+
+
+  if (
+    !Number.isInteger(id) ||
+    id < 1 ||
+    !hasStage(id)
+  ) {
+
+    return {
+      previousHighest: previousHighest,
+      highestClearedStage: previousHighest,
+      isFirstClear: false
+    };
+
+  }
+
+
+  const isFirstClear =
+    id === previousHighest + 1 &&
+    id > previousHighest;
+
+  const highestClearedStage =
+    Math.max(
+      previousHighest,
+      id
+    );
+
+
+  if (
+    highestClearedStage !==
+    previousHighest
+  ) {
+
+    setHighestClearedStage(
+      highestClearedStage
+    );
+
+  }
+
+
+  return {
+    previousHighest: previousHighest,
+    highestClearedStage: highestClearedStage,
+    isFirstClear: isFirstClear
+  };
+
+}
+
+
+function getSortedStages() {
+
+  return Object.values(STAGES)
+    .filter((stage) => {
+
+      return (
+        stage &&
+        Number.isInteger(stage.id) &&
+        hasStage(stage.id)
+      );
+
+    })
+    .sort((a, b) => {
+
+      return a.id - b.id;
+
+    });
+
+}
+
+
+function getPreferredStageId() {
+
+  const nextId =
+    getHighestClearedStage() + 1;
+
+
+  if (isStagePlayable(nextId)) {
+
+    return nextId;
+
+  }
+
+
+  let best = null;
+
+
+  getSortedStages().forEach((stage) => {
+
+    if (isStagePlayable(stage.id)) {
+
+      best = stage.id;
+
+    }
+
+  });
+
+
+  return best;
+
+}
+
+
+function getHomeLocationStage() {
+
+  const preferredId =
+    getPreferredStageId();
+
+
+  if (
+    preferredId &&
+    hasStage(preferredId)
+  ) {
+
+    return STAGES[preferredId];
+
+  }
+
+
+  return null;
+
+}
+
+
+function updateHomeLocation() {
+
+  const label =
+    document.getElementById(
+      "home-current-year"
+    );
+
+  const stage =
+    getHomeLocationStage();
+
+
+  if (!label || !stage) {
+
+    return;
+
+  }
+
+
+  label.textContent =
+    formatHeiseiYear(stage.year);
+
+}
+
+
+function updateStageStartAvailability() {
+
+  if (!stageStartButton) {
+
+    return;
+
+  }
+
+
+  stageStartButton.disabled =
+    !isStagePlayable(currentStageId);
+
+}
+
+
+function bindStageSelectClicks() {
+
+  const scroll =
+    document.querySelector(
+      "#timeline-screen .timeline-scroll"
+    );
+
+
+  if (
+    !scroll ||
+    scroll.dataset.stageSelectBound ===
+      "1"
+  ) {
+
+    return;
+
+  }
+
+
+  scroll.dataset.stageSelectBound = "1";
+
+
+  scroll.addEventListener(
+    "click",
+    (event) => {
+
+      const node =
+        event.target.closest(
+          ".year-node"
+        );
+
+
+      if (
+        !node ||
+        node.disabled
+      ) {
+
+        return;
+
+      }
+
+
+      const stageId =
+        Number(node.dataset.stageId);
+
+
+      if (!isStagePlayable(stageId)) {
+
+        return;
+
+      }
+
+
+      setCurrentStageId(stageId);
+
+      renderStageSelect();
+
+    }
+  );
+
+}
+
+
+function renderStageSelect(options) {
+
+  const scroll =
+    document.querySelector(
+      "#timeline-screen .timeline-scroll"
+    );
+
+
+  if (!scroll) {
+
+    return;
+
+  }
+
+
+  bindStageSelectClicks();
+
+
+  scroll
+    .querySelectorAll(".year-node")
+    .forEach((node) => {
+
+      node.remove();
+
+    });
+
+
+  const selectDefault =
+    options &&
+    options.selectDefault;
+
+  let selectedId =
+    currentStageId;
+
+
+  if (selectDefault) {
+
+    selectedId =
+      getPreferredStageId();
+
+  } else if (
+    !isStagePlayable(selectedId)
+  ) {
+
+    selectedId =
+      getPreferredStageId();
+
+  }
+
+
+  if (selectedId) {
+
+    setCurrentStageId(selectedId);
+
+  }
+
+
+  getSortedStages().forEach((stage) => {
+
+    const state =
+      getStageNodeState(stage.id);
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+
+    button.className = "year-node";
+
+    button.dataset.stageId =
+      String(stage.id);
+
+    if (state === "locked") {
+
+      button.classList.add("locked");
+
+      button.disabled = true;
+
+    } else {
+
+      button.classList.add("unlocked");
+
+      button.classList.add(
+        state === "cleared"
+          ? "is-cleared"
+          : "is-current"
+      );
+
+    }
+
+
+    if (
+      stage.id === currentStageId &&
+      state !== "locked"
+    ) {
+
+      button.classList.add("selected");
+
+    }
+
+
+    const circle =
+      document.createElement("span");
+
+    circle.className = "year-circle";
+
+    circle.textContent =
+      state === "locked"
+        ? "🔒"
+        : String(stage.id);
+
+
+    const name =
+      document.createElement("strong");
+
+    name.textContent =
+      formatHeiseiYear(stage.year);
+
+
+    const note =
+      document.createElement("small");
+
+    note.textContent =
+      state === "cleared"
+        ? "CLEAR"
+        : (stage.title || "");
+
+
+    button.appendChild(circle);
+
+    button.appendChild(name);
+
+    button.appendChild(note);
+
+    scroll.appendChild(button);
+
+  });
+
+
+  const selectedStage =
+    getCurrentStage();
+
+
+  if (
+    selectedStage &&
+    isStagePlayable(selectedStage.id)
+  ) {
+
+    applyTimelineStageDetail(
+      selectedStage
+    );
+
+  }
+
+
+  updateStageStartAvailability();
+
+}
+
+
+function initStageProgress() {
+
+  stageProgress =
+    loadStageProgress();
+
+  saveStageProgress();
+
+  renderStageSelect({
+    selectDefault: true
+  });
+
+  updateHomeLocation();
+
+}
+
+
+initStageProgress();
 
 
 function getMoshCrowdEndX() {
@@ -2048,7 +2626,10 @@ function startBattle() {
     getCurrentStage();
 
 
-  if (!stage) {
+  if (
+    !stage ||
+    !isStagePlayable(stage.id)
+  ) {
 
     return false;
 
@@ -20646,14 +21227,55 @@ function winBattle() {
   }
 
 
+  const clearedStage =
+    activeBattleStage;
+
+
   stopBattle();
+
+
+  if (
+    clearedStage &&
+    Number.isInteger(clearedStage.id)
+  ) {
+
+    const clearResult =
+      markStageCleared(
+        clearedStage.id
+      );
+
+
+    if (
+      clearResult.isFirstClear &&
+      isStagePlayable(
+        clearedStage.id + 1
+      )
+    ) {
+
+      setCurrentStageId(
+        clearedStage.id + 1
+      );
+
+    } else if (
+      isStagePlayable(clearedStage.id)
+    ) {
+
+      setCurrentStageId(
+        clearedStage.id
+      );
+
+    }
+
+
+    updateHomeLocation();
+
+    renderStageSelect();
+
+  }
 
 
   setTimeout(
     () => {
-
-      const clearedStage =
-        activeBattleStage;
 
       alert(
         clearedStage
@@ -20715,6 +21337,15 @@ function loseBattle() {
 stageStartButton.addEventListener(
   "click",
   () => {
+
+    if (
+      !isStagePlayable(currentStageId)
+    ) {
+
+      return;
+
+    }
+
 
     startBattle();
 
