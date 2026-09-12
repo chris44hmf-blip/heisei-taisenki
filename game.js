@@ -481,16 +481,35 @@ yearNodes.forEach((node) => {
         node.dataset.stamina;
 
 
+      if (year === "1") {
+
+        setCurrentStageId(1);
+
+      }
+
+
+      const selectedStage =
+        year === "1"
+          ? STAGES[1]
+          : null;
+
+
       document.getElementById(
         "stage-year"
       ).textContent =
-        `平成${year === "1" ? "元" : year}年`;
+        selectedStage
+          ? formatHeiseiYear(
+              selectedStage.year
+            )
+          : `平成${year === "1" ? "元" : year}年`;
 
 
       document.getElementById(
         "stage-title"
       ).textContent =
-        title;
+        selectedStage
+          ? selectedStage.title
+          : title;
 
 
       document.getElementById(
@@ -609,13 +628,230 @@ const STAGE_ENVIRONMENTS = {
 
 const STAGES = {
 
-  heisei1: {
+  1: {
 
-    environment: "A"
+    id: 1,
+
+    year: 1,
+
+    title: "バブルの狂騒",
+
+    environment: "A",
+
+    spawns: [
+
+      { delay: 1500, type: "salaryman" },
+
+      { delay: 5000, type: "salaryman" },
+
+      { delay: 8500, type: "salaryman" },
+
+      { delay: 12000, type: "juriana" },
+
+      { delay: 15000, type: "salaryman" },
+
+      { delay: 18000, type: "juriana" },
+
+      { delay: 21000, type: "salaryman" },
+
+      { delay: 25000, type: "bubble" },
+
+      { delay: 28000, type: "salaryman" },
+
+      { delay: 31000, type: "juriana" },
+
+      { delay: 34000, type: "bubble" },
+
+      { delay: 38000, type: "salaryman" },
+
+      { delay: 39500, type: "salaryman" },
+
+      { delay: 41000, type: "juriana" },
+
+      { delay: 45000, type: "boss" }
+
+    ]
 
   }
 
 };
+
+
+let currentStageId = 1;
+
+let activeBattleStage = null;
+
+
+function formatHeiseiYear(year) {
+
+  const value =
+    Number(year);
+
+
+  if (value === 1) {
+
+    return "平成元年";
+
+  }
+
+
+  return `平成${value}年`;
+
+}
+
+
+function setCurrentStageId(stageId) {
+
+  currentStageId = stageId;
+
+}
+
+
+function getCurrentStage() {
+
+  if (
+    !Object.prototype
+      .hasOwnProperty.call(
+        STAGES,
+        currentStageId
+      )
+  ) {
+
+    return null;
+
+  }
+
+
+  return STAGES[currentStageId];
+
+}
+
+
+function applyTimelineStageDetail(stage) {
+
+  if (!stage) {
+
+    return;
+
+  }
+
+
+  const label =
+    document.querySelector(
+      "#timeline-screen .stage-label"
+    );
+
+  const yearEl =
+    document.getElementById(
+      "stage-year"
+    );
+
+  const titleEl =
+    document.getElementById(
+      "stage-title"
+    );
+
+
+  if (label) {
+
+    const code =
+      String(stage.id).padStart(
+        2,
+        "0"
+      );
+
+    label.textContent =
+      `STAGE ${code}`;
+
+  }
+
+
+  if (yearEl) {
+
+    yearEl.textContent =
+      formatHeiseiYear(stage.year);
+
+  }
+
+
+  if (titleEl) {
+
+    titleEl.textContent =
+      stage.title || "";
+
+  }
+
+}
+
+
+function updateBattleStageHeader(stage) {
+
+  if (!stage) {
+
+    return;
+
+  }
+
+
+  const yearEl =
+    document.getElementById(
+      "battle-stage-year"
+    );
+
+  const titleEl =
+    document.getElementById(
+      "battle-stage-title"
+    );
+
+
+  if (yearEl) {
+
+    yearEl.textContent =
+      formatHeiseiYear(stage.year);
+
+  }
+
+
+  if (titleEl) {
+
+    titleEl.textContent =
+      stage.title || "";
+
+  }
+
+}
+
+
+function formatStageClearAlert(stage) {
+
+  const yearLabel =
+    formatHeiseiYear(stage.year);
+
+  const title =
+    stage.title || "";
+
+
+  if (!title) {
+
+    return (
+      yearLabel +
+      " 突破！"
+    );
+
+  }
+
+
+  return (
+    yearLabel +
+    " 突破！\n\n" +
+    title +
+    "を乗り越えた。"
+  );
+
+}
+
+
+applyTimelineStageDetail(STAGES[1]);
 
 
 function getMoshCrowdEndX() {
@@ -1808,6 +2044,20 @@ let enemyBaseMaxHp = 2000;
 
 function startBattle() {
 
+  const stage =
+    getCurrentStage();
+
+
+  if (!stage) {
+
+    return false;
+
+  }
+
+
+  activeBattleStage = stage;
+
+
  /* 戦闘BGMに切り替え */
 
   menuBgm.pause();
@@ -1859,8 +2109,10 @@ function startBattle() {
   applyCamera();
 
   applyStageEnvironment(
-    STAGES.heisei1.environment
+    stage.environment
   );
+
+  updateBattleStageHeader(stage);
 
 moshGauge = 0;
 
@@ -1982,11 +2234,10 @@ moshTimer =
     );
 
 
-  /* =========================
-   平成元年 ENEMY WAVE
-========================= */
+  scheduleStageSpawns(stage);
 
-startHeisei1Wave();
+  return true;
+
 }
 
 
@@ -20401,8 +20652,15 @@ function winBattle() {
   setTimeout(
     () => {
 
+      const clearedStage =
+        activeBattleStage;
+
       alert(
-        "平成元年 突破！\n\nバブルの狂騒を乗り越えた。"
+        clearedStage
+          ? formatStageClearAlert(
+              clearedStage
+            )
+          : "突破！"
       );
 
 
@@ -20510,65 +20768,31 @@ if (battlePauseResume) {
 
 }
 /* =========================
-   平成元年 WAVE
+   STAGE SPAWNS
 ========================= */
 
-function startHeisei1Wave() {
+function scheduleStageSpawns(stage) {
 
-  /*
-    序盤
-    サラリーマン中心
-  */
+  if (
+    !stage ||
+    !Array.isArray(stage.spawns)
+  ) {
 
-  scheduleEnemy(1500, "salaryman");
-  scheduleEnemy(5000, "salaryman");
-  scheduleEnemy(8500, "salaryman");
+    return;
 
-
-  /*
-    中盤
-    ジュリ扇女登場
-  */
-
-  scheduleEnemy(12000, "juriana");
-
-  scheduleEnemy(15000, "salaryman");
-
-  scheduleEnemy(18000, "juriana");
-
-  scheduleEnemy(21000, "salaryman");
+  }
 
 
-  /*
-    後半
-    バブル野郎登場
-  */
+  stage.spawns.forEach(
+    (spawn) => {
 
-  scheduleEnemy(25000, "bubble");
+      scheduleEnemy(
+        spawn.delay,
+        spawn.type
+      );
 
-  scheduleEnemy(28000, "salaryman");
-
-  scheduleEnemy(31000, "juriana");
-
-  scheduleEnemy(34000, "bubble");
-
-
-  /*
-    ボス前ラッシュ
-  */
-
-  scheduleEnemy(38000, "salaryman");
-
-  scheduleEnemy(39500, "salaryman");
-
-  scheduleEnemy(41000, "juriana");
-
-
-  /*
-    BOSS
-  */
-
-  scheduleEnemy(45000, "boss");
+    }
+  );
 
 }
 
