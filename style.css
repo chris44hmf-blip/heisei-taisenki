@@ -83,6 +83,12 @@ h3,
 .bs-gacha-pay-note,
 .bs-gacha-prompt-button,
 .bs-gacha-confirm-text,
+.bs-gacha-reveal-number,
+.bs-gacha-reveal-rarity,
+.bs-gacha-reveal-name,
+.bs-gacha-reveal-group,
+.bs-gacha-reveal-status,
+.bs-gacha-reveal-tap,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,
@@ -1886,6 +1892,12 @@ h2 {
 
 .bs-gacha-prompt-title,
 .bs-gacha-confirm-text,
+.bs-gacha-reveal-number,
+.bs-gacha-reveal-rarity,
+.bs-gacha-reveal-name,
+.bs-gacha-reveal-group,
+.bs-gacha-reveal-status,
+.bs-gacha-reveal-tap,
 .bs-gacha-pay-note {
   margin: 0;
 
@@ -1924,10 +1936,340 @@ h2 {
     );
 }
 
+.bs-gacha-reveal {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 7;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  opacity: 1;
+}
+
+.bs-gacha-reveal[hidden] {
+  display: none;
+}
+
+.bs-gacha-reveal.is-ready {
+  pointer-events: auto;
+
+  cursor: pointer;
+}
+
+.bs-gacha-reveal.is-closing {
+  opacity: 0;
+
+  transition: opacity 280ms ease;
+}
+
+.bs-gacha-reveal-dim,
+.bs-gacha-reveal-glow,
+.bs-gacha-reveal-flash {
+  position: absolute;
+
+  pointer-events: none;
+}
+
+#bs-gacha-screen.is-revealing .bs-gacha-header,
+#bs-gacha-screen.is-revealing .bs-gacha-body {
+  visibility: hidden;
+}
+
+.bs-gacha-reveal-dim {
+  inset: 0;
+
+  background:
+    radial-gradient(
+      ellipse 42% 62% at 50% 42%,
+      rgba(0, 0, 0, 0.28) 0%,
+      rgba(0, 0, 0, 0.78) 76%
+    );
+
+  opacity: 0;
+}
+
+.bs-gacha-reveal.is-open .bs-gacha-reveal-dim {
+  opacity: 1;
+
+  transition: opacity 280ms ease;
+}
+
+.bs-gacha-reveal-glow {
+  left: 50%;
+
+  top: 42%;
+
+  width: min(46vw, 280px);
+
+  height: min(70vh, 320px);
+
+  transform: translate(-50%, -52%);
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(255, 255, 255, 0.34) 0%,
+      rgba(255, 255, 255, 0.08) 42%,
+      transparent 70%
+    );
+
+  opacity: 0;
+}
+
+.bs-gacha-reveal.is-silhouette .bs-gacha-reveal-glow {
+  opacity: 1;
+
+  transition: opacity 420ms ease;
+}
+
+.bs-gacha-reveal-flash {
+  inset: 0;
+
+  background:
+    radial-gradient(
+      ellipse 64% 72% at 50% 42%,
+      rgba(255, 255, 255, 0.94) 0%,
+      rgba(255, 255, 255, 0.28) 42%,
+      transparent 74%
+    );
+
+  opacity: 0;
+}
+
+.bs-gacha-reveal-character {
+  position: absolute;
+
+  left: 50%;
+
+  top: 41%;
+
+  height: min(58vh, 250px);
+
+  width: auto;
+
+  max-width: min(42vw, 220px);
+
+  object-fit: contain;
+
+  object-position: center bottom;
+
+  opacity: 0;
+
+  transform: translate(-50%, -50%) scale(0.94);
+
+  filter: brightness(0);
+
+  pointer-events: none;
+
+  transition:
+    opacity 420ms ease,
+    transform 420ms ease;
+}
+
+.bs-gacha-reveal-character.is-shown {
+  opacity: 1;
+
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.bs-gacha-reveal-character.is-color {
+  filter:
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.42));
+
+  animation: bs-gacha-reveal-pop 420ms ease;
+}
+
+.bs-gacha-reveal-info,
+.bs-gacha-reveal-status,
+.bs-gacha-reveal-tap {
+  position: absolute;
+
+  margin: 0;
+
+  pointer-events: none;
+
+  opacity: 0;
+}
+
+.bs-gacha-reveal.is-info .bs-gacha-reveal-info,
+.bs-gacha-reveal.is-info .bs-gacha-reveal-status,
+.bs-gacha-reveal.is-ready .bs-gacha-reveal-tap {
+  opacity: 1;
+
+  transition: opacity 280ms ease;
+}
+
+.bs-gacha-reveal-info {
+  left: max(14px, 4vw);
+
+  bottom: max(34px, 7vh);
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+
+  max-width: min(42vw, 240px);
+
+  text-align: left;
+
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.bs-gacha-reveal-number {
+  text-align: left;
+
+  color: #d7deea;
+
+  font-size: clamp(11px, 1.7vw, 14px);
+
+  letter-spacing: 0.12em;
+}
+
+.bs-gacha-reveal-rarity {
+  text-align: left;
+
+  color: #f3f6fb;
+
+  font-size: clamp(12px, 1.9vw, 16px);
+
+  letter-spacing: 0.08em;
+}
+
+.bs-gacha-reveal-name {
+  text-align: left;
+
+  color: #ffffff;
+
+  font-size: clamp(16px, 2.6vw, 24px);
+
+  letter-spacing: 0.04em;
+
+  line-height: 1.2;
+}
+
+.bs-gacha-reveal-group {
+  text-align: left;
+
+  color: #c5cedb;
+
+  font-size: clamp(11px, 1.6vw, 14px);
+
+  letter-spacing: 0.08em;
+}
+
+.bs-gacha-reveal-status {
+  right: max(14px, 4vw);
+
+  top: 22%;
+
+  color: #f4ead0;
+
+  font-size: clamp(14px, 2.2vw, 20px);
+
+  letter-spacing: 0.12em;
+
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.bs-gacha-reveal-status.is-new {
+  top: 18%;
+
+  padding: 4px 10px;
+
+  border: 2px solid #f0ddb0;
+
+  border-radius: 2px;
+
+  background: rgba(18, 14, 10, 0.88);
+
+  color: #f8e7b4;
+
+  font-size: clamp(16px, 2.8vw, 26px);
+
+  letter-spacing: 0.18em;
+
+  transform: rotate(-7deg);
+}
+
+.bs-gacha-reveal-status[hidden],
+.bs-gacha-reveal-tap[hidden] {
+  display: none;
+}
+
+.bs-gacha-reveal-tap {
+  left: 0;
+
+  right: 0;
+
+  bottom: max(8px, 1.6vh);
+
+  color: #eef2f8;
+
+  font-size: clamp(12px, 1.8vw, 15px);
+
+  letter-spacing: 0.16em;
+
+  text-align: center;
+
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+}
+
+@keyframes bs-gacha-reveal-pop {
+
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  45% {
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+}
+
 @media (prefers-reduced-motion: reduce) {
 
   .bs-gacha-lighting.is-shake {
     animation: none;
+  }
+
+  .bs-gacha-reveal-character,
+  .bs-gacha-reveal-character.is-color,
+  .bs-gacha-reveal.is-closing {
+    animation: none;
+
+    transition-duration: 1ms;
+  }
+
+}
+
+@media (max-height: 400px) {
+
+  .bs-gacha-reveal-character {
+    top: 40%;
+
+    height: min(52vh, 196px);
+
+    max-width: min(34vw, 168px);
+  }
+
+  .bs-gacha-reveal-info {
+    bottom: 28px;
+
+    gap: 0;
+  }
+
+  .bs-gacha-reveal-status {
+    top: 14%;
   }
 
 }
@@ -7059,6 +7401,12 @@ h3,
 .bs-gacha-pay-note,
 .bs-gacha-prompt-button,
 .bs-gacha-confirm-text,
+.bs-gacha-reveal-number,
+.bs-gacha-reveal-rarity,
+.bs-gacha-reveal-name,
+.bs-gacha-reveal-group,
+.bs-gacha-reveal-status,
+.bs-gacha-reveal-tap,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
 .doritike-gacha-result-back,

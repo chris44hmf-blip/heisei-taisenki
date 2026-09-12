@@ -9612,6 +9612,16 @@ let bsGachaLightingActive = false;
 
 let bsGachaLightingToken = 0;
 
+let bsGachaRevealActive = false;
+
+let bsGachaRevealReady = false;
+
+let bsGachaRevealClosing = false;
+
+let bsGachaRevealToken = 0;
+
+let bsGachaSequenceToken = 0;
+
 
 const bsGachaBack =
   document.getElementById(
@@ -9760,6 +9770,67 @@ const bsGachaLightFlash =
   bsGachaLighting
     ? bsGachaLighting.querySelector(
       ".bs-gacha-light-flash"
+    )
+    : null;
+
+const bsGachaReveal =
+  document.getElementById(
+    "bs-gacha-reveal"
+  );
+
+const bsGachaRevealCharacter =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-character"
+    )
+    : null;
+
+const bsGachaRevealFlash =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-flash"
+    )
+    : null;
+
+const bsGachaRevealNumber =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-number"
+    )
+    : null;
+
+const bsGachaRevealRarity =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-rarity"
+    )
+    : null;
+
+const bsGachaRevealName =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-name"
+    )
+    : null;
+
+const bsGachaRevealGroup =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-group"
+    )
+    : null;
+
+const bsGachaRevealStatus =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-status"
+    )
+    : null;
+
+const bsGachaRevealTap =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-tap"
     )
     : null;
 
@@ -10160,9 +10231,18 @@ async function playBsGachaLegendLighting(token) {
 }
 
 
-async function playBsGachaLighting(rarity) {
+async function playBsGachaLighting(
+  rarity,
+  options
+) {
 
   const level = Number(rarity);
+
+  const holdBusy =
+    !!(
+      options &&
+      options.holdBusy
+    );
 
   if (
     bsGachaLightingActive ||
@@ -10171,7 +10251,7 @@ async function playBsGachaLighting(rarity) {
     level > 4
   ) {
 
-    return;
+    return false;
 
   }
 
@@ -10268,11 +10348,754 @@ async function playBsGachaLighting(rarity) {
 
       bsGachaLightingActive = false;
 
-      setBsGachaBusy(false);
+      if (!holdBusy) {
+
+        setBsGachaBusy(false);
+
+      }
+
+      return true;
+
+    }
+
+    return false;
+
+  }
+
+}
+
+
+function getBsGachaStarRarityKey(star) {
+
+  const level = Number(star);
+
+  const keys =
+    Object.keys(BS_GACHA_RARITY_STAR);
+
+  for (
+    let index = 0;
+    index < keys.length;
+    index += 1
+  ) {
+
+    if (
+      BS_GACHA_RARITY_STAR[keys[index]] ===
+      level
+    ) {
+
+      return keys[index];
 
     }
 
   }
+
+  return null;
+
+}
+
+
+function getBsGachaStarLabel(star) {
+
+  const key =
+    getBsGachaStarRarityKey(star);
+
+  if (!key) {
+
+    return "";
+
+  }
+
+  return getRarityLabel(key);
+
+}
+
+
+function isBsGachaSingleResult(results) {
+
+  return (
+    Array.isArray(results) &&
+    results.length === 1
+  );
+
+}
+
+
+function setBsGachaRevealPhase(phase) {
+
+  if (!bsGachaReveal) {
+
+    return;
+
+  }
+
+  if (phase) {
+
+    bsGachaReveal.dataset.phase =
+      phase;
+
+    return;
+
+  }
+
+  delete bsGachaReveal.dataset.phase;
+
+}
+
+
+function resetBsGachaReveal() {
+
+  bsGachaRevealReady = false;
+
+  bsGachaRevealClosing = false;
+
+  if (bsGachaRevealCharacter) {
+
+    bsGachaRevealCharacter.onload = null;
+
+    bsGachaRevealCharacter.onerror = null;
+
+    bsGachaRevealCharacter.removeAttribute(
+      "src"
+    );
+
+    bsGachaRevealCharacter.alt = "";
+
+    bsGachaRevealCharacter.classList.remove(
+      "is-silhouette",
+      "is-shown",
+      "is-color"
+    );
+
+  }
+
+  if (bsGachaRevealFlash) {
+
+    bsGachaRevealFlash.style.opacity = "0";
+
+  }
+
+  if (bsGachaRevealNumber) {
+
+    bsGachaRevealNumber.textContent = "";
+
+  }
+
+  if (bsGachaRevealRarity) {
+
+    bsGachaRevealRarity.textContent = "";
+
+  }
+
+  if (bsGachaRevealName) {
+
+    bsGachaRevealName.textContent = "";
+
+  }
+
+  if (bsGachaRevealGroup) {
+
+    bsGachaRevealGroup.textContent = "";
+
+  }
+
+  if (bsGachaRevealStatus) {
+
+    bsGachaRevealStatus.textContent = "";
+
+    bsGachaRevealStatus.hidden = true;
+
+    bsGachaRevealStatus.classList.remove(
+      "is-new",
+      "is-fragment"
+    );
+
+  }
+
+  if (bsGachaRevealTap) {
+
+    bsGachaRevealTap.hidden = true;
+
+  }
+
+  if (bsGachaReveal) {
+
+    bsGachaReveal.hidden = true;
+
+    bsGachaReveal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    bsGachaReveal.removeAttribute(
+      "tabindex"
+    );
+
+  bsGachaReveal.classList.remove(
+    "is-open",
+    "is-silhouette",
+    "is-info",
+    "is-ready",
+    "is-closing"
+  );
+
+  if (bsGachaScreen) {
+
+    bsGachaScreen.classList.remove(
+      "is-revealing"
+    );
+
+  }
+
+  }
+
+  setBsGachaRevealPhase("");
+
+}
+
+
+function cancelBsGachaReveal() {
+
+  bsGachaRevealToken += 1;
+
+  bsGachaRevealActive = false;
+
+  resetBsGachaReveal();
+
+}
+
+
+function cancelBsGachaPullPresentation() {
+
+  bsGachaSequenceToken += 1;
+
+  cancelBsGachaLighting();
+
+  cancelBsGachaReveal();
+
+}
+
+
+function loadBsGachaRevealImage(src) {
+
+  return new Promise((resolve) => {
+
+    if (
+      !bsGachaRevealCharacter ||
+      !src
+    ) {
+
+      resolve(false);
+
+      return;
+
+    }
+
+    const finish = (ok) => {
+
+      bsGachaRevealCharacter.onload = null;
+
+      bsGachaRevealCharacter.onerror = null;
+
+      resolve(ok);
+
+    };
+
+    bsGachaRevealCharacter.onload = () => {
+
+      finish(
+        bsGachaRevealCharacter.naturalWidth > 0
+      );
+
+    };
+
+    bsGachaRevealCharacter.onerror = () => {
+
+      finish(false);
+
+    };
+
+    bsGachaRevealCharacter.src = src;
+
+    if (bsGachaRevealCharacter.complete) {
+
+      finish(
+        bsGachaRevealCharacter.naturalWidth > 0
+      );
+
+    }
+
+  });
+
+}
+
+
+function fillBsGachaRevealCopy(
+  character,
+  result
+) {
+
+  if (bsGachaRevealNumber) {
+
+    bsGachaRevealNumber.textContent =
+      getAllyCharacterNumberLabel(
+        character
+      );
+
+  }
+
+  if (bsGachaRevealRarity) {
+
+    bsGachaRevealRarity.textContent =
+      getBsGachaStarLabel(
+        result && result.rarity
+      );
+
+  }
+
+  if (bsGachaRevealName) {
+
+    bsGachaRevealName.textContent =
+      character && character.name
+        ? character.name
+        : "";
+
+  }
+
+  if (bsGachaRevealGroup) {
+
+    bsGachaRevealGroup.textContent =
+      getCharacterGroup(character);
+
+  }
+
+  if (!bsGachaRevealStatus) {
+
+    return;
+
+  }
+
+  bsGachaRevealStatus.textContent = "";
+
+  bsGachaRevealStatus.hidden = true;
+
+  bsGachaRevealStatus.classList.remove(
+    "is-new",
+    "is-fragment"
+  );
+
+  if (result && result.isNew === true) {
+
+    bsGachaRevealStatus.textContent =
+      "NEW";
+
+    bsGachaRevealStatus.hidden = false;
+
+    bsGachaRevealStatus.classList.add(
+      "is-new"
+    );
+
+    bsGachaRevealStatus.hidden = true;
+
+    return;
+
+  }
+
+  const amount =
+    Number(
+      result && result.fragmentAmount
+    );
+
+  const fragments =
+    Number.isFinite(amount)
+      ? Math.max(0, Math.floor(amount))
+      : 0;
+
+  bsGachaRevealStatus.textContent =
+    "カケラ +" + String(fragments);
+
+  bsGachaRevealStatus.hidden = false;
+
+  bsGachaRevealStatus.classList.add(
+    "is-fragment"
+  );
+
+  bsGachaRevealStatus.hidden = true;
+
+}
+
+
+async function playBsGachaSingleReveal(
+  result,
+  sequenceToken
+) {
+
+  if (
+    bsGachaRevealActive ||
+    !bsGachaReveal ||
+    !bsGachaRevealCharacter ||
+    !result
+  ) {
+
+    return false;
+
+  }
+
+  const character =
+    CHARACTERS[result.characterId];
+
+  const menuSrc =
+    character &&
+    character.images &&
+    character.images.menu;
+
+  if (!character || !menuSrc) {
+
+    return false;
+
+  }
+
+  bsGachaRevealActive = true;
+
+  const token =
+    bsGachaRevealToken + 1;
+
+  bsGachaRevealToken = token;
+
+  setBsGachaBusy(true);
+
+  resetBsGachaReveal();
+
+  bsGachaRevealActive = true;
+
+  const reduced =
+    prefersBsGachaReducedMotion();
+
+  fillBsGachaRevealCopy(
+    character,
+    result
+  );
+
+  bsGachaRevealCharacter.alt =
+    character.name || "";
+
+  const loaded =
+    await loadBsGachaRevealImage(menuSrc);
+
+  if (
+    !loaded ||
+    token !== bsGachaRevealToken ||
+    sequenceToken !== bsGachaSequenceToken
+  ) {
+
+    if (token === bsGachaRevealToken) {
+
+      cancelBsGachaReveal();
+
+    }
+
+    return false;
+
+  }
+
+  bsGachaReveal.hidden = false;
+
+  bsGachaReveal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  if (bsGachaScreen) {
+
+    bsGachaScreen.classList.add(
+      "is-revealing"
+    );
+
+  }
+
+  bsGachaReveal.classList.add(
+    "is-open",
+    "is-silhouette"
+  );
+
+  bsGachaRevealCharacter.classList.add(
+    "is-silhouette"
+  );
+
+  setBsGachaRevealPhase("silhouette");
+
+  await waitBsGachaLighting(20);
+
+  if (token !== bsGachaRevealToken) {
+
+    return false;
+
+  }
+
+  bsGachaRevealCharacter.classList.add(
+    "is-shown"
+  );
+
+  await waitBsGachaLighting(
+    reduced ? 220 : 1080
+  );
+
+  if (token !== bsGachaRevealToken) {
+
+    return false;
+
+  }
+
+  setBsGachaRevealPhase("flash");
+
+  if (bsGachaRevealFlash) {
+
+    bsGachaRevealFlash.style.opacity =
+      reduced ? "0.28" : "0.82";
+
+  }
+
+  await waitBsGachaLighting(
+    reduced ? 80 : 140
+  );
+
+  if (token !== bsGachaRevealToken) {
+
+    return false;
+
+  }
+
+  bsGachaRevealCharacter.classList.remove(
+    "is-silhouette"
+  );
+
+  bsGachaRevealCharacter.classList.add(
+    "is-color"
+  );
+
+  bsGachaReveal.classList.remove(
+    "is-silhouette"
+  );
+
+  setBsGachaRevealPhase("color");
+
+  await waitBsGachaLighting(70);
+
+  if (bsGachaRevealFlash) {
+
+    bsGachaRevealFlash.style.opacity = "0";
+
+  }
+
+  await waitBsGachaLighting(
+    reduced ? 80 : 240
+  );
+
+  if (token !== bsGachaRevealToken) {
+
+    return false;
+
+  }
+
+  bsGachaReveal.classList.add("is-info");
+
+  if (bsGachaRevealStatus) {
+
+    bsGachaRevealStatus.hidden = false;
+
+  }
+
+  setBsGachaRevealPhase("info");
+
+  await waitBsGachaLighting(
+    reduced ? 40 : 260
+  );
+
+  if (token !== bsGachaRevealToken) {
+
+    return false;
+
+  }
+
+  bsGachaRevealReady = true;
+
+  bsGachaReveal.classList.add("is-ready");
+
+  bsGachaReveal.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  bsGachaReveal.tabIndex = 0;
+
+  if (bsGachaRevealTap) {
+
+    bsGachaRevealTap.hidden = false;
+
+  }
+
+  setBsGachaRevealPhase("ready");
+
+  return true;
+
+}
+
+
+function closeBsGachaReveal() {
+
+  if (
+    !bsGachaRevealReady ||
+    bsGachaRevealClosing ||
+    !bsGachaRevealActive
+  ) {
+
+    return;
+
+  }
+
+  bsGachaRevealReady = false;
+
+  bsGachaRevealClosing = true;
+
+  const token = bsGachaRevealToken;
+
+  bsGachaReveal.classList.remove(
+    "is-ready"
+  );
+
+  bsGachaReveal.classList.add(
+    "is-closing"
+  );
+
+  bsGachaReveal.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  setBsGachaRevealPhase("closing");
+
+  window.setTimeout(() => {
+
+    if (token !== bsGachaRevealToken) {
+
+      return;
+
+    }
+
+    resetBsGachaReveal();
+
+    resetBsGachaLighting();
+
+    bsGachaRevealActive = false;
+
+    setBsGachaBusy(false);
+
+  }, prefersBsGachaReducedMotion() ? 16 : 280);
+
+}
+
+
+function handleBsGachaRevealTap(event) {
+
+  if (event) {
+
+    event.preventDefault();
+
+  }
+
+  closeBsGachaReveal();
+
+}
+
+
+async function playBsGachaPullPresentation(
+  token,
+  rarity,
+  single,
+  result
+) {
+
+  const played =
+    await playBsGachaLighting(
+      rarity,
+      {
+        holdBusy: single
+      }
+    );
+
+  if (
+    token !== bsGachaSequenceToken ||
+    !played
+  ) {
+
+    return;
+
+  }
+
+  if (!single) {
+
+    setBsGachaBusy(false);
+
+    return;
+
+  }
+
+  const revealed =
+    await playBsGachaSingleReveal(
+      result,
+      token
+    );
+
+  if (
+    token === bsGachaSequenceToken &&
+    !revealed
+  ) {
+
+    setBsGachaBusy(false);
+
+  }
+
+}
+
+
+function startBsGachaPullPresentation(outcome) {
+
+  if (
+    bsGachaLightingActive ||
+    bsGachaRevealActive
+  ) {
+
+    return;
+
+  }
+
+  const results =
+    outcome &&
+    Array.isArray(outcome.results)
+      ? outcome.results
+      : [];
+
+  const rarity =
+    getBsGachaHighestRarity(results);
+
+  if (rarity < 1) {
+
+    setBsGachaBusy(false);
+
+    return;
+
+  }
+
+  const token =
+    bsGachaSequenceToken + 1;
+
+  bsGachaSequenceToken = token;
+
+  playBsGachaPullPresentation(
+    token,
+    rarity,
+    isBsGachaSingleResult(results),
+    results[0]
+  );
 
 }
 
@@ -10969,33 +11792,7 @@ function handoffBsGachaPull(outcome) {
 
   showBsGachaMessage("抽選完了");
 
-  const rarity =
-    getBsGachaHighestRarity(
-      outcome && outcome.results
-    );
-
-  if (
-    rarity >= 1 &&
-    !bsGachaLightingActive
-  ) {
-
-    playBsGachaLighting(rarity);
-
-    if (!bsGachaLightingActive) {
-
-      setBsGachaBusy(false);
-
-    }
-
-    return;
-
-  }
-
-  if (!bsGachaLightingActive) {
-
-    setBsGachaBusy(false);
-
-  }
+  startBsGachaPullPresentation(outcome);
 
 }
 
@@ -11105,7 +11902,7 @@ function openBsGacha() {
 
   }
 
-  cancelBsGachaLighting();
+  cancelBsGachaPullPresentation();
 
   isBsGachaBusy = false;
 
@@ -11132,7 +11929,7 @@ function closeBsGacha() {
 
   }
 
-  cancelBsGachaLighting();
+  cancelBsGachaPullPresentation();
 
   closeBsGachaPrompt();
 
@@ -11160,6 +11957,38 @@ function handleBsGachaBack() {
   }
 
   closeBsGacha();
+
+}
+
+
+if (bsGachaReveal) {
+
+  bsGachaReveal.addEventListener(
+    "click",
+    (event) => {
+
+      handleBsGachaRevealTap(event);
+
+    }
+  );
+
+  bsGachaReveal.addEventListener(
+    "keydown",
+    (event) => {
+
+      if (
+        event.key !== "Enter" &&
+        event.key !== " "
+      ) {
+
+        return;
+
+      }
+
+      handleBsGachaRevealTap(event);
+
+    }
+  );
 
 }
 
