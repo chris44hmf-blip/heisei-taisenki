@@ -10209,7 +10209,7 @@ async function playBsGachaLegendLighting(token) {
   const dimmed =
     await dimBsGachaLighting(
       token,
-      150
+      240
     );
 
   if (!dimmed) {
@@ -10921,7 +10921,7 @@ function updateBsGachaRevealProgress() {
 }
 
 
-function getBsGachaRevealTiming(mode) {
+function getBsGachaRevealTiming(mode, beat) {
 
   const multi = mode === "multi";
 
@@ -10941,13 +10941,17 @@ function getBsGachaRevealTiming(mode) {
 
   if (multi) {
 
+    const opening = beat === "open";
+
+    const closing = beat === "last";
+
     return {
-      silhouette: 450,
+      silhouette: opening || closing ? 500 : 380,
       flashHold: 90,
       flashPeak: 0.86,
       flashClear: 70,
-      beforeInfo: 250,
-      beforeReady: 280,
+      beforeInfo: closing ? 280 : 220,
+      beforeReady: closing ? 340 : 200,
       fade: 220
     };
 
@@ -11412,7 +11416,10 @@ async function presentBsGachaResult(
   bsGachaRevealCycle += 1;
 
   const timing =
-    getBsGachaRevealTiming(mode);
+    getBsGachaRevealTiming(
+      mode,
+      options && options.beat
+    );
 
   fillBsGachaRevealCopy(
     character,
@@ -11763,7 +11770,16 @@ async function playBsGachaRevealQueue(
         ],
         sequenceToken,
         {
-          mode: mode
+          mode: mode,
+          beat:
+            bsGachaRevealQueueIndex <= 0
+              ? "open"
+              : (
+                bsGachaRevealQueueIndex >=
+                bsGachaRevealQueue.length - 1
+                  ? "last"
+                  : "mid"
+              )
         }
       );
 
@@ -12161,22 +12177,60 @@ function setBsGachaPayButton(
 
   }
 
+  button.classList.remove("is-short");
+
+  button.replaceChildren();
+
   if (cost == null) {
 
     button.textContent = label;
 
     button.disabled = true;
 
+    button.removeAttribute("title");
+
     return;
 
   }
 
-  button.textContent =
-    label + " " + String(cost);
+  const short = balance < cost;
+
+  const name =
+    document.createElement("span");
+
+  name.className = "bs-gacha-pay-label";
+
+  name.textContent = label;
+
+  const need =
+    document.createElement("span");
+
+  need.className = "bs-gacha-pay-need";
+
+  need.textContent = short
+    ? "不足"
+    : "必要 " + String(cost);
+
+  button.append(name, need);
+
+  button.classList.toggle(
+    "is-short",
+    short
+  );
+
+  if (short) {
+
+    button.title = "所持が足りません";
+
+  } else {
+
+    button.removeAttribute("title");
+
+  }
 
   button.disabled =
     isBsGachaBusy ||
-    balance < cost;
+    short;
 
 }
 
@@ -12331,7 +12385,11 @@ function renderBsGachaScreen() {
     bsGachaPull10Label.textContent =
       multiCount == null
         ? ""
-        : String(multiCount) + "回引く";
+        : (
+          multiCount === 10
+            ? "10連"
+            : String(multiCount) + "回引く"
+        );
 
   }
 
