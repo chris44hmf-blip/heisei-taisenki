@@ -16500,30 +16500,6 @@ function initBattleDeck() {
 initBattleDeck();
 
 
-// TEMP STEP 2-7 KAEDE TEST
-unlockCharacter("kaede");
-
-if (battleDeck[1] === null) {
-
-  setBattleDeckSlot(
-    1,
-    "kaede"
-  );
-
-}
-// TEMP STEP 2-7 KAEDE TEST
-
-
-// TEMP KAIRI TEST
-unlockCharacter("kairi");
-// TEMP KAIRI TEST
-
-
-// TEMP CHRIS TEST
-unlockCharacter("chris");
-// TEMP CHRIS TEST
-
-
 function getDeployCooldownMs(character) {
 
   const cooldownMs =
@@ -21220,6 +21196,46 @@ function stopBattle() {
    WIN
 ========================= */
 
+function unlockStoryCharactersForStage(
+  stageId
+) {
+
+  const id =
+    Number(stageId);
+
+
+  if (!Number.isInteger(id)) {
+
+    return;
+
+  }
+
+
+  Object.values(CHARACTERS).forEach(
+    (character) => {
+
+      if (
+        !character ||
+        !character.id ||
+        !character.unlock ||
+        character.unlock.type !==
+          "story" ||
+        character.unlock.stage !== id
+      ) {
+
+        return;
+
+      }
+
+
+      unlockCharacter(character.id);
+
+    }
+  );
+
+}
+
+
 function winBattle() {
 
   if (!battleRunning) {
@@ -21243,6 +21259,15 @@ function winBattle() {
       markStageCleared(
         clearedStage.id
       );
+
+
+    if (clearResult.isFirstClear) {
+
+      unlockStoryCharactersForStage(
+        clearedStage.id
+      );
+
+    }
 
 
     if (
