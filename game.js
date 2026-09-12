@@ -11390,13 +11390,6 @@ function getCharacterMenuScale(character) {
 }
 
 
-const FORMATION_OWNED_SLOT_LAYOUT = [
-  { left: 13.22, top: 31.03, width: 7.24, height: 34.43 },
-  { left: 22.31, top: 31.03, width: 7.36, height: 34.43 },
-  { left: 31.40, top: 31.03, width: 7.36, height: 34.43 },
-  { left: 40.49, top: 31.03, width: 7.36, height: 34.43 }
-];
-
 const FORMATION_FRONT_SLOT_LAYOUT = [
   { left: 52.45, top: 35.92, width: 5.68, height: 11.16 },
   { left: 59.87, top: 35.92, width: 5.68, height: 11.16 },
@@ -11594,7 +11587,9 @@ function setFormationRarityFilter(filter) {
   selectedFormationCharacterId =
     null;
 
-  renderFormationScreen();
+  renderFormationScreen({
+    resetOwnedScroll: true
+  });
 
 }
 
@@ -12571,7 +12566,57 @@ function createFormationCardMetaHtml(
 }
 
 
-function createFormationOwnedCard(character, box) {
+function getFormationOwnedSortNumber(
+  character
+) {
+
+  const number =
+    Number(
+      character &&
+      character.number
+    );
+
+  if (
+    !Number.isInteger(number) ||
+    number < 1
+  ) {
+
+    return null;
+
+  }
+
+  return number;
+
+}
+
+
+function compareFormationOwnedCharacters(
+  left,
+  right
+) {
+
+  const leftNumber =
+    getFormationOwnedSortNumber(left);
+
+  const rightNumber =
+    getFormationOwnedSortNumber(right);
+
+  if (
+    leftNumber != null &&
+    rightNumber != null &&
+    leftNumber !== rightNumber
+  ) {
+
+    return leftNumber - rightNumber;
+
+  }
+
+  return 0;
+
+}
+
+
+function createFormationOwnedCard(character) {
 
   const card =
     document.createElement("button");
@@ -12627,8 +12672,6 @@ function createFormationOwnedCard(character, box) {
     </button>
 
   `;
-
-  applyFormationPercentBox(card, box);
 
   applyFormationMenuScale(
     card.querySelector("img"),
@@ -12772,7 +12815,9 @@ function createFormationDeckSlot(
 }
 
 
-function renderFormationScreen() {
+function renderFormationScreen(
+  options
+) {
 
   const ownedList =
     document.getElementById(
@@ -12811,6 +12856,17 @@ function renderFormationScreen() {
   }
 
 
+  const resetOwnedScroll =
+    !!(
+      options &&
+      options.resetOwnedScroll
+    );
+
+  const ownedScrollLeft =
+    resetOwnedScroll
+      ? 0
+      : ownedList.scrollLeft;
+
   ownedList.innerHTML = "";
 
   frontSlots.innerHTML = "";
@@ -12830,6 +12886,10 @@ function renderFormationScreen() {
 
     });
 
+  ownedRoster.sort(
+    compareFormationOwnedCharacters
+  );
+
 
   const visibleOwnedRoster =
     ownedRoster.filter((character) => {
@@ -12842,27 +12902,18 @@ function renderFormationScreen() {
     });
 
 
-  visibleOwnedRoster.forEach((character, index) => {
-
-    const box =
-      FORMATION_OWNED_SLOT_LAYOUT[
-        index
-      ];
-
-    if (!box) {
-
-      return;
-
-    }
+  visibleOwnedRoster.forEach((character) => {
 
     ownedList.appendChild(
       createFormationOwnedCard(
-        character,
-        box
+        character
       )
     );
 
   });
+
+  ownedList.scrollLeft =
+    ownedScrollLeft;
 
 
   if (ownedCount) {

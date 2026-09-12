@@ -5656,7 +5656,6 @@ h2 {
   height: 2.6%;
 }
 
-.formation-owned-list,
 .formation-slots {
   position: absolute;
 
@@ -5665,7 +5664,46 @@ h2 {
   pointer-events: none;
 }
 
-.formation-owned-card,
+.formation-owned-list {
+  position: absolute;
+
+  left: 13.22%;
+  top: 31.03%;
+
+  width: 34.63%;
+  height: 34.43%;
+
+  z-index: 2;
+
+  display: flex;
+
+  flex-direction: row;
+
+  align-items: stretch;
+
+  box-sizing: border-box;
+
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  pointer-events: auto;
+
+  -webkit-overflow-scrolling: touch;
+
+  scroll-snap-type: x mandatory;
+
+  background: #101114;
+
+  box-shadow:
+    inset 0 0 0 2px #2a2c30;
+
+  scrollbar-width: none;
+}
+
+.formation-owned-list::-webkit-scrollbar {
+  display: none;
+}
+
 .formation-slot {
   position: absolute;
 
@@ -5695,6 +5733,47 @@ h2 {
   appearance: none;
 
   -webkit-appearance: none;
+}
+
+.formation-owned-card {
+  position: relative;
+
+  flex: 0 0 25%;
+
+  width: 25%;
+  height: 100%;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  margin: 0;
+  padding: 1.6% 2.2%;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #ece8e0;
+
+  line-height: 1.15;
+
+  pointer-events: auto;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  scroll-snap-align: start;
 }
 
 .formation-owned-card.is-selected::after,
