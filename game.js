@@ -9622,6 +9622,14 @@ let bsGachaRevealToken = 0;
 
 let bsGachaSequenceToken = 0;
 
+let bsGachaRevealQueue = [];
+
+let bsGachaRevealQueueIndex = -1;
+
+let bsGachaRevealAdvance = null;
+
+let bsGachaRevealCycle = 0;
+
 
 const bsGachaBack =
   document.getElementById(
@@ -9831,6 +9839,13 @@ const bsGachaRevealTap =
   bsGachaReveal
     ? bsGachaReveal.querySelector(
       ".bs-gacha-reveal-tap"
+    )
+    : null;
+
+const bsGachaRevealProgress =
+  bsGachaReveal
+    ? bsGachaReveal.querySelector(
+      ".bs-gacha-reveal-progress"
     )
     : null;
 
@@ -10538,6 +10553,14 @@ function resetBsGachaReveal() {
 
   }
 
+  if (bsGachaRevealProgress) {
+
+    bsGachaRevealProgress.textContent = "";
+
+    bsGachaRevealProgress.hidden = true;
+
+  }
+
   if (bsGachaReveal) {
 
     bsGachaReveal.hidden = true;
@@ -10580,6 +10603,8 @@ function cancelBsGachaReveal() {
 
   bsGachaRevealActive = false;
 
+  settleBsGachaRevealAdvance("cancel");
+
   resetBsGachaReveal();
 
 }
@@ -10619,11 +10644,15 @@ function cancelBsGachaPullPresentation() {
 
   bsGachaSequenceToken += 1;
 
+  clearBsGachaRevealQueue();
+
   cancelBsGachaLighting();
 
   cancelBsGachaReveal();
 
   exitBsGachaPresentation();
+
+  setBsGachaBusy(false);
 
 }
 
@@ -10643,7 +10672,17 @@ function loadBsGachaRevealImage(src) {
 
     }
 
+    let settled = false;
+
     const finish = (ok) => {
+
+      if (settled) {
+
+        return;
+
+      }
+
+      settled = true;
 
       bsGachaRevealCharacter.onload = null;
 
@@ -10666,6 +10705,12 @@ function loadBsGachaRevealImage(src) {
       finish(false);
 
     };
+
+    bsGachaRevealCharacter.removeAttribute(
+      "src"
+    );
+
+    void bsGachaRevealCharacter.offsetWidth;
 
     bsGachaRevealCharacter.src = src;
 
@@ -10777,10 +10822,178 @@ function fillBsGachaRevealCopy(
 }
 
 
-async function playBsGachaSingleReveal(
-  result,
-  sequenceToken
+function clearBsGachaRevealQueue() {
+
+  bsGachaRevealQueue = [];
+
+  bsGachaRevealQueueIndex = -1;
+
+  bsGachaRevealCycle = 0;
+
+}
+
+
+function settleBsGachaRevealAdvance(reason) {
+
+  const pending = bsGachaRevealAdvance;
+
+  bsGachaRevealAdvance = null;
+
+  if (typeof pending === "function") {
+
+    pending(reason);
+
+  }
+
+}
+
+
+function armBsGachaRevealAdvance() {
+
+  settleBsGachaRevealAdvance("replaced");
+
+  return new Promise((resolve) => {
+
+    bsGachaRevealAdvance = resolve;
+
+  });
+
+}
+
+
+function updateBsGachaRevealProgress() {
+
+  if (!bsGachaRevealProgress) {
+
+    return;
+
+  }
+
+  const total = bsGachaRevealQueue.length;
+
+  if (
+    total <= 1 ||
+    bsGachaRevealQueueIndex < 0
+  ) {
+
+    bsGachaRevealProgress.textContent = "";
+
+    bsGachaRevealProgress.hidden = true;
+
+    return;
+
+  }
+
+  bsGachaRevealProgress.textContent =
+    String(bsGachaRevealQueueIndex + 1) +
+    " / " +
+    String(total);
+
+  bsGachaRevealProgress.hidden = false;
+
+}
+
+
+function getBsGachaRevealTiming(mode) {
+
+  const multi = mode === "multi";
+
+  if (prefersBsGachaReducedMotion()) {
+
+    return {
+      silhouette: multi ? 180 : 220,
+      flashHold: 70,
+      flashPeak: multi ? 0.22 : 0.3,
+      flashClear: multi ? 40 : 70,
+      beforeInfo: 80,
+      beforeReady: 40,
+      fade: 16
+    };
+
+  }
+
+  if (multi) {
+
+    return {
+      silhouette: 450,
+      flashHold: 90,
+      flashPeak: 0.86,
+      flashClear: 70,
+      beforeInfo: 250,
+      beforeReady: 280,
+      fade: 220
+    };
+
+  }
+
+  return {
+    silhouette: 1080,
+    flashHold: 110,
+    flashPeak: 0.96,
+    flashClear: 70,
+    beforeInfo: 240,
+    beforeReady: 260,
+    fade: 280
+  };
+
+}
+
+
+function replayBsGachaRevealClass(
+  element,
+  className
 ) {
+
+  if (!element) {
+
+    return;
+
+  }
+
+  element.classList.remove(className);
+
+  element.style.animation = "none";
+
+  void element.offsetWidth;
+
+  element.style.animation = "";
+
+  element.classList.add(className);
+
+}
+
+
+function finishBsGachaRevealSequence() {
+
+  resetBsGachaReveal();
+
+  resetBsGachaLighting();
+
+  clearBsGachaRevealQueue();
+
+  exitBsGachaPresentation();
+
+  bsGachaRevealActive = false;
+
+  bsGachaRevealReady = false;
+
+  bsGachaRevealClosing = false;
+
+  setBsGachaBusy(false);
+
+}
+
+
+async function presentBsGachaResult(
+  result,
+  sequenceToken,
+  options
+) {
+
+  const mode =
+    options && options.mode === "multi"
+      ? "multi"
+      : "single";
 
   if (
     bsGachaRevealActive ||
@@ -10820,16 +11033,23 @@ async function playBsGachaSingleReveal(
 
   bsGachaRevealActive = true;
 
-  const reduced =
-    prefersBsGachaReducedMotion();
+  bsGachaRevealCycle += 1;
+
+  const timing =
+    getBsGachaRevealTiming(mode);
 
   fillBsGachaRevealCopy(
     character,
     result
   );
 
+  updateBsGachaRevealProgress();
+
   bsGachaRevealCharacter.alt =
     character.name || "";
+
+  bsGachaRevealCharacter.dataset.cycle =
+    String(bsGachaRevealCycle);
 
   const loaded =
     await loadBsGachaRevealImage(menuSrc);
@@ -10870,7 +11090,8 @@ async function playBsGachaSingleReveal(
     "is-silhouette"
   );
 
-  bsGachaRevealCharacter.classList.add(
+  replayBsGachaRevealClass(
+    bsGachaRevealCharacter,
     "is-silhouette"
   );
 
@@ -10884,12 +11105,13 @@ async function playBsGachaSingleReveal(
 
   }
 
-  bsGachaRevealCharacter.classList.add(
+  replayBsGachaRevealClass(
+    bsGachaRevealCharacter,
     "is-shown"
   );
 
   await waitBsGachaLighting(
-    reduced ? 220 : 1080
+    timing.silhouette
   );
 
   if (token !== bsGachaRevealToken) {
@@ -10902,13 +11124,17 @@ async function playBsGachaSingleReveal(
 
   if (bsGachaRevealFlash) {
 
+    bsGachaRevealFlash.style.opacity = "0";
+
+    void bsGachaRevealFlash.offsetWidth;
+
     bsGachaRevealFlash.style.opacity =
-      reduced ? "0.3" : "0.96";
+      String(timing.flashPeak);
 
   }
 
   await waitBsGachaLighting(
-    reduced ? 70 : 110
+    timing.flashHold
   );
 
   if (token !== bsGachaRevealToken) {
@@ -10921,7 +11147,8 @@ async function playBsGachaSingleReveal(
     "is-silhouette"
   );
 
-  bsGachaRevealCharacter.classList.add(
+  replayBsGachaRevealClass(
+    bsGachaRevealCharacter,
     "is-color"
   );
 
@@ -10931,7 +11158,9 @@ async function playBsGachaSingleReveal(
 
   setBsGachaRevealPhase("color");
 
-  await waitBsGachaLighting(70);
+  await waitBsGachaLighting(
+    timing.flashClear
+  );
 
   if (bsGachaRevealFlash) {
 
@@ -10940,7 +11169,7 @@ async function playBsGachaSingleReveal(
   }
 
   await waitBsGachaLighting(
-    reduced ? 80 : 240
+    timing.beforeInfo
   );
 
   if (token !== bsGachaRevealToken) {
@@ -10960,7 +11189,7 @@ async function playBsGachaSingleReveal(
   setBsGachaRevealPhase("info");
 
   await waitBsGachaLighting(
-    reduced ? 40 : 260
+    timing.beforeReady
   );
 
   if (token !== bsGachaRevealToken) {
@@ -10993,6 +11222,22 @@ async function playBsGachaSingleReveal(
 }
 
 
+async function playBsGachaSingleReveal(
+  result,
+  sequenceToken
+) {
+
+  return presentBsGachaResult(
+    result,
+    sequenceToken,
+    {
+      mode: "single"
+    }
+  );
+
+}
+
+
 function closeBsGachaReveal() {
 
   if (
@@ -11009,42 +11254,26 @@ function closeBsGachaReveal() {
 
   bsGachaRevealClosing = true;
 
-  const token = bsGachaRevealToken;
+  if (bsGachaReveal) {
 
-  bsGachaReveal.classList.remove(
-    "is-ready"
-  );
+    bsGachaReveal.classList.remove(
+      "is-ready"
+    );
 
-  bsGachaReveal.classList.add(
-    "is-closing"
-  );
+    bsGachaReveal.classList.add(
+      "is-closing"
+    );
 
-  bsGachaReveal.setAttribute(
-    "aria-hidden",
-    "true"
-  );
+    bsGachaReveal.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+  }
 
   setBsGachaRevealPhase("closing");
 
-  window.setTimeout(() => {
-
-    if (token !== bsGachaRevealToken) {
-
-      return;
-
-    }
-
-    resetBsGachaReveal();
-
-    resetBsGachaLighting();
-
-    exitBsGachaPresentation();
-
-    bsGachaRevealActive = false;
-
-    setBsGachaBusy(false);
-
-  }, prefersBsGachaReducedMotion() ? 16 : 280);
+  settleBsGachaRevealAdvance("advance");
 
 }
 
@@ -11062,18 +11291,182 @@ function handleBsGachaRevealTap(event) {
 }
 
 
+async function fadeBsGachaRevealOut(
+  sequenceToken
+) {
+
+  const token = bsGachaRevealToken;
+
+  const timing =
+    getBsGachaRevealTiming(
+      bsGachaRevealQueue.length > 1
+        ? "multi"
+        : "single"
+    );
+
+  await waitBsGachaLighting(
+    timing.fade
+  );
+
+  if (
+    sequenceToken !== bsGachaSequenceToken ||
+    token !== bsGachaRevealToken
+  ) {
+
+    return false;
+
+  }
+
+  resetBsGachaReveal();
+
+  bsGachaRevealActive = false;
+
+  return true;
+
+}
+
+
+function abortBsGachaRevealSequence(
+  sequenceToken
+) {
+
+  if (sequenceToken !== bsGachaSequenceToken) {
+
+    return;
+
+  }
+
+  clearBsGachaRevealQueue();
+
+  exitBsGachaPresentation();
+
+  bsGachaRevealActive = false;
+
+  setBsGachaBusy(false);
+
+}
+
+
+async function playBsGachaRevealQueue(
+  sequenceToken,
+  results
+) {
+
+  bsGachaRevealQueue =
+    Array.isArray(results)
+      ? results.slice()
+      : [];
+
+  bsGachaRevealQueueIndex = 0;
+
+  const mode =
+    isBsGachaSingleResult(bsGachaRevealQueue)
+      ? "single"
+      : "multi";
+
+  while (
+    bsGachaRevealQueueIndex <
+    bsGachaRevealQueue.length
+  ) {
+
+    if (sequenceToken !== bsGachaSequenceToken) {
+
+      return;
+
+    }
+
+    const advance =
+      armBsGachaRevealAdvance();
+
+    const revealed =
+      await presentBsGachaResult(
+        bsGachaRevealQueue[
+          bsGachaRevealQueueIndex
+        ],
+        sequenceToken,
+        {
+          mode: mode
+        }
+      );
+
+    if (sequenceToken !== bsGachaSequenceToken) {
+
+      return;
+
+    }
+
+    if (!revealed) {
+
+      settleBsGachaRevealAdvance("failed");
+
+      abortBsGachaRevealSequence(
+        sequenceToken
+      );
+
+      return;
+
+    }
+
+    const action = await advance;
+
+    if (
+      action !== "advance" ||
+      sequenceToken !== bsGachaSequenceToken
+    ) {
+
+      return;
+
+    }
+
+    const last =
+      bsGachaRevealQueueIndex >=
+      bsGachaRevealQueue.length - 1;
+
+    const faded =
+      await fadeBsGachaRevealOut(
+        sequenceToken
+      );
+
+    if (
+      !faded ||
+      sequenceToken !== bsGachaSequenceToken
+    ) {
+
+      return;
+
+    }
+
+    if (last) {
+
+      finishBsGachaRevealSequence();
+
+      return;
+
+    }
+
+    bsGachaRevealQueueIndex += 1;
+
+  }
+
+}
+
+
 async function playBsGachaPullPresentation(
   token,
   rarity,
-  single,
-  result
+  results
 ) {
+
+  const list =
+    Array.isArray(results)
+      ? results.slice()
+      : [];
 
   const played =
     await playBsGachaLighting(
       rarity,
       {
-        holdBusy: single
+        holdBusy: true
       }
     );
 
@@ -11087,6 +11480,8 @@ async function playBsGachaPullPresentation(
       !bsGachaRevealActive
     ) {
 
+      clearBsGachaRevealQueue();
+
       exitBsGachaPresentation();
 
       setBsGachaBusy(false);
@@ -11097,32 +11492,10 @@ async function playBsGachaPullPresentation(
 
   }
 
-  if (!single) {
-
-    exitBsGachaPresentation();
-
-    setBsGachaBusy(false);
-
-    return;
-
-  }
-
-  const revealed =
-    await playBsGachaSingleReveal(
-      result,
-      token
-    );
-
-  if (
-    token === bsGachaSequenceToken &&
-    !revealed
-  ) {
-
-    exitBsGachaPresentation();
-
-    setBsGachaBusy(false);
-
-  }
+  await playBsGachaRevealQueue(
+    token,
+    list
+  );
 
 }
 
@@ -11141,7 +11514,7 @@ function startBsGachaPullPresentation(outcome) {
   const results =
     outcome &&
     Array.isArray(outcome.results)
-      ? outcome.results
+      ? outcome.results.slice()
       : [];
 
   const rarity =
@@ -11163,8 +11536,7 @@ function startBsGachaPullPresentation(outcome) {
   playBsGachaPullPresentation(
     token,
     rarity,
-    isBsGachaSingleResult(results),
-    results[0]
+    results
   );
 
   return true;
@@ -12007,12 +12379,6 @@ function openBsGacha() {
 
 
 function closeBsGacha() {
-
-  if (isBsGachaBusy) {
-
-    return;
-
-  }
 
   cancelBsGachaPullPresentation();
 

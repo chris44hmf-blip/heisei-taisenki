@@ -88,6 +88,7 @@ h3,
 .bs-gacha-reveal-name,
 .bs-gacha-reveal-group,
 .bs-gacha-reveal-status,
+.bs-gacha-reveal-progress,
 .bs-gacha-reveal-tap,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
@@ -2018,6 +2019,7 @@ h2 {
 .bs-gacha-reveal-name,
 .bs-gacha-reveal-group,
 .bs-gacha-reveal-status,
+.bs-gacha-reveal-progress,
 .bs-gacha-reveal-tap,
 .bs-gacha-pay-note {
   margin: 0;
@@ -2317,7 +2319,42 @@ h2 {
   transform: rotate(-7deg);
 }
 
+.bs-gacha-reveal-progress {
+  position: absolute;
+
+  margin: 0;
+
+  pointer-events: none;
+
+  top: max(8px, env(safe-area-inset-top, 0px));
+
+  right: max(
+    14px,
+    4vw,
+    env(safe-area-inset-right, 0px)
+  );
+
+  z-index: 2;
+
+  color: #e8eef8;
+
+  font-size: clamp(12px, 1.8vw, 16px);
+
+  letter-spacing: 0.14em;
+
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+
+  opacity: 0;
+}
+
+.bs-gacha-reveal.is-open .bs-gacha-reveal-progress {
+  opacity: 1;
+
+  transition: opacity 180ms ease;
+}
+
 .bs-gacha-reveal-status[hidden],
+.bs-gacha-reveal-progress[hidden],
 .bs-gacha-reveal-tap[hidden] {
   display: none;
 }
@@ -2327,7 +2364,11 @@ h2 {
 
   right: 0;
 
-  bottom: max(8px, 1.6vh);
+  bottom: max(
+    8px,
+    1.6vh,
+    env(safe-area-inset-bottom, 0px)
+  );
 
   color: #eef2f8;
 
@@ -2394,6 +2435,10 @@ h2 {
 
   .bs-gacha-reveal-status {
     top: 14%;
+  }
+
+  .bs-gacha-reveal-progress {
+    font-size: 12px;
   }
 
 }
@@ -7530,6 +7575,7 @@ h3,
 .bs-gacha-reveal-name,
 .bs-gacha-reveal-group,
 .bs-gacha-reveal-status,
+.bs-gacha-reveal-progress,
 .bs-gacha-reveal-tap,
 .doritike-gacha-pull,
 .doritike-gacha-result-item,
