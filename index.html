@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=bs-multi-1">
+  <link rel="stylesheet" href="style.css?v=bs-summary-1">
 </head>
 
 <body>
@@ -605,6 +605,29 @@
     <p class="bs-gacha-reveal-tap" hidden>
       タップして続ける
     </p>
+
+  </div>
+
+  <div
+    id="bs-gacha-summary"
+    class="bs-gacha-summary"
+    hidden
+    aria-hidden="true"
+  >
+
+    <p class="bs-gacha-summary-title">10連結果</p>
+
+    <div
+      class="bs-gacha-summary-grid"
+      role="list"
+    ></div>
+
+    <button
+      type="button"
+      class="bs-gacha-summary-close"
+    >
+      閉じる
+    </button>
 
   </div>
 
@@ -2061,7 +2084,7 @@
   </div>
 
 
-  <script src="game.js?v=bs-multi-1"></script>
+  <script src="game.js?v=bs-summary-1"></script>
 
 </body>
 </html>

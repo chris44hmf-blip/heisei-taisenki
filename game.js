@@ -9630,6 +9630,12 @@ let bsGachaRevealAdvance = null;
 
 let bsGachaRevealCycle = 0;
 
+let bsGachaSummaryOpen = false;
+
+let bsGachaSummaryClosing = false;
+
+let bsGachaSummaryResults = [];
+
 
 const bsGachaBack =
   document.getElementById(
@@ -9846,6 +9852,25 @@ const bsGachaRevealProgress =
   bsGachaReveal
     ? bsGachaReveal.querySelector(
       ".bs-gacha-reveal-progress"
+    )
+    : null;
+
+const bsGachaSummary =
+  document.getElementById(
+    "bs-gacha-summary"
+  );
+
+const bsGachaSummaryGrid =
+  bsGachaSummary
+    ? bsGachaSummary.querySelector(
+      ".bs-gacha-summary-grid"
+    )
+    : null;
+
+const bsGachaSummaryClose =
+  bsGachaSummary
+    ? bsGachaSummary.querySelector(
+      ".bs-gacha-summary-close"
     )
     : null;
 
@@ -10650,6 +10675,8 @@ function cancelBsGachaPullPresentation() {
 
   cancelBsGachaReveal();
 
+  resetBsGachaSummary();
+
   exitBsGachaPresentation();
 
   setBsGachaBusy(false);
@@ -10963,11 +10990,360 @@ function replayBsGachaRevealClass(
 }
 
 
+function getBsGachaSummaryStarMark(rarity) {
+
+  const label =
+    getBsGachaStarLabel(rarity);
+
+  const stars =
+    String(label).replace(
+      /[^★]/g,
+      ""
+    );
+
+  return stars || label;
+
+}
+
+
+function buildBsGachaSummaryCard(
+  result,
+  index
+) {
+
+  const card =
+    document.createElement("article");
+
+  card.className =
+    "bs-gacha-summary-card";
+
+  card.setAttribute("role", "listitem");
+
+  card.dataset.index = String(index);
+
+  const rarity = Number(
+    result && result.rarity
+  );
+
+  if (
+    rarity >= 1 &&
+    rarity <= 4
+  ) {
+
+    card.dataset.rarity =
+      String(rarity);
+
+  }
+
+  const character =
+    result &&
+    CHARACTERS[result.characterId];
+
+  const menuSrc =
+    character &&
+    character.images &&
+    character.images.menu;
+
+  const image =
+    document.createElement("img");
+
+  image.className =
+    "bs-gacha-summary-image";
+
+  image.alt =
+    character && character.name
+      ? character.name
+      : "";
+
+  image.draggable = false;
+
+  if (menuSrc) {
+
+    image.src = menuSrc;
+
+  }
+
+  const rarityEl =
+    document.createElement("p");
+
+  rarityEl.className =
+    "bs-gacha-summary-rarity";
+
+  const label =
+    getBsGachaStarLabel(
+      result && result.rarity
+    );
+
+  rarityEl.textContent =
+    getBsGachaSummaryStarMark(
+      result && result.rarity
+    );
+
+  if (label) {
+
+    rarityEl.title = label;
+
+    rarityEl.setAttribute(
+      "aria-label",
+      label
+    );
+
+  }
+
+  const nameEl =
+    document.createElement("p");
+
+  nameEl.className =
+    "bs-gacha-summary-name";
+
+  nameEl.textContent =
+    character && character.name
+      ? character.name
+      : "";
+
+  const statusEl =
+    document.createElement("p");
+
+  statusEl.className =
+    "bs-gacha-summary-status";
+
+  if (result && result.isNew === true) {
+
+    statusEl.textContent = "NEW";
+
+    statusEl.classList.add("is-new");
+
+  } else {
+
+    const amount = Number(
+      result && result.fragmentAmount
+    );
+
+    const fragments =
+      Number.isFinite(amount)
+        ? Math.max(0, Math.floor(amount))
+        : 0;
+
+    statusEl.textContent =
+      "カケラ +" + String(fragments);
+
+    statusEl.classList.add(
+      "is-fragment"
+    );
+
+  }
+
+  card.append(
+    image,
+    rarityEl,
+    nameEl,
+    statusEl
+  );
+
+  return card;
+
+}
+
+
+function resetBsGachaSummary() {
+
+  bsGachaSummaryOpen = false;
+
+  bsGachaSummaryClosing = false;
+
+  bsGachaSummaryResults = [];
+
+  if (bsGachaSummaryGrid) {
+
+    bsGachaSummaryGrid.replaceChildren();
+
+  }
+
+  if (bsGachaSummaryClose) {
+
+    bsGachaSummaryClose.disabled = false;
+
+  }
+
+  if (!bsGachaSummary) {
+
+    return;
+
+  }
+
+  bsGachaSummary.hidden = true;
+
+  bsGachaSummary.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  bsGachaSummary.classList.remove(
+    "is-open",
+    "is-closing"
+  );
+
+}
+
+
+function openBsGachaSummary(results) {
+
+  if (
+    !bsGachaSummary ||
+    !bsGachaSummaryGrid ||
+    bsGachaSummaryOpen ||
+    !Array.isArray(results) ||
+    results.length < 2
+  ) {
+
+    return false;
+
+  }
+
+  bsGachaSummaryResults =
+    results.slice();
+
+  bsGachaSummaryGrid.replaceChildren();
+
+  const reduced =
+    prefersBsGachaReducedMotion();
+
+  for (
+    let index = 0;
+    index < bsGachaSummaryResults.length;
+    index += 1
+  ) {
+
+    const card =
+      buildBsGachaSummaryCard(
+        bsGachaSummaryResults[index],
+        index
+      );
+
+    if (!reduced) {
+
+      card.style.animationDelay =
+        String(index * 50) + "ms";
+
+    }
+
+    bsGachaSummaryGrid.appendChild(
+      card
+    );
+
+  }
+
+  bsGachaSummaryOpen = true;
+
+  bsGachaSummaryClosing = false;
+
+  bsGachaSummary.hidden = false;
+
+  bsGachaSummary.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+  bsGachaSummary.classList.remove(
+    "is-closing"
+  );
+
+  void bsGachaSummary.offsetWidth;
+
+  bsGachaSummary.classList.add(
+    "is-open"
+  );
+
+  if (bsGachaScreen) {
+
+    bsGachaScreen.classList.add(
+      "is-presenting"
+    );
+
+  }
+
+  setBsGachaBusy(true);
+
+  return true;
+
+}
+
+
+function finishBsGachaSummary() {
+
+  resetBsGachaSummary();
+
+  resetBsGachaReveal();
+
+  resetBsGachaLighting();
+
+  clearBsGachaRevealQueue();
+
+  exitBsGachaPresentation();
+
+  bsGachaRevealActive = false;
+
+  bsGachaRevealReady = false;
+
+  bsGachaRevealClosing = false;
+
+  setBsGachaBusy(false);
+
+}
+
+
+function closeBsGachaSummary() {
+
+  if (
+    !bsGachaSummaryOpen ||
+    bsGachaSummaryClosing ||
+    !bsGachaSummary
+  ) {
+
+    return;
+
+  }
+
+  bsGachaSummaryClosing = true;
+
+  if (bsGachaSummaryClose) {
+
+    bsGachaSummaryClose.disabled = true;
+
+  }
+
+  const token = bsGachaSequenceToken;
+
+  bsGachaSummary.classList.add(
+    "is-closing"
+  );
+
+  bsGachaSummary.classList.remove(
+    "is-open"
+  );
+
+  window.setTimeout(() => {
+
+    if (token !== bsGachaSequenceToken) {
+
+      return;
+
+    }
+
+    finishBsGachaSummary();
+
+  }, prefersBsGachaReducedMotion() ? 16 : 200);
+
+}
+
+
 function finishBsGachaRevealSequence() {
 
   resetBsGachaReveal();
 
   resetBsGachaLighting();
+
+  resetBsGachaSummary();
 
   clearBsGachaRevealQueue();
 
@@ -11338,6 +11714,8 @@ function abortBsGachaRevealSequence(
 
   clearBsGachaRevealQueue();
 
+  resetBsGachaSummary();
+
   exitBsGachaPresentation();
 
   bsGachaRevealActive = false;
@@ -11437,6 +11815,19 @@ async function playBsGachaRevealQueue(
     }
 
     if (last) {
+
+      if (
+        mode === "multi" &&
+        openBsGachaSummary(
+          bsGachaRevealQueue
+        )
+      ) {
+
+        clearBsGachaRevealQueue();
+
+        return;
+
+      }
 
       finishBsGachaRevealSequence();
 
@@ -12437,6 +12828,22 @@ if (bsGachaReveal) {
       }
 
       handleBsGachaRevealTap(event);
+
+    }
+  );
+
+}
+
+
+if (bsGachaSummaryClose) {
+
+  bsGachaSummaryClose.addEventListener(
+    "click",
+    (event) => {
+
+      event.preventDefault();
+
+      closeBsGachaSummary();
 
     }
   );
