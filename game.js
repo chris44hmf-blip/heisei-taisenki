@@ -2114,6 +2114,180 @@ const STAGES = {
 
     ]
 
+  },
+
+  28: {
+
+    id: 28,
+
+    year: 28,
+
+    title: "街とスマホがつながる",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の位置ゲースマホ",
+
+      emoji: "📍",
+
+      monumentId: "year-28",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 2800, type: "furyou_oraora" },
+
+      { delay: 4200, type: "furyou_gyaru_o" },
+
+      { delay: 5700, type: "furyou_regent" },
+
+      { delay: 7300, type: "furyou_bontan" },
+
+      { delay: 9000, type: "furyou_jimoto_senpai" },
+
+      { delay: 10800, type: "furyou_chari_bo" },
+
+      { delay: 12700, type: "furyou_jimoto_saikyo" },
+
+      { delay: 14700, type: "furyou_oraora" },
+
+      { delay: 16800, type: "furyou_koshipan" },
+
+      { delay: 19000, type: "furyou_regent" },
+
+      { delay: 21400, type: "furyou_kaizo_chari" },
+
+      { delay: 24100, type: "ippan_garakee" },
+
+      { delay: 27200, type: "furyou_jimoto_saikyo" },
+
+      { delay: 37000, type: "furyou_kaizo_chari" }
+
+    ]
+
+  },
+
+  29: {
+
+    id: 29,
+
+    year: 29,
+
+    title: "映える日常",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のフォトフレーム",
+
+      emoji: "🖼️",
+
+      monumentId: "year-29",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_gyaru_o" },
+
+      { delay: 2700, type: "furyou_chari_bo" },
+
+      { delay: 4000, type: "furyou_oraora" },
+
+      { delay: 5400, type: "furyou_regent" },
+
+      { delay: 6900, type: "furyou_bontan" },
+
+      { delay: 8500, type: "furyou_jimoto_senpai" },
+
+      { delay: 10200, type: "furyou_oraora" },
+
+      { delay: 12000, type: "furyou_jimoto_saikyo" },
+
+      { delay: 13900, type: "furyou_chari_bo" },
+
+      { delay: 15900, type: "furyou_koshipan" },
+
+      { delay: 18000, type: "furyou_regent" },
+
+      { delay: 20300, type: "furyou_kaizo_chari" },
+
+      { delay: 22900, type: "ippan_prilian" },
+
+      { delay: 26000, type: "furyou_jimoto_saikyo" },
+
+      { delay: 36500, type: "furyou_koshipan" }
+
+    ]
+
+  },
+
+  30: {
+
+    id: 30,
+
+    year: 30,
+
+    title: "縦画面の時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の縦型動画スマホ",
+
+      emoji: "📱",
+
+      monumentId: "year-30",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 2600, type: "furyou_oraora" },
+
+      { delay: 3800, type: "furyou_regent" },
+
+      { delay: 5100, type: "furyou_gyaru_o" },
+
+      { delay: 6500, type: "furyou_bontan" },
+
+      { delay: 8000, type: "furyou_jimoto_saikyo" },
+
+      { delay: 9600, type: "furyou_chari_bo" },
+
+      { delay: 11300, type: "furyou_koshipan" },
+
+      { delay: 13100, type: "furyou_oraora" },
+
+      { delay: 15000, type: "furyou_kaizo_chari" },
+
+      { delay: 17100, type: "furyou_regent" },
+
+      { delay: 19400, type: "furyou_jimoto_saikyo" },
+
+      { delay: 22000, type: "furyou_koshipan" },
+
+      { delay: 25100, type: "furyou_kaizo_chari" },
+
+      { delay: 36000, type: "furyou_jimoto_saikyo" }
+
+    ]
+
   }
 
 };
