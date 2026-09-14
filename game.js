@@ -603,6 +603,8 @@ let currentStageId = 1;
 
 let activeBattleStage = null;
 
+let activeMedalSnapshot = [];
+
 
 function formatHeiseiYear(year) {
 
@@ -1750,9 +1752,45 @@ function isPlainObject(value) {
 }
 
 
-function normalizeMedalEquipped(value) {
+function medalIdFromEquippedValue(raw) {
+
+  if (
+    raw === null ||
+    raw === undefined ||
+    typeof raw === "boolean"
+  ) {
+
+    return null;
+
+  }
+
+
+  const id =
+    typeof raw === "number"
+      ? raw
+      : Number(raw);
+
+
+  if (!Number.isInteger(id)) {
+
+    return null;
+
+  }
+
+
+  return id;
+
+}
+
+
+function sanitizeEquippedMedals(
+  value,
+  owned
+) {
 
   const slots = [null, null, null];
+
+  const seen = {};
 
 
   if (!Array.isArray(value)) {
@@ -1767,12 +1805,35 @@ function normalizeMedalEquipped(value) {
 
   while (index < 3) {
 
+    const raw =
+      index < value.length
+        ? value[index]
+        : null;
+
+    const id =
+      medalIdFromEquippedValue(raw);
+
+    const medal =
+      id === null
+        ? null
+        : getMedalDef(id);
+
+    const key =
+      medal
+        ? String(medal.id)
+        : "";
+
+
     if (
-      index < value.length &&
-      value[index] !== undefined
+      medal &&
+      owned &&
+      owned[key] === true &&
+      !seen[key]
     ) {
 
-      slots[index] = value[index];
+      slots[index] = medal.id;
+
+      seen[key] = true;
 
     }
 
@@ -1828,8 +1889,9 @@ function sanitizeMedalProgress(value) {
 
 
   empty.equipped =
-    normalizeMedalEquipped(
-      value.equipped
+    sanitizeEquippedMedals(
+      value.equipped,
+      empty.owned
     );
 
 
@@ -2031,6 +2093,531 @@ function ownsMedal(medalId) {
   );
 
 }
+
+
+function getEquippedMedals() {
+
+  return medalProgress.equipped.slice();
+
+}
+
+
+function equipMedal(slotIndex, medalId) {
+
+  if (
+    !Number.isInteger(slotIndex) ||
+    slotIndex < 0 ||
+    slotIndex > 2
+  ) {
+
+    return false;
+
+  }
+
+
+  const medal =
+    getMedalDef(medalId);
+
+
+  if (
+    !medal ||
+    !ownsMedal(medal.id)
+  ) {
+
+    return false;
+
+  }
+
+
+  const current =
+    getEquippedMedals();
+
+  let index = 0;
+
+
+  while (index < 3) {
+
+    if (
+      index !== slotIndex &&
+      current[index] === medal.id
+    ) {
+
+      return false;
+
+    }
+
+    index += 1;
+
+  }
+
+
+  if (current[slotIndex] === medal.id) {
+
+    return true;
+
+  }
+
+
+  current[slotIndex] = medal.id;
+
+  medalProgress.equipped = current;
+
+  saveMedalProgress();
+
+
+  return true;
+
+}
+
+
+function unequipMedal(slotIndex) {
+
+  if (
+    !Number.isInteger(slotIndex) ||
+    slotIndex < 0 ||
+    slotIndex > 2
+  ) {
+
+    return false;
+
+  }
+
+
+  const current =
+    getEquippedMedals();
+
+
+  if (current[slotIndex] === null) {
+
+    return true;
+
+  }
+
+
+  current[slotIndex] = null;
+
+  medalProgress.equipped = current;
+
+  saveMedalProgress();
+
+
+  return true;
+
+}
+
+
+function resolveEquippedMedals() {
+
+  const snapshot = [];
+
+  const seen = {};
+
+  const equipped =
+    getEquippedMedals();
+
+  let index = 0;
+
+
+  while (index < equipped.length) {
+
+    const id = equipped[index];
+
+    const medal =
+      id === null
+        ? null
+        : getMedalDef(id);
+
+    const key =
+      medal
+        ? String(medal.id)
+        : "";
+
+
+    if (
+      medal &&
+      ownsMedal(medal.id) &&
+      !seen[key]
+    ) {
+
+      snapshot.push({
+
+        id: medal.id,
+
+        name: medal.name,
+
+        effect: medal.effect
+
+      });
+
+      seen[key] = true;
+
+    }
+
+    index += 1;
+
+  }
+
+
+  return snapshot;
+
+}
+
+
+function getActiveMedalSnapshot() {
+
+  return activeMedalSnapshot.map(
+    (medal) => {
+
+      return {
+
+        id: medal.id,
+
+        name: medal.name,
+
+        effect: medal.effect
+
+      };
+
+    }
+  );
+
+}
+
+
+function clearActiveMedalSnapshot() {
+
+  activeMedalSnapshot = [];
+
+}
+
+
+let medalSelectorSlot = null;
+
+
+function renderMedalEquipment() {
+
+  const root =
+    document.getElementById(
+      "formation-medal-slots"
+    );
+
+
+  if (!root) {
+
+    return;
+
+  }
+
+
+  root.innerHTML = "";
+
+  const equipped =
+    getEquippedMedals();
+
+  let index = 0;
+
+
+  while (index < 3) {
+
+    const medalId = equipped[index];
+
+    const medal =
+      medalId === null
+        ? null
+        : getMedalDef(medalId);
+
+    const name =
+      medal
+        ? medal.name
+        : "未装備";
+
+    const button =
+      document.createElement("button");
+
+
+    button.type = "button";
+
+    button.className =
+      "formation-medal-slot";
+
+    if (!medal) {
+
+      button.classList.add("is-empty");
+
+    }
+
+    button.dataset.medalSlot =
+      String(index);
+
+    button.title = name;
+
+    button.innerHTML = `
+
+      <span class="formation-medal-slot-label">SLOT ${index + 1}</span>
+      <span class="formation-medal-slot-name"><span class="formation-medal-mark" aria-hidden="true">◎</span> ${name}</span>
+
+    `;
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        openMedalSelector(index);
+
+      }
+    );
+
+    root.appendChild(button);
+
+    index += 1;
+
+  }
+
+}
+
+
+function renderMedalSelector() {
+
+  const list =
+    document.getElementById(
+      "formation-medal-list"
+    );
+
+  const empty =
+    document.getElementById(
+      "formation-medal-empty"
+    );
+
+
+  if (!list) {
+
+    return;
+
+  }
+
+
+  list.innerHTML = "";
+
+  const owned =
+    listMedals().filter((medal) => {
+
+      return ownsMedal(medal.id);
+
+    });
+
+  owned.sort((left, right) => {
+
+    return left.id - right.id;
+
+  });
+
+
+  if (empty) {
+
+    empty.hidden = owned.length > 0;
+
+  }
+
+
+  const equipped =
+    getEquippedMedals();
+
+
+  owned.forEach((medal) => {
+
+    const usedAt =
+      equipped.indexOf(medal.id);
+
+    const blocked =
+      usedAt !== -1 &&
+      usedAt !== medalSelectorSlot;
+
+    const button =
+      document.createElement("button");
+
+
+    button.type = "button";
+
+    button.className =
+      "formation-medal-option";
+
+    button.disabled = blocked;
+
+    button.textContent =
+      blocked
+        ? medal.name + "（装備中）"
+        : medal.name;
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        if (
+          medalSelectorSlot === null ||
+          blocked
+        ) {
+
+          return;
+
+        }
+
+
+        if (
+          equipMedal(
+            medalSelectorSlot,
+            medal.id
+          )
+        ) {
+
+          closeMedalSelector();
+
+          renderMedalEquipment();
+
+        }
+
+      }
+    );
+
+    list.appendChild(button);
+
+  });
+
+}
+
+
+function openMedalSelector(slotIndex) {
+
+  if (
+    !Number.isInteger(slotIndex) ||
+    slotIndex < 0 ||
+    slotIndex > 2
+  ) {
+
+    return;
+
+  }
+
+
+  const selector =
+    document.getElementById(
+      "formation-medal-selector"
+    );
+
+
+  if (!selector) {
+
+    return;
+
+  }
+
+
+  medalSelectorSlot = slotIndex;
+
+  renderMedalSelector();
+
+  selector.hidden = false;
+
+}
+
+
+function closeMedalSelector() {
+
+  medalSelectorSlot = null;
+
+  const selector =
+    document.getElementById(
+      "formation-medal-selector"
+    );
+
+
+  if (selector) {
+
+    selector.hidden = true;
+
+  }
+
+}
+
+
+function bindMedalEquipmentUi() {
+
+  const selector =
+    document.getElementById(
+      "formation-medal-selector"
+    );
+
+  const unequip =
+    document.getElementById(
+      "formation-medal-unequip"
+    );
+
+  const backdrop =
+    document.getElementById(
+      "formation-medal-selector-backdrop"
+    );
+
+
+  if (
+    !selector ||
+    selector.dataset.bound === "1"
+  ) {
+
+    return;
+
+  }
+
+
+  selector.dataset.bound = "1";
+
+
+  if (unequip) {
+
+    unequip.addEventListener(
+      "click",
+      () => {
+
+        if (medalSelectorSlot === null) {
+
+          return;
+
+        }
+
+
+        if (
+          unequipMedal(
+            medalSelectorSlot
+          )
+        ) {
+
+          closeMedalSelector();
+
+          renderMedalEquipment();
+
+        }
+
+      }
+    );
+
+  }
+
+
+  if (backdrop) {
+
+    backdrop.addEventListener(
+      "click",
+      () => {
+
+        closeMedalSelector();
+
+      }
+    );
+
+  }
+
+}
+
+
+bindMedalEquipmentUi();
 
 
 function grantMedal(medalId) {
@@ -3446,6 +4033,9 @@ function startBattle() {
 
 
   activeBattleStage = stage;
+
+  activeMedalSnapshot =
+    resolveEquippedMedals();
 
 
  /* 戦闘BGMに切り替え */
@@ -17675,6 +18265,8 @@ function startFormationEditing() {
 
   closeFormationFormDetail(true);
 
+  closeMedalSelector();
+
   formationRarityFilter =
     FORMATION_RARITY_FILTER_ALL;
 
@@ -17780,6 +18372,8 @@ function resetFormationEditing() {
     null;
 
   closeFormationFormDetail(true);
+
+  closeMedalSelector();
 
   formationRarityFilter =
     FORMATION_RARITY_FILTER_ALL;
@@ -19062,6 +19656,8 @@ function renderFormationScreen(
 
 
   updateFormationRarityFilterButtons();
+
+  renderMedalEquipment();
 
 }
 
@@ -22249,6 +22845,8 @@ updateMoshUI();
 ========================= */
 
 function stopBattle() {
+
+  clearActiveMedalSnapshot();
 
   battleRunning = false;
 

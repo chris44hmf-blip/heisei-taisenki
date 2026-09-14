@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=stage-progress-1">
+  <link rel="stylesheet" href="style.css?v=medal-slots-1">
 </head>
 
 <body>
@@ -1958,6 +1958,78 @@
 
   </div>
 
+  <section
+    class="formation-medal-bar"
+    aria-label="遺物メダル"
+  >
+
+    <div class="formation-medal-heading">
+      遺物メダル
+    </div>
+
+    <div
+      id="formation-medal-slots"
+      class="formation-medal-slots"
+    ></div>
+
+  </section>
+
+  <div
+    id="formation-medal-selector"
+    class="formation-medal-selector"
+    hidden
+  >
+
+    <button
+      id="formation-medal-selector-backdrop"
+      class="formation-medal-selector-backdrop"
+      type="button"
+      aria-label="閉じる"
+    ></button>
+
+    <div
+      class="formation-medal-selector-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="formation-medal-selector-title"
+    >
+
+      <div class="formation-medal-selector-head">
+
+        <div
+          id="formation-medal-selector-title"
+          class="formation-medal-selector-title"
+        >
+          遺物メダル
+        </div>
+
+        <button
+          id="formation-medal-unequip"
+          class="formation-medal-unequip"
+          type="button"
+        >
+          外す
+        </button>
+
+      </div>
+
+      <p
+        id="formation-medal-empty"
+        class="formation-medal-empty"
+        hidden
+      >
+        所持している遺物メダルはありません
+      </p>
+
+      <div
+        id="formation-medal-list"
+        class="formation-medal-list"
+      ></div>
+
+    </div>
+
+  </div>
+
 </section>
   <!-- 縦画面警告 -->
   <div id="rotate-message">
@@ -1969,7 +2041,7 @@
   </div>
 
 
-  <script src="game.js?v=story-unlock-1"></script>
+  <script src="game.js?v=medal-slots-1"></script>
 
 </body>
 </html>

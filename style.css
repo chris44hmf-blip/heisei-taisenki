@@ -6980,6 +6980,8 @@ h2 {
   align-items: center;
   justify-content: center;
 
+  flex-direction: column;
+
   overflow: hidden;
 
   min-height: 0;
@@ -6987,6 +6989,7 @@ h2 {
   background: #050505;
 
   --formation-ui-font: var(--font-ui);
+  --formation-medal-bar: 54px;
 }
 
 .formation-stage {
@@ -6994,8 +6997,13 @@ h2 {
 
   width: min(
     100%,
-    calc(var(--app-height, 100dvh) * 1672 / 941)
+    calc(
+      (var(--app-height, 100dvh) - var(--formation-medal-bar))
+      * 1672 / 941
+    )
   );
+
+  max-height: calc(100% - var(--formation-medal-bar));
 
   aspect-ratio: 1672 / 941;
 
@@ -7399,6 +7407,280 @@ h2 {
 
 .formation-form-detail[hidden] {
   display: none !important;
+}
+
+.formation-medal-bar {
+  flex: 0 0 var(--formation-medal-bar);
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  width: min(
+    100%,
+    calc(
+      (var(--app-height, 100dvh) - var(--formation-medal-bar))
+      * 1672 / 941
+    )
+  );
+
+  height: var(--formation-medal-bar);
+
+  box-sizing: border-box;
+
+  padding: 4px 8px;
+
+  background: #0c0c0c;
+
+  border-top: 1px solid #3a3428;
+
+  line-height: 1.2;
+}
+
+.formation-medal-heading {
+  flex: 0 0 auto;
+
+  color: #e6d3a1;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(10px, 2.5vh, 13px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+
+  white-space: nowrap;
+}
+
+.formation-medal-slots {
+  flex: 1 1 auto;
+
+  min-width: 0;
+
+  height: 100%;
+
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 6px;
+}
+
+.formation-medal-slot {
+  min-width: 0;
+  min-height: 36px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 1px;
+
+  margin: 0;
+  padding: 3px 6px;
+
+  border: 1px solid #6a5a32;
+  border-radius: 4px;
+
+  background: #161410;
+
+  color: #ece8e0;
+
+  font-family: var(--formation-ui-font);
+
+  text-align: left;
+
+  cursor: pointer;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+}
+
+.formation-medal-slot-label {
+  color: #c8b48a;
+
+  font-size: 9px;
+
+  letter-spacing: 0.08em;
+}
+
+.formation-medal-slot-name {
+  display: block;
+
+  overflow: hidden;
+
+  font-size: clamp(10px, 2.7vh, 13px);
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
+}
+
+.formation-medal-mark {
+  color: #e6d3a1;
+}
+
+.formation-medal-selector {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 30;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding:
+    max(8px, env(safe-area-inset-top, 0px))
+    max(8px, env(safe-area-inset-right, 0px))
+    max(8px, env(safe-area-inset-bottom, 0px))
+    max(8px, env(safe-area-inset-left, 0px));
+}
+
+.formation-medal-selector[hidden] {
+  display: none !important;
+}
+
+.formation-medal-selector-backdrop {
+  position: absolute;
+
+  inset: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border: 0;
+
+  background: rgba(0, 0, 0, 0.62);
+
+  cursor: pointer;
+}
+
+.formation-medal-selector-panel {
+  position: relative;
+
+  z-index: 1;
+
+  width: min(94%, 520px);
+
+  max-height: min(78%, 300px);
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  box-sizing: border-box;
+
+  padding: 8px;
+
+  border: 2px solid #6a5a32;
+  border-radius: 8px;
+
+  background: #12110e;
+
+  overflow: hidden;
+}
+
+.formation-medal-selector-head {
+  flex: 0 0 auto;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.formation-medal-selector-title {
+  color: #e6d3a1;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(12px, 2.8vh, 15px);
+
+  font-weight: 700;
+
+  letter-spacing: 0.08em;
+}
+
+.formation-medal-unequip,
+.formation-medal-option {
+  margin: 0;
+
+  border: 1px solid #6a5a32;
+  border-radius: 4px;
+
+  background: #1c1914;
+
+  color: #ece8e0;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(12px, 2.8vh, 14px);
+
+  cursor: pointer;
+}
+
+.formation-medal-unequip {
+  flex: 0 0 auto;
+
+  min-height: 32px;
+
+  padding: 4px 12px;
+}
+
+.formation-medal-list {
+  flex: 1 1 auto;
+
+  min-height: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 6px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.formation-medal-option {
+  flex: 0 0 auto;
+
+  min-height: 36px;
+
+  padding: 6px 8px;
+
+  text-align: left;
+}
+
+.formation-medal-option:disabled {
+  opacity: 0.45;
+
+  cursor: default;
+}
+
+.formation-medal-empty {
+  margin: 0;
+
+  color: #ece8e0;
+
+  font-family: var(--formation-ui-font);
+
+  font-size: clamp(11px, 2.6vh, 13px);
+
+  line-height: 1.4;
 }
 
 .formation-form-detail-backdrop {
