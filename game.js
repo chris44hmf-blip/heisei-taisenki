@@ -1708,6 +1708,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  21: {
+
+    id: 21,
+
+    year: 21,
+
+    title: "世代交代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のガラケーとスマホ",
+
+      emoji: "📱",
+
+      monumentId: "year-21",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3200, type: "furyou_gyaru_o" },
+
+      { delay: 5100, type: "furyou_oraora" },
+
+      { delay: 7100, type: "furyou_bontan" },
+
+      { delay: 9200, type: "furyou_regent" },
+
+      { delay: 11400, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 13700, type: "furyou_jimoto_senpai" },
+
+      { delay: 16100, type: "furyou_chari_bo" },
+
+      { delay: 18600, type: "furyou_oraora" },
+
+      { delay: 21200, type: "furyou_jimoto_saikyo" },
+
+      { delay: 23900, type: "furyou_gyaru_o" },
+
+      { delay: 26700, type: "furyou_koshipan" },
+
+      { delay: 29800, type: "furyou_chari_bo" },
+
+      { delay: 33300, type: "furyou_oraora" },
+
+      { delay: 40500, type: "furyou_kaizo_chari" }
+
+    ]
+
   }
 
 };
@@ -23584,6 +23642,54 @@ const ENEMIES = {
     attackInterval: 1150,
 
     yaniReward: 175,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  furyou_kaizo_chari: {
+
+    id: "furyou_kaizo_chari",
+
+    unitType: "furyou_kaizo_chari",
+
+    name: "魔改造チャリ暴",
+
+    family: "furyou",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🚲",
+
+    image: null,
+
+    hp: 780,
+
+    attack: 54,
+
+    range: 52,
+
+    speed: 1.45,
+
+    attackInterval: 900,
+
+    yaniReward: 180,
 
     spawnOffsetX: 0,
 
