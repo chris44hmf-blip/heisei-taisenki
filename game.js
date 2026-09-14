@@ -560,6 +560,18 @@ const STAGES = {
 
     environment: "A",
 
+    enemyBase: {
+
+      name: "バブル本社",
+
+      emoji: "🏢",
+
+      monumentId: "year-01",
+
+      image: null
+
+    },
+
     spawns: [
 
       { delay: 1500, type: "salaryman" },
@@ -4123,6 +4135,8 @@ enemyBaseHp = 2000;
 
   updateBattleUI();
 
+  applyStageEnemyBase(stage);
+
   updateBaseUI();
 
   showScreen(battleScreen);
@@ -4248,6 +4262,115 @@ function updateBattleUI() {
 /* =========================
    BASE UI
 ========================= */
+
+function getStageEnemyBase(stage) {
+
+  const display = {
+
+    name: "バブル本社",
+
+    emoji: "🏢",
+
+    monumentId: null,
+
+    image: null
+
+  };
+
+  const source =
+    stage &&
+    stage.enemyBase;
+
+
+  if (
+    !source ||
+    typeof source !== "object" ||
+    Array.isArray(source)
+  ) {
+
+    return display;
+
+  }
+
+
+  if (
+    typeof source.name === "string" &&
+    source.name.length > 0
+  ) {
+
+    display.name = source.name;
+
+  }
+
+
+  if (
+    typeof source.emoji === "string" &&
+    source.emoji.length > 0
+  ) {
+
+    display.emoji = source.emoji;
+
+  }
+
+
+  if (
+    typeof source.monumentId === "string" &&
+    source.monumentId.length > 0
+  ) {
+
+    display.monumentId = source.monumentId;
+
+  }
+
+
+  return display;
+
+}
+
+
+function applyStageEnemyBase(stage) {
+
+  const display =
+    getStageEnemyBase(stage);
+
+  const building =
+    enemyBase.querySelector(
+      ".enemy-building"
+    );
+
+  const name =
+    enemyBase.querySelector(
+      ".base-name"
+    );
+
+
+  if (building) {
+
+    building.textContent =
+      display.emoji;
+
+  }
+
+
+  if (name) {
+
+    name.textContent =
+      display.name;
+
+  }
+
+
+  return display;
+
+}
+
+
+function resetEnemyBaseDisplay() {
+
+  return applyStageEnemyBase(null);
+
+}
+
 
 function updateBaseUI() {
 
