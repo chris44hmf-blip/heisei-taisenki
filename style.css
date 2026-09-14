@@ -5051,7 +5051,13 @@ h2 {
 }
 
 .year-node strong {
-  font-size: 16px;
+  max-width: 100%;
+
+  font-size: 14px;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
 }
 
 .year-node small {
@@ -5152,7 +5158,11 @@ h2 {
 .stage-detail h4 {
   margin-top: 3px;
 
-  font-size: clamp(26px, 4vw, 48px);
+  font-size: clamp(22px, 3.4vw, 40px);
+
+  line-height: 1.15;
+
+  white-space: nowrap;
 }
 
 .stage-detail p {
@@ -5161,6 +5171,11 @@ h2 {
   font-size: clamp(12px, 1.4vw, 17px);
 
   font-weight: bold;
+}
+
+#stage-title:empty,
+#stage-title[hidden] {
+  display: none;
 }
 
 .stage-info {
@@ -5265,9 +5280,20 @@ h2 {
 
 
 .battle-stage-name small {
-  color: #eee;
+  color: #fff;
 
-  font-size: 10px;
+  font-size:
+    clamp(
+      13px,
+      1.6vw,
+      18px
+    );
+
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
 }
 
 
@@ -5278,6 +5304,11 @@ h2 {
       1.6vw,
       18px
     );
+}
+
+#battle-stage-title:empty,
+#battle-stage-title[hidden] {
+  display: none;
 }
 
 

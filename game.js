@@ -618,20 +618,96 @@ let activeBattleStage = null;
 let activeMedalSnapshot = [];
 
 
-function formatHeiseiYear(year) {
+const HEISEI_YEAR_DIGITS = [
+  "",
+  "一",
+  "二",
+  "三",
+  "四",
+  "五",
+  "六",
+  "七",
+  "八",
+  "九"
+];
+
+
+function formatJapaneseNumberForHeisei(year) {
 
   const value =
     Number(year);
 
 
-  if (value === 1) {
+  if (
+    !Number.isInteger(value) ||
+    value < 1 ||
+    value > 31
+  ) {
 
-    return "平成元年";
+    return null;
 
   }
 
 
-  return `平成${value}年`;
+  if (value === 1) {
+
+    return "元";
+
+  }
+
+
+  const tens =
+    Math.floor(value / 10);
+
+  const ones =
+    value % 10;
+
+  const oneDigit =
+    ones === 0
+      ? ""
+      : HEISEI_YEAR_DIGITS[ones];
+
+
+  if (tens === 0) {
+
+    return HEISEI_YEAR_DIGITS[ones];
+
+  }
+
+
+  if (tens === 1) {
+
+    return "十" + oneDigit;
+
+  }
+
+
+  if (tens === 2) {
+
+    return "二十" + oneDigit;
+
+  }
+
+
+  return "三十" + oneDigit;
+
+}
+
+
+function formatHeiseiYear(year) {
+
+  const label =
+    formatJapaneseNumberForHeisei(year);
+
+
+  if (!label) {
+
+    return "平成--";
+
+  }
+
+
+  return "平成" + label + "年";
 
 }
 
@@ -706,8 +782,9 @@ function applyTimelineStageDetail(stage) {
 
   if (titleEl) {
 
-    titleEl.textContent =
-      stage.title || "";
+    titleEl.textContent = "";
+
+    titleEl.hidden = true;
 
   }
 
@@ -744,8 +821,9 @@ function updateBattleStageHeader(stage) {
 
   if (titleEl) {
 
-    titleEl.textContent =
-      stage.title || "";
+    titleEl.textContent = "";
+
+    titleEl.hidden = true;
 
   }
 
@@ -754,28 +832,11 @@ function updateBattleStageHeader(stage) {
 
 function formatStageClearAlert(stage) {
 
-  const yearLabel =
-    formatHeiseiYear(stage.year);
-
-  const title =
-    stage.title || "";
-
-
-  if (!title) {
-
-    return (
-      yearLabel +
-      " 突破！"
-    );
-
-  }
-
-
   return (
-    yearLabel +
-    " 突破！\n\n" +
-    title +
-    "を乗り越えた。"
+    formatHeiseiYear(
+      stage && stage.year
+    ) +
+    " 突破！"
   );
 
 }
@@ -1392,7 +1453,7 @@ function renderStageSelect(options) {
     note.textContent =
       state === "cleared"
         ? "CLEAR"
-        : (stage.title || "");
+        : "";
 
 
     button.appendChild(circle);
