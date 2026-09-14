@@ -9682,7 +9682,7 @@ const CHARACTERS = {
 
     id: "walking_death",
 
-    name: "《ウォーキングデス》",
+    name: "ウォーキングデス",
 
     group: "ライブハウス民",
 
