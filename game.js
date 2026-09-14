@@ -9676,6 +9676,90 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  walking_death: {
+
+    id: "walking_death",
+
+    name: "《ウォーキングデス》",
+
+    group: "ライブハウス民",
+
+    number: 28,
+
+    rarity: CHARACTER_RARITY.HEADLINER,
+
+    images:
+      getCharacterImages(
+        "walking_death"
+      ),
+
+    stats: {
+
+      hp: 420,
+
+      attack: 95,
+
+      attackInterval: 1200,
+
+      speed: 0.75,
+
+      range: 165,
+
+      yaniCost: 300,
+
+      deployCooldownMs: 5500
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 240,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 160,
+
+      launchOffsetX: 36,
+
+      launchDelayMs: 90,
+
+      hitRadius: 28,
+
+      effectImage:
+        "images/characters/walking_death/walking_death_effect.webp",
+
+      effectWidth: 88
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
