@@ -1012,6 +1012,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  9: {
+
+    id: 9,
+
+    year: 9,
+
+    title: "厚底の街",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の厚底ブーツ",
+
+      emoji: "👢",
+
+      monumentId: "year-09",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_charitsuu" },
+
+      { delay: 3600, type: "ippan_gamekid" },
+
+      { delay: 5800, type: "ippan_tissue" },
+
+      { delay: 8200, type: "ippan_salaryman" },
+
+      { delay: 10600, type: "ippan_purikura" },
+
+      { delay: 13100, type: "ippan_utsurimasu" },
+
+      { delay: 15700, type: "ippan_crt" },
+
+      { delay: 18400, type: "ippan_gamekid" },
+
+      { delay: 21200, type: "ippan_salaryman" },
+
+      { delay: 24100, type: "ippan_purikura" },
+
+      { delay: 27100, type: "ippan_utsurimasu" },
+
+      { delay: 30200, type: "ippan_crt" },
+
+      { delay: 33400, type: "juriana" },
+
+      { delay: 36800, type: "bubble" },
+
+      { delay: 41500, type: "ippan_heisei_senshi_24" }
+
+    ]
+
   }
 
 };
@@ -22320,6 +22378,54 @@ const ENEMIES = {
     className: "battle-enemy",
 
     unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_heisei_senshi_24: {
+
+    id: "ippan_heisei_senshi_24",
+
+    unitType: "ippan_heisei_senshi_24",
+
+    name: "平成戦士・二十四時",
+
+    family: "ippan",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🕛",
+
+    image: null,
+
+    hp: 900,
+
+    attack: 48,
+
+    range: 65,
+
+    speed: 0.45,
+
+    attackInterval: 1400,
+
+    yaniReward: 140,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
 
     behaviors: []
 
