@@ -1418,6 +1418,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  16: {
+
+    id: 16,
+
+    year: 16,
+
+    title: "日記の向こう側",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の日記表示PC",
+
+      emoji: "💻",
+
+      monumentId: "year-16",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3400, type: "furyou_bontan" },
+
+      { delay: 5500, type: "furyou_gyaru_o" },
+
+      { delay: 7700, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 10000, type: "furyou_jimoto_senpai" },
+
+      { delay: 12400, type: "furyou_bontan" },
+
+      { delay: 14900, type: "ippan_gamekid" },
+
+      { delay: 17500, type: "furyou_chari_bo" },
+
+      { delay: 20200, type: "furyou_bontan" },
+
+      { delay: 23000, type: "ippan_salaryman" },
+
+      { delay: 25900, type: "furyou_jimoto_senpai" },
+
+      { delay: 28900, type: "furyou_gyaru_o" },
+
+      { delay: 32000, type: "ippan_garakee" },
+
+      { delay: 35500, type: "furyou_bontan" },
+
+      { delay: 40500, type: "furyou_bontan" }
+
+    ]
+
   }
 
 };
@@ -23054,6 +23112,54 @@ const ENEMIES = {
     attackInterval: 850,
 
     yaniReward: 50,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_bontan: {
+
+    id: "furyou_bontan",
+
+    unitType: "furyou_bontan",
+
+    name: "ボンタン",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "👖",
+
+    image: null,
+
+    hp: 360,
+
+    attack: 26,
+
+    range: 42,
+
+    speed: 0.65,
+
+    attackInterval: 1200,
+
+    yaniReward: 65,
 
     spawnOffsetX: 0,
 
