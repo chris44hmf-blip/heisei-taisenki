@@ -19811,17 +19811,225 @@ function showUnitKnockbackHurt(unit) {
 
 
 /* =========================
-   SALARYMAN
+   ENEMIES
+   平成元年の既存4体のみ。
+   spawn key は STAGES の type と一致。
 ========================= */
 
-function spawnSalaryman() {
+const ENEMIES = {
+
+  salaryman: {
+
+    id: "salaryman",
+
+    unitType: "salaryman",
+
+    name: "24時間戦う漢",
+
+    family: "legacy",
+
+    role: "normal",
+
+    palette: null,
+
+    emoji: "👔",
+
+    image: null,
+
+    hp: 180,
+
+    attack: 22,
+
+    range: 55,
+
+    speed: 0.8,
+
+    attackInterval: 1100,
+
+    yaniReward: 45,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    behaviors: []
+
+  },
+
+  juriana: {
+
+    id: "juriana",
+
+    unitType: "juriana",
+
+    name: "ジュリ扇女",
+
+    family: "legacy",
+
+    role: "normal",
+
+    palette: null,
+
+    emoji: "🪭",
+
+    image: null,
+
+    hp: 110,
+
+    attack: 28,
+
+    range: 170,
+
+    speed: 0.7,
+
+    attackInterval: 1400,
+
+    yaniReward: 60,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    behaviors: []
+
+  },
+
+  bubble: {
+
+    id: "bubble",
+
+    unitType: "bubble",
+
+    name: "バブル野郎",
+
+    family: "legacy",
+
+    role: "normal",
+
+    palette: null,
+
+    emoji: "💰",
+
+    image: null,
+
+    hp: 650,
+
+    attack: 38,
+
+    range: 60,
+
+    speed: 0.38,
+
+    attackInterval: 1500,
+
+    yaniReward: 120,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy bubble-enemy",
+
+    behaviors: []
+
+  },
+
+  boss: {
+
+    id: "boss",
+
+    unitType: "threePercent",
+
+    name: "増税獣 サンパーセント",
+
+    family: "legacy",
+
+    role: "midBoss",
+
+    palette: null,
+
+    emoji: "👹",
+
+    image: null,
+
+    hp: 1400,
+
+    attack: 70,
+
+    range: 75,
+
+    speed: 0.32,
+
+    attackInterval: 1600,
+
+    yaniReward: 300,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: [
+
+      {
+
+        id: "yaniPercentTax",
+
+        rate: 0.03,
+
+        messageBody: "ヤニを3%徴収された！"
+
+      }
+
+    ]
+
+  }
+
+};
+
+
+function getEnemyDef(type) {
+
+  if (
+    typeof type !== "string" ||
+    !Object.prototype.hasOwnProperty.call(
+      ENEMIES,
+      type
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  return ENEMIES[type];
+
+}
+
+
+function createBattleEnemy(def) {
+
+  if (!def) {
+
+    return;
+
+  }
+
 
   const element =
     document.createElement("div");
 
 
   element.className =
-    "battle-enemy";
+    def.className;
 
 
   element.innerHTML = `
@@ -19831,11 +20039,11 @@ function spawnSalaryman() {
     </div>
 
     <div class="enemy-body">
-      👔
+      ${def.emoji}
     </div>
 
     <div class="enemy-label">
-      24時間戦う漢
+      ${def.name}
     </div>
 
   `;
@@ -19854,7 +20062,7 @@ function spawnSalaryman() {
 
   const enemy = {
 
-    type: "salaryman",
+    type: def.unitType,
 
     element: element,
 
@@ -19863,30 +20071,113 @@ function spawnSalaryman() {
         ".character-hp-bar"
       ),
 
-    hp: 180,
+    hp: def.hp,
 
-    maxHp: 180,
+    maxHp: def.hp,
 
-    attack: 22,
+    attack: def.attack,
 
-    range: 55,
+    range: def.range,
 
-    speed: 0.8,
+    speed: def.speed,
 
     x: getEnemySpawnX(),
 
     attackCooldown: 0,
 
-    attackInterval: 1100,
+    attackInterval: def.attackInterval,
 
-    yaniReward: 45,
+    yaniReward: def.yaniReward,
 
     dead: false
 
   };
 
 
+  if (def.unitBoss === true) {
+
+    enemy.boss = true;
+
+  }
+
+
   enemyUnits.push(enemy);
+
+}
+
+
+function applyBossYaniPercentTax(def) {
+
+  const behaviors =
+    def.behaviors || [];
+
+  let behavior = null;
+
+  let index = 0;
+
+
+  while (index < behaviors.length) {
+
+    if (
+      behaviors[index] &&
+      behaviors[index].id === "yaniPercentTax"
+    ) {
+
+      behavior = behaviors[index];
+
+      break;
+
+    }
+
+    index += 1;
+
+  }
+
+
+  if (!behavior) {
+
+    return;
+
+  }
+
+
+  const tax =
+    Math.floor(
+      yani * behavior.rate
+    );
+
+
+  yani -= tax;
+
+  updateBattleUI();
+
+
+  showBossMessage(
+    def.name,
+    `${behavior.messageBody} -${tax}`
+  );
+
+}
+
+
+/* =========================
+   SALARYMAN
+========================= */
+
+function spawnSalaryman() {
+
+  const def =
+    getEnemyDef("salaryman");
+
+
+  if (!def) {
+
+    return;
+
+  }
+
+
+  createBattleEnemy(def);
 
 }
 
@@ -21476,6 +21767,13 @@ function clearEnemySpawnTimers() {
 
 function spawnScheduledEnemy(type) {
 
+  if (!getEnemyDef(type)) {
+
+    return;
+
+  }
+
+
   if (type === "salaryman") {
 
     spawnSalaryman();
@@ -21564,79 +21862,18 @@ function updateEnemySpawns() {
 
 function spawnJuriana() {
 
-  const element =
-    document.createElement("div");
+  const def =
+    getEnemyDef("juriana");
 
 
-  element.className =
-    "battle-enemy";
+  if (!def) {
+
+    return;
+
+  }
 
 
-  element.innerHTML = `
-
-    <div class="character-hp">
-      <div class="character-hp-bar"></div>
-    </div>
-
-    <div class="enemy-body">
-      🪭
-    </div>
-
-    <div class="enemy-label">
-      ジュリ扇女
-    </div>
-
-  `;
-
-
-  applySpawnPosition(
-    element,
-    getEnemySpawnX()
-  );
-
-
-  unitLayer.appendChild(element);
-
-
-  const enemy = {
-
-    type: "juriana",
-
-    element: element,
-
-    hpBar:
-      element.querySelector(
-        ".character-hp-bar"
-      ),
-
-    /* 打たれ弱い */
-    hp: 110,
-
-    maxHp: 110,
-
-    /* 攻撃はそこそこ */
-    attack: 28,
-
-    /* 遠距離 */
-    range: 170,
-
-    /* 普通の速度 */
-    speed: 0.7,
-
-    x: getEnemySpawnX(),
-
-    attackCooldown: 0,
-
-    attackInterval: 1400,
-
-    yaniReward: 60,
-
-    dead: false
-
-  };
-
-
-  enemyUnits.push(enemy);
+  createBattleEnemy(def);
 
 }
 /* =========================
@@ -21645,77 +21882,18 @@ function spawnJuriana() {
 
 function spawnBubbleMan() {
 
-  const element =
-    document.createElement("div");
+  const def =
+    getEnemyDef("bubble");
 
 
-  element.className =
-    "battle-enemy bubble-enemy";
+  if (!def) {
+
+    return;
+
+  }
 
 
-  element.innerHTML = `
-
-    <div class="character-hp">
-      <div class="character-hp-bar"></div>
-    </div>
-
-    <div class="enemy-body">
-      💰
-    </div>
-
-    <div class="enemy-label">
-      バブル野郎
-    </div>
-
-  `;
-
-
-  applySpawnPosition(
-    element,
-    getEnemySpawnX()
-  );
-
-
-  unitLayer.appendChild(element);
-
-
-  const enemy = {
-
-    type: "bubble",
-
-    element: element,
-
-    hpBar:
-      element.querySelector(
-        ".character-hp-bar"
-      ),
-
-    /* めちゃ硬い */
-    hp: 650,
-
-    maxHp: 650,
-
-    attack: 38,
-
-    range: 60,
-
-    /* 鈍足 */
-    speed: 0.38,
-
-    x: getEnemySpawnX(),
-
-    attackCooldown: 0,
-
-    attackInterval: 1500,
-
-    yaniReward: 120,
-
-    dead: false
-
-  };
-
-
-  enemyUnits.push(enemy);
+  createBattleEnemy(def);
 
 }
 /* =========================
@@ -21725,104 +21903,25 @@ function spawnBubbleMan() {
 
 function spawnThreePercent() {
 
-  /*
-    登場時
-
-    現在ヤニの3%を徴収
-  */
-
-  const tax =
-    Math.floor(
-      yani * 0.03
-    );
+  const def =
+    getEnemyDef("boss");
 
 
-  yani -= tax;
+  if (!def) {
 
-  updateBattleUI();
+    return;
+
+  }
 
 
   /*
-    登場演出
+    このboss定義の behavior だけ。
+    role midBoss 一般には徴収しない。
   */
 
-  showBossMessage(
-    "増税獣 サンパーセント",
-    `ヤニを3%徴収された！ -${tax}`
-  );
+  applyBossYaniPercentTax(def);
 
-
-  const element =
-    document.createElement("div");
-
-
-  element.className =
-    "battle-enemy boss-enemy";
-
-
-  element.innerHTML = `
-
-    <div class="character-hp">
-      <div class="character-hp-bar"></div>
-    </div>
-
-    <div class="enemy-body">
-      👹
-    </div>
-
-    <div class="enemy-label">
-      増税獣 サンパーセント
-    </div>
-
-  `;
-
-
-  applySpawnPosition(
-    element,
-    getEnemySpawnX()
-  );
-
-
-  unitLayer.appendChild(element);
-
-
-  const enemy = {
-
-    type: "threePercent",
-
-    element: element,
-
-    hpBar:
-      element.querySelector(
-        ".character-hp-bar"
-      ),
-
-    hp: 1400,
-
-    maxHp: 1400,
-
-    attack: 70,
-
-    range: 75,
-
-    speed: 0.32,
-
-    x: getEnemySpawnX(),
-
-    attackCooldown: 0,
-
-    attackInterval: 1600,
-
-    yaniReward: 300,
-
-    dead: false,
-
-    boss: true
-
-  };
-
-
-  enemyUnits.push(enemy);
+  createBattleEnemy(def);
 
 }
 /* =========================
