@@ -20726,6 +20726,8 @@ function spawnCharacter(characterId) {
 
   playerUnits.push(unit);
 
+  return unit;
+
 }
 
 
@@ -21627,6 +21629,12 @@ function getEnemySpawnOffsetX(def) {
 
 function getEnemySpawnWorldX(def) {
 
+  /*
+    正の spawnOffsetX は敵拠点側（右・後方）。
+    負は player 側（前方）。
+    0 なら既存出現Xと一致。
+  */
+
   return (
     getEnemySpawnX() +
     getEnemySpawnOffsetX(def)
@@ -22085,6 +22093,62 @@ function findNearestEnemy(unit) {
 }
 
 
+function isEnemyAoeAttack(enemy) {
+
+  return Boolean(
+    enemy &&
+    enemy.attackKind === "aoe"
+  );
+
+}
+
+
+function getAlliedUnitsInEnemyAttackRange(enemy) {
+
+  const targets = [];
+
+
+  if (!enemy) {
+
+    return targets;
+
+  }
+
+
+  playerUnits.forEach((unit) => {
+
+    if (
+      !unit ||
+      unit.dead
+    ) {
+
+      return;
+
+    }
+
+
+    const distance =
+      enemy.x -
+      unit.x;
+
+
+    if (
+      distance >= 0 &&
+      distance <= enemy.range
+    ) {
+
+      targets.push(unit);
+
+    }
+
+  });
+
+
+  return targets;
+
+}
+
+
 function findNearestPlayer(enemy) {
 
   let target = null;
@@ -22193,6 +22257,26 @@ function tryAttack(
 
 
   if (!playerAttack) {
+
+    if (isEnemyAoeAttack(attacker)) {
+
+      getAlliedUnitsInEnemyAttackRange(
+        attacker
+      ).forEach((unit) => {
+
+        damageCharacter(
+          unit,
+          attacker.attack,
+          false,
+          attacker
+        );
+
+      });
+
+      return;
+
+    }
+
 
     damageCharacter(
       target,
