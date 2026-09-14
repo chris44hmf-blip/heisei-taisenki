@@ -954,6 +954,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  8: {
+
+    id: 8,
+
+    year: 8,
+
+    title: "育成の鼓動",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の育成端末",
+
+      emoji: "🥚",
+
+      monumentId: "year-08",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_purikura" },
+
+      { delay: 3700, type: "ippan_gamekid" },
+
+      { delay: 5900, type: "ippan_charitsuu" },
+
+      { delay: 8200, type: "ippan_purikura" },
+
+      { delay: 10600, type: "ippan_tissue" },
+
+      { delay: 13000, type: "ippan_salaryman" },
+
+      { delay: 15500, type: "ippan_utsurimasu" },
+
+      { delay: 18100, type: "ippan_purikura" },
+
+      { delay: 20800, type: "ippan_crt" },
+
+      { delay: 23600, type: "salaryman" },
+
+      { delay: 26500, type: "ippan_gamekid" },
+
+      { delay: 29500, type: "ippan_purikura" },
+
+      { delay: 32600, type: "juriana" },
+
+      { delay: 36000, type: "bubble" },
+
+      { delay: 40500, type: "ippan_purikura" }
+
+    ]
+
   }
 
 };
@@ -22206,6 +22264,54 @@ const ENEMIES = {
     attackInterval: 1200,
 
     yaniReward: 45,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_purikura: {
+
+    id: "ippan_purikura",
+
+    unitType: "ippan_purikura",
+
+    name: "プリ機",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "📸",
+
+    image: null,
+
+    hp: 210,
+
+    attack: 22,
+
+    range: 85,
+
+    speed: 0.75,
+
+    attackInterval: 1000,
+
+    yaniReward: 50,
 
     spawnOffsetX: 0,
 
