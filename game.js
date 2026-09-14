@@ -9526,6 +9526,77 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  mosh_kids: {
+
+    id: "mosh_kids",
+
+    name: "モッシュキッズ",
+
+    group: "ライブハウス民",
+
+    number: 7,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "mosh_kids"
+      ),
+
+    stats: {
+
+      hp: 230,
+
+      attack: 32,
+
+      attackInterval: 700,
+
+      speed: 1.70,
+
+      range: 42,
+
+      yaniCost: 120,
+
+      deployCooldownMs: 2200
+
+    },
+
+    battle: {
+
+      spriteSize: 95,
+
+      attackSpriteMs: 180,
+
+      hurtSpriteMs: 260,
+
+      deathKnockbackPx: 22,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
