@@ -838,6 +838,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  6: {
+
+    id: 6,
+
+    year: 6,
+
+    title: "街角の記憶",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のルーズ像",
+
+      emoji: "🧦",
+
+      monumentId: "year-06",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_crt" },
+
+      { delay: 3900, type: "ippan_gamekid" },
+
+      { delay: 6500, type: "ippan_charitsuu" },
+
+      { delay: 9200, type: "ippan_crt" },
+
+      { delay: 11800, type: "ippan_tissue" },
+
+      { delay: 14500, type: "ippan_salaryman" },
+
+      { delay: 17200, type: "ippan_crt" },
+
+      { delay: 20000, type: "salaryman" },
+
+      { delay: 22800, type: "ippan_gamekid" },
+
+      { delay: 25800, type: "ippan_crt" },
+
+      { delay: 28800, type: "juriana" },
+
+      { delay: 31800, type: "ippan_salaryman" },
+
+      { delay: 34800, type: "ippan_crt" },
+
+      { delay: 38200, type: "bubble" },
+
+      { delay: 42500, type: "ippan_gamekid" }
+
+    ]
+
   }
 
 };
@@ -21994,6 +22052,54 @@ const ENEMIES = {
     attackInterval: 800,
 
     yaniReward: 40,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_crt: {
+
+    id: "ippan_crt",
+
+    unitType: "ippan_crt",
+
+    name: "ブラウン管",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "📺",
+
+    image: null,
+
+    hp: 300,
+
+    attack: 30,
+
+    range: 48,
+
+    speed: 0.55,
+
+    attackInterval: 1250,
+
+    yaniReward: 55,
 
     spawnOffsetX: 0,
 
