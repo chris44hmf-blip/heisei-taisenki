@@ -2288,6 +2288,66 @@ const STAGES = {
 
     ]
 
+  },
+
+  31: {
+
+    id: 31,
+
+    year: 31,
+
+    title: "平成に取り残された漢達",
+
+    environment: "A",
+
+    winCondition: "finalBossAndBaseDestroy",
+
+    enemyBase: {
+
+      name: "黄金の《平成》",
+
+      emoji: "平成",
+
+      monumentId: "year-31",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 2800, type: "furyou_oraora" },
+
+      { delay: 4200, type: "furyou_regent" },
+
+      { delay: 5700, type: "furyou_gyaru_o" },
+
+      { delay: 7300, type: "furyou_bontan" },
+
+      { delay: 9000, type: "furyou_jimoto_saikyo" },
+
+      { delay: 10800, type: "furyou_chari_bo" },
+
+      { delay: 12700, type: "furyou_koshipan" },
+
+      { delay: 14700, type: "furyou_oraora" },
+
+      { delay: 16800, type: "furyou_kaizo_chari" },
+
+      { delay: 19000, type: "furyou_regent" },
+
+      { delay: 21400, type: "furyou_jimoto_saikyo" },
+
+      { delay: 24100, type: "furyou_koshipan" },
+
+      { delay: 27200, type: "furyou_kaizo_chari" },
+
+      { delay: 42000, type: "heisei_final" }
+
+    ]
+
   }
 
 };
@@ -24228,6 +24288,54 @@ const ENEMIES = {
     spawnOffsetX: 0,
 
     attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  heisei_final: {
+
+    id: "heisei_final",
+
+    unitType: "heisei_final",
+
+    name: "《平成》",
+
+    family: "ippan",
+
+    role: "finalBoss",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "平成",
+
+    image: null,
+
+    hp: 5000,
+
+    attack: 85,
+
+    range: 190,
+
+    speed: 0.22,
+
+    attackInterval: 1800,
+
+    yaniReward: 500,
+
+    spawnOffsetX: 180,
+
+    attackKind: "aoe",
 
     className: "battle-enemy boss-enemy",
 
