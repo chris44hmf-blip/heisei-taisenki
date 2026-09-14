@@ -21420,14 +21420,118 @@ function getEnemyDef(type) {
 }
 
 
-function createBattleEnemy(def) {
+function getEnemySpawnOffsetX(def) {
 
-  if (!def) {
+  const offset =
+    Number(
+      def &&
+      def.spawnOffsetX
+    );
+
+
+  if (!Number.isFinite(offset)) {
+
+    return 0;
+
+  }
+
+
+  return offset;
+
+}
+
+
+function getEnemySpawnWorldX(def) {
+
+  return (
+    getEnemySpawnX() +
+    getEnemySpawnOffsetX(def)
+  );
+
+}
+
+
+function applyYaniPercentTax(
+  def,
+  behavior
+) {
+
+  if (
+    !behavior ||
+    behavior.id !== "yaniPercentTax"
+  ) {
 
     return;
 
   }
 
+
+  const tax =
+    Math.floor(
+      yani * behavior.rate
+    );
+
+
+  yani -= tax;
+
+  updateBattleUI();
+
+
+  showBossMessage(
+    def.name,
+    `${behavior.messageBody} -${tax}`
+  );
+
+}
+
+
+function applyEnemySpawnBehaviors(def) {
+
+  const behaviors =
+    def &&
+    def.behaviors;
+
+
+  if (!Array.isArray(behaviors)) {
+
+    return;
+
+  }
+
+
+  behaviors.forEach((behavior) => {
+
+    if (
+      !behavior ||
+      behavior.id !== "yaniPercentTax"
+    ) {
+
+      return;
+
+    }
+
+
+    applyYaniPercentTax(
+      def,
+      behavior
+    );
+
+  });
+
+}
+
+
+function createBattleEnemy(def) {
+
+  if (!def) {
+
+    return null;
+
+  }
+
+
+  const spawnX =
+    getEnemySpawnWorldX(def);
 
   const element =
     document.createElement("div");
@@ -21456,7 +21560,7 @@ function createBattleEnemy(def) {
 
   applySpawnPosition(
     element,
-    getEnemySpawnX()
+    spawnX
   );
 
 
@@ -21486,13 +21590,21 @@ function createBattleEnemy(def) {
 
     speed: def.speed,
 
-    x: getEnemySpawnX(),
+    x: spawnX,
 
     attackCooldown: 0,
 
     attackInterval: def.attackInterval,
 
     yaniReward: def.yaniReward,
+
+    family: def.family,
+
+    role: def.role,
+
+    attackKind: def.attackKind,
+
+    spawnOffsetX: getEnemySpawnOffsetX(def),
 
     dead: false
 
@@ -21508,81 +21620,34 @@ function createBattleEnemy(def) {
 
   enemyUnits.push(enemy);
 
-}
 
-
-function applyBossYaniPercentTax(def) {
-
-  const behaviors =
-    def.behaviors || [];
-
-  let behavior = null;
-
-  let index = 0;
-
-
-  while (index < behaviors.length) {
-
-    if (
-      behaviors[index] &&
-      behaviors[index].id === "yaniPercentTax"
-    ) {
-
-      behavior = behaviors[index];
-
-      break;
-
-    }
-
-    index += 1;
-
-  }
-
-
-  if (!behavior) {
-
-    return;
-
-  }
-
-
-  const tax =
-    Math.floor(
-      yani * behavior.rate
-    );
-
-
-  yani -= tax;
-
-  updateBattleUI();
-
-
-  showBossMessage(
-    def.name,
-    `${behavior.messageBody} -${tax}`
-  );
+  return enemy;
 
 }
 
 
-/* =========================
-   SALARYMAN
-========================= */
-
-function spawnSalaryman() {
-
-  const def =
-    getEnemyDef("salaryman");
-
+function spawnEnemyFromDef(def) {
 
   if (!def) {
 
-    return;
+    return null;
 
   }
 
 
-  createBattleEnemy(def);
+  applyEnemySpawnBehaviors(def);
+
+
+  return createBattleEnemy(def);
+
+}
+
+
+function spawnEnemyByType(type) {
+
+  return spawnEnemyFromDef(
+    getEnemyDef(type)
+  );
 
 }
 
@@ -23179,39 +23244,7 @@ function clearEnemySpawnTimers() {
 
 function spawnScheduledEnemy(type) {
 
-  if (!getEnemyDef(type)) {
-
-    return;
-
-  }
-
-
-  if (type === "salaryman") {
-
-    spawnSalaryman();
-
-  }
-
-
-  if (type === "juriana") {
-
-    spawnJuriana();
-
-  }
-
-
-  if (type === "bubble") {
-
-    spawnBubbleMan();
-
-  }
-
-
-  if (type === "boss") {
-
-    spawnThreePercent();
-
-  }
+  spawnEnemyByType(type);
 
 }
 
@@ -23266,74 +23299,6 @@ function updateEnemySpawns() {
   );
 
   enemySpawnQueue = remaining;
-
-}
-/* =========================
-   ジュリ扇女
-========================= */
-
-function spawnJuriana() {
-
-  const def =
-    getEnemyDef("juriana");
-
-
-  if (!def) {
-
-    return;
-
-  }
-
-
-  createBattleEnemy(def);
-
-}
-/* =========================
-   バブル野郎
-========================= */
-
-function spawnBubbleMan() {
-
-  const def =
-    getEnemyDef("bubble");
-
-
-  if (!def) {
-
-    return;
-
-  }
-
-
-  createBattleEnemy(def);
-
-}
-/* =========================
-   BOSS
-   増税獣 サンパーセント
-========================= */
-
-function spawnThreePercent() {
-
-  const def =
-    getEnemyDef("boss");
-
-
-  if (!def) {
-
-    return;
-
-  }
-
-
-  /*
-    このboss定義の behavior だけ。
-    role midBoss 一般には徴収しない。
-  */
-
-  applyBossYaniPercentTax(def);
-
-  createBattleEnemy(def);
 
 }
 /* =========================
