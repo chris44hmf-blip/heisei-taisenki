@@ -1302,6 +1302,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  14: {
+
+    id: 14,
+
+    year: 14,
+
+    title: "熱狂のスタジアム",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のスタジアム像",
+
+      emoji: "🏟️",
+
+      monumentId: "year-14",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_gyaru_o" },
+
+      { delay: 3500, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 5600, type: "furyou_jimoto_senpai" },
+
+      { delay: 7800, type: "ippan_charitsuu" },
+
+      { delay: 10100, type: "furyou_gyaru_o" },
+
+      { delay: 12500, type: "ippan_gamekid" },
+
+      { delay: 15000, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 17600, type: "furyou_jimoto_senpai" },
+
+      { delay: 20300, type: "ippan_salaryman" },
+
+      { delay: 23100, type: "furyou_gyaru_o" },
+
+      { delay: 26000, type: "ippan_utsurimasu" },
+
+      { delay: 29000, type: "furyou_jimoto_senpai" },
+
+      { delay: 32100, type: "ippan_garakee" },
+
+      { delay: 35600, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 40700, type: "furyou_jimoto_senpai" }
+
+    ]
+
   }
 
 };
@@ -22842,6 +22900,54 @@ const ENEMIES = {
     attackInterval: 750,
 
     yaniReward: 40,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_jimoto_senpai: {
+
+    id: "furyou_jimoto_senpai",
+
+    unitType: "furyou_jimoto_senpai",
+
+    name: "地元の先輩",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "😎",
+
+    image: null,
+
+    hp: 280,
+
+    attack: 34,
+
+    range: 55,
+
+    speed: 0.9,
+
+    attackInterval: 1100,
+
+    yaniReward: 60,
 
     spawnOffsetX: 0,
 
