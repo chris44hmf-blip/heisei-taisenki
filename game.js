@@ -9660,7 +9660,11 @@ const CHARACTERS = {
 
       type: ATTACK_TYPE.MELEE_AOE,
 
-      aoeRadius: 65
+      aoeRadius: 65,
+
+      dashToTarget: true,
+
+      dashSpeed: 0.55
 
     },
 
@@ -24767,6 +24771,34 @@ function updateUnits() {
 
 
       if (
+        isAttackDashActive(unit)
+      ) {
+
+        if (
+          isHealthKnockbackActive(
+            unit
+          )
+        ) {
+
+          clearAttackDash(unit);
+
+        } else if (
+          updateAttackDashMotion(
+            unit
+          )
+        ) {
+
+          unit.element.style.left =
+            unit.x + "px";
+
+          return;
+
+        }
+
+      }
+
+
+      if (
         updateHealthKnockbackMotion(
           unit
         )
@@ -25121,6 +25153,16 @@ function tryAttack(
   }
 
 
+  if (
+    playerAttack &&
+    isAttackDashActive(attacker)
+  ) {
+
+    return;
+
+  }
+
+
   const now =
     Date.now();
 
@@ -25149,14 +25191,46 @@ function tryAttack(
   setTimeout(
     () => {
 
-      attacker.element
-        .classList.remove(
-          "attacking"
-        );
+      if (
+        attacker.element &&
+        attacker.element.isConnected
+      ) {
+
+        attacker.element
+          .classList.remove(
+            "attacking"
+          );
+
+      }
 
     },
     180
   );
+
+
+  const behavior =
+    playerAttack
+      ? getAttackBehavior(attacker)
+      : null;
+
+
+  if (
+    playerAttack &&
+    behavior &&
+    behavior.type ===
+      ATTACK_TYPE.MELEE_AOE &&
+    behavior.dashToTarget === true
+  ) {
+
+    beginMeleeAoeDash(
+      attacker,
+      behavior,
+      target
+    );
+
+    return;
+
+  }
 
 
   showUnitAttack(
@@ -25196,10 +25270,6 @@ function tryAttack(
     return;
 
   }
-
-
-  const behavior =
-    getAttackBehavior(attacker);
 
 
   if (
@@ -25245,10 +25315,267 @@ function tryAttack(
 }
 
 
+function isAttackDashActive(unit) {
+
+  return !!(
+    unit &&
+    unit.attackDash &&
+    unit.attackDash.active
+  );
+
+}
+
+
+function clearAttackDash(unit) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  unit.attackDash = null;
+
+}
+
+
+function beginMeleeAoeDash(
+  attacker,
+  behavior,
+  target
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    isAttackDashActive(attacker)
+  ) {
+
+    return;
+
+  }
+
+
+  const startX =
+    attacker.x;
+
+  const impactX =
+    target &&
+    Number.isFinite(target.x)
+      ? target.x
+      : startX;
+
+
+  const distance =
+    Math.max(
+      0,
+      impactX -
+      startX
+    );
+
+
+  clearUnitSpriteTimer(attacker);
+
+  setUnitSprite(
+    attacker,
+    "attack"
+  );
+
+
+  if (distance <= 8) {
+
+    applyMeleeAoeDamage(
+      attacker,
+      behavior,
+      target,
+      impactX
+    );
+
+    showUnitAttack(attacker);
+
+    return;
+
+  }
+
+
+  const dashSpeed =
+    typeof behavior.dashSpeed ===
+      "number" &&
+    behavior.dashSpeed > 0
+      ? behavior.dashSpeed
+      : 0.55;
+
+
+  const durationMs =
+    Math.min(
+      350,
+      Math.max(
+        200,
+        distance /
+        dashSpeed
+      )
+    );
+
+
+  attacker.attackDash = {
+
+    active: true,
+
+    startX: startX,
+
+    impactX: impactX,
+
+    startedAt: Date.now(),
+
+    durationMs: durationMs,
+
+    behavior: behavior,
+
+    primaryTarget: target || null
+
+  };
+
+}
+
+
+function updateAttackDashMotion(unit) {
+
+  const dash =
+    unit &&
+    unit.attackDash;
+
+
+  if (
+    !dash ||
+    !dash.active
+  ) {
+
+    return false;
+
+  }
+
+
+  if (unit.dead) {
+
+    clearAttackDash(unit);
+
+    return false;
+
+  }
+
+
+  const elapsed =
+    Date.now() -
+    dash.startedAt;
+
+  const t =
+    Math.min(
+      1,
+      elapsed /
+      dash.durationMs
+    );
+
+
+  unit.x =
+    dash.startX +
+    (
+      dash.impactX -
+      dash.startX
+    ) *
+    t;
+
+
+  if (t >= 1) {
+
+    finishAttackDash(unit);
+
+  }
+
+
+  return true;
+
+}
+
+
+function finishAttackDash(unit) {
+
+  const dash =
+    unit &&
+    unit.attackDash;
+
+
+  if (!dash) {
+
+    return;
+
+  }
+
+
+  dash.active = false;
+
+
+  if (unit.dead) {
+
+    clearAttackDash(unit);
+
+    return;
+
+  }
+
+
+  unit.x =
+    dash.impactX;
+
+
+  applyMeleeAoeDamage(
+    unit,
+    dash.behavior,
+    dash.primaryTarget,
+    dash.impactX
+  );
+
+
+  clearAttackDash(unit);
+
+  clearUnitSpriteTimer(unit);
+
+  setUnitSprite(
+    unit,
+    "attack"
+  );
+
+  unit.spriteTimer =
+    setTimeout(
+      () => {
+
+        unit.spriteTimer =
+          null;
+
+        if (!unit.dead) {
+
+          setUnitSprite(
+            unit,
+            "idle"
+          );
+
+        }
+
+      },
+      (
+        unit.battle &&
+        unit.battle.attackSpriteMs
+      ) ||
+      180
+    );
+
+}
+
+
 function applyMeleeAoeDamage(
   attacker,
   behavior,
-  primaryTarget
+  primaryTarget,
+  impactXOverride
 ) {
 
   const aoeRadius =
@@ -25258,43 +25585,65 @@ function applyMeleeAoeDamage(
       : null;
 
 
-  if (
-    aoeRadius != null &&
-    primaryTarget &&
-    !primaryTarget.dead
-  ) {
+  if (aoeRadius != null) {
 
-    const impactX =
-      primaryTarget.x;
+    let impactX = null;
 
-    enemyUnits.forEach((enemy) => {
+    if (
+      Number.isFinite(
+        impactXOverride
+      )
+    ) {
 
-      if (enemy.dead) {
+      impactX =
+        impactXOverride;
 
-        return;
+    } else if (
+      primaryTarget &&
+      !primaryTarget.dead &&
+      Number.isFinite(
+        primaryTarget.x
+      )
+    ) {
 
-      }
+      impactX =
+        primaryTarget.x;
 
-      if (
-        Math.abs(
-          enemy.x -
-          impactX
-        ) <=
-        aoeRadius
-      ) {
+    }
 
-        damageCharacter(
-          enemy,
-          attacker.attack,
-          true,
-          attacker
-        );
 
-      }
+    if (impactX != null) {
 
-    });
+      enemyUnits.forEach((enemy) => {
 
-    return;
+        if (enemy.dead) {
+
+          return;
+
+        }
+
+        if (
+          Math.abs(
+            enemy.x -
+            impactX
+          ) <=
+          aoeRadius
+        ) {
+
+          damageCharacter(
+            enemy,
+            attacker.attack,
+            true,
+            attacker
+          );
+
+        }
+
+      });
+
+      return;
+
+    }
 
   }
 
@@ -26039,6 +26388,10 @@ function defeatCharacter(
 ) {
 
   target.dead = true;
+
+  clearAttackDash(
+    target
+  );
 
   clearHealthKnockback(
     target
