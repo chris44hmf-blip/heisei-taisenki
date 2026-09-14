@@ -1534,6 +1534,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  18: {
+
+    id: 18,
+
+    year: 18,
+
+    title: "動画の向こう側",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の動画モニター",
+
+      emoji: "📺",
+
+      monumentId: "year-18",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3300, type: "furyou_oraora" },
+
+      { delay: 5300, type: "furyou_gyaru_o" },
+
+      { delay: 7400, type: "furyou_bontan" },
+
+      { delay: 9600, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 11900, type: "furyou_regent" },
+
+      { delay: 14300, type: "furyou_jimoto_senpai" },
+
+      { delay: 16800, type: "furyou_oraora" },
+
+      { delay: 19400, type: "furyou_chari_bo" },
+
+      { delay: 22100, type: "furyou_bontan" },
+
+      { delay: 24900, type: "furyou_regent" },
+
+      { delay: 27800, type: "furyou_gyaru_o" },
+
+      { delay: 30900, type: "furyou_jimoto_senpai" },
+
+      { delay: 34400, type: "ippan_garakee" },
+
+      { delay: 39500, type: "furyou_oraora" }
+
+    ]
+
   }
 
 };
@@ -23266,6 +23324,54 @@ const ENEMIES = {
     attackInterval: 1000,
 
     yaniReward: 60,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_oraora: {
+
+    id: "furyou_oraora",
+
+    unitType: "furyou_oraora",
+
+    name: "オラオラ男",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "💪",
+
+    image: null,
+
+    hp: 300,
+
+    attack: 44,
+
+    range: 46,
+
+    speed: 1.05,
+
+    attackInterval: 950,
+
+    yaniReward: 70,
 
     spawnOffsetX: 0,
 
