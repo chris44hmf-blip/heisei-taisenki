@@ -1070,6 +1070,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  10: {
+
+    id: 10,
+
+    year: 10,
+
+    title: "音を持ち歩く時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の携帯音楽端末",
+
+      emoji: "🎧",
+
+      monumentId: "year-10",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_purikura" },
+
+      { delay: 3500, type: "ippan_gamekid" },
+
+      { delay: 5700, type: "ippan_charitsuu" },
+
+      { delay: 8000, type: "ippan_tissue" },
+
+      { delay: 10400, type: "ippan_salaryman" },
+
+      { delay: 12900, type: "ippan_utsurimasu" },
+
+      { delay: 15500, type: "ippan_crt" },
+
+      { delay: 18200, type: "ippan_purikura" },
+
+      { delay: 21000, type: "ippan_gamekid" },
+
+      { delay: 23900, type: "ippan_salaryman" },
+
+      { delay: 26900, type: "ippan_utsurimasu" },
+
+      { delay: 30000, type: "ippan_crt" },
+
+      { delay: 33300, type: "bubble" },
+
+      { delay: 36800, type: "ippan_heisei_senshi_24" },
+
+      { delay: 42000, type: "ippan_prilian" }
+
+    ]
+
   }
 
 };
@@ -22418,6 +22476,54 @@ const ENEMIES = {
     attackInterval: 1400,
 
     yaniReward: 140,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  ippan_prilian: {
+
+    id: "ippan_prilian",
+
+    unitType: "ippan_prilian",
+
+    name: "プリリアン",
+
+    family: "ippan",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "👽",
+
+    image: null,
+
+    hp: 760,
+
+    attack: 42,
+
+    range: 145,
+
+    speed: 0.6,
+
+    attackInterval: 1200,
+
+    yaniReward: 150,
 
     spawnOffsetX: 0,
 
