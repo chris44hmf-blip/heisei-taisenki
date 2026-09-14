@@ -722,6 +722,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  4: {
+
+    id: 4,
+
+    year: 4,
+
+    title: "呼び出しの時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の呼び出し端末",
+
+      emoji: "📟",
+
+      monumentId: "year-04",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_tissue" },
+
+      { delay: 3800, type: "ippan_charitsuu" },
+
+      { delay: 6200, type: "ippan_tissue" },
+
+      { delay: 8500, type: "ippan_salaryman" },
+
+      { delay: 10800, type: "ippan_tissue" },
+
+      { delay: 13200, type: "salaryman" },
+
+      { delay: 15600, type: "ippan_charitsuu" },
+
+      { delay: 18000, type: "ippan_tissue" },
+
+      { delay: 20500, type: "juriana" },
+
+      { delay: 23000, type: "ippan_salaryman" },
+
+      { delay: 25500, type: "ippan_tissue" },
+
+      { delay: 28500, type: "ippan_charitsuu" },
+
+      { delay: 31500, type: "ippan_tissue" },
+
+      { delay: 35000, type: "bubble" },
+
+      { delay: 39500, type: "ippan_salaryman" }
+
+    ]
+
   }
 
 };
@@ -21782,6 +21840,54 @@ const ENEMIES = {
     attackInterval: 1050,
 
     yaniReward: 45,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_tissue: {
+
+    id: "ippan_tissue",
+
+    unitType: "ippan_tissue",
+
+    name: "ティッシュ配り",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🧻",
+
+    image: null,
+
+    hp: 120,
+
+    attack: 14,
+
+    range: 95,
+
+    speed: 1.1,
+
+    attackInterval: 850,
+
+    yaniReward: 30,
 
     spawnOffsetX: 0,
 
