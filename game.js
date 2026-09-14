@@ -896,6 +896,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  7: {
+
+    id: 7,
+
+    year: 7,
+
+    title: "記憶を焼き付けろ",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のプリ機",
+
+      emoji: "📸",
+
+      monumentId: "year-07",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_utsurimasu" },
+
+      { delay: 3900, type: "ippan_gamekid" },
+
+      { delay: 6300, type: "ippan_charitsuu" },
+
+      { delay: 8700, type: "ippan_utsurimasu" },
+
+      { delay: 11200, type: "ippan_salaryman" },
+
+      { delay: 13700, type: "ippan_tissue" },
+
+      { delay: 16200, type: "ippan_crt" },
+
+      { delay: 18800, type: "ippan_utsurimasu" },
+
+      { delay: 21500, type: "salaryman" },
+
+      { delay: 24300, type: "ippan_gamekid" },
+
+      { delay: 27200, type: "ippan_utsurimasu" },
+
+      { delay: 30200, type: "juriana" },
+
+      { delay: 33300, type: "ippan_salaryman" },
+
+      { delay: 36500, type: "bubble" },
+
+      { delay: 41000, type: "ippan_utsurimasu" }
+
+    ]
+
   }
 
 };
@@ -22100,6 +22158,54 @@ const ENEMIES = {
     attackInterval: 1250,
 
     yaniReward: 55,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_utsurimasu: {
+
+    id: "ippan_utsurimasu",
+
+    unitType: "ippan_utsurimasu",
+
+    name: "写リます",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "📷",
+
+    image: null,
+
+    hp: 150,
+
+    attack: 26,
+
+    range: 130,
+
+    speed: 0.85,
+
+    attackInterval: 1200,
+
+    yaniReward: 45,
 
     spawnOffsetX: 0,
 
