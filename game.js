@@ -1940,6 +1940,180 @@ const STAGES = {
 
     ]
 
+  },
+
+  25: {
+
+    id: 25,
+
+    year: 25,
+
+    title: "遊びは手のひらへ",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のスマホゲーム",
+
+      emoji: "🎮",
+
+      monumentId: "year-25",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_gamekid" },
+
+      { delay: 3000, type: "furyou_chari_bo" },
+
+      { delay: 4600, type: "furyou_gyaru_o" },
+
+      { delay: 6300, type: "furyou_oraora" },
+
+      { delay: 8100, type: "furyou_regent" },
+
+      { delay: 10000, type: "furyou_bontan" },
+
+      { delay: 12000, type: "ippan_purikura" },
+
+      { delay: 14100, type: "furyou_jimoto_senpai" },
+
+      { delay: 16300, type: "furyou_oraora" },
+
+      { delay: 18600, type: "furyou_jimoto_saikyo" },
+
+      { delay: 21000, type: "furyou_chari_bo" },
+
+      { delay: 23600, type: "furyou_koshipan" },
+
+      { delay: 26400, type: "ippan_garakee" },
+
+      { delay: 29600, type: "furyou_regent" },
+
+      { delay: 38200, type: "furyou_kaizo_chari" }
+
+    ]
+
+  },
+
+  26: {
+
+    id: 26,
+
+    year: 26,
+
+    title: "自分を映す時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の自撮り棒",
+
+      emoji: "🤳",
+
+      monumentId: "year-26",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_gyaru_o" },
+
+      { delay: 2900, type: "furyou_chari_bo" },
+
+      { delay: 4400, type: "furyou_oraora" },
+
+      { delay: 6000, type: "furyou_regent" },
+
+      { delay: 7700, type: "furyou_jimoto_senpai" },
+
+      { delay: 9500, type: "furyou_bontan" },
+
+      { delay: 11400, type: "ippan_purikura" },
+
+      { delay: 13400, type: "furyou_chari_bo" },
+
+      { delay: 15500, type: "furyou_oraora" },
+
+      { delay: 17700, type: "furyou_koshipan" },
+
+      { delay: 20000, type: "furyou_regent" },
+
+      { delay: 22500, type: "furyou_jimoto_saikyo" },
+
+      { delay: 25200, type: "ippan_garakee" },
+
+      { delay: 28300, type: "furyou_kaizo_chari" },
+
+      { delay: 37800, type: "furyou_koshipan" }
+
+    ]
+
+  },
+
+  27: {
+
+    id: 27,
+
+    year: 27,
+
+    title: "配信される日常",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の配信カメラ",
+
+      emoji: "📹",
+
+      monumentId: "year-27",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 2800, type: "furyou_oraora" },
+
+      { delay: 4200, type: "furyou_gyaru_o" },
+
+      { delay: 5700, type: "furyou_regent" },
+
+      { delay: 7300, type: "furyou_bontan" },
+
+      { delay: 9000, type: "furyou_jimoto_senpai" },
+
+      { delay: 10800, type: "furyou_chari_bo" },
+
+      { delay: 12700, type: "furyou_oraora" },
+
+      { delay: 14700, type: "furyou_jimoto_saikyo" },
+
+      { delay: 16800, type: "furyou_koshipan" },
+
+      { delay: 19000, type: "furyou_regent" },
+
+      { delay: 21400, type: "furyou_kaizo_chari" },
+
+      { delay: 24100, type: "ippan_prilian" },
+
+      { delay: 27200, type: "furyou_jimoto_saikyo" },
+
+      { delay: 37200, type: "furyou_kaizo_chari" }
+
+    ]
+
   }
 
 };
