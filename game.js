@@ -1592,6 +1592,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  19: {
+
+    id: 19,
+
+    year: 19,
+
+    title: "電子音の街",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のPCとマイク",
+
+      emoji: "🎙️",
+
+      monumentId: "year-19",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3300, type: "furyou_oraora" },
+
+      { delay: 5300, type: "furyou_gyaru_o" },
+
+      { delay: 7400, type: "furyou_bontan" },
+
+      { delay: 9600, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 11900, type: "furyou_regent" },
+
+      { delay: 14300, type: "furyou_jimoto_senpai" },
+
+      { delay: 16800, type: "furyou_chari_bo" },
+
+      { delay: 19400, type: "furyou_oraora" },
+
+      { delay: 22100, type: "furyou_bontan" },
+
+      { delay: 24900, type: "furyou_regent" },
+
+      { delay: 27800, type: "furyou_gyaru_o" },
+
+      { delay: 30900, type: "ippan_garakee" },
+
+      { delay: 34400, type: "furyou_oraora" },
+
+      { delay: 41000, type: "furyou_jimoto_saikyo" }
+
+    ]
+
   }
 
 };
@@ -23380,6 +23438,54 @@ const ENEMIES = {
     className: "battle-enemy",
 
     unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_jimoto_saikyo: {
+
+    id: "furyou_jimoto_saikyo",
+
+    unitType: "furyou_jimoto_saikyo",
+
+    name: "地元最強※自称",
+
+    family: "furyou",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "👑",
+
+    image: null,
+
+    hp: 1050,
+
+    attack: 58,
+
+    range: 62,
+
+    speed: 0.55,
+
+    attackInterval: 1350,
+
+    yaniReward: 170,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
 
     behaviors: []
 
