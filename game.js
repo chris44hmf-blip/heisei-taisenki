@@ -1360,6 +1360,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  15: {
+
+    id: 15,
+
+    year: 15,
+
+    title: "写メの時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のカメラ付き携帯",
+
+      emoji: "📱",
+
+      monumentId: "year-15",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_gyaru_o" },
+
+      { delay: 3300, type: "furyou_chari_bo" },
+
+      { delay: 5300, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 7400, type: "furyou_jimoto_senpai" },
+
+      { delay: 9600, type: "furyou_chari_bo" },
+
+      { delay: 11900, type: "ippan_charitsuu" },
+
+      { delay: 14300, type: "furyou_gyaru_o" },
+
+      { delay: 16800, type: "furyou_chari_bo" },
+
+      { delay: 19400, type: "ippan_gamekid" },
+
+      { delay: 22100, type: "furyou_jimoto_senpai" },
+
+      { delay: 24900, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 27800, type: "furyou_chari_bo" },
+
+      { delay: 30900, type: "ippan_prilian" },
+
+      { delay: 34400, type: "ippan_garakee" },
+
+      { delay: 39500, type: "furyou_chari_bo" }
+
+    ]
+
   }
 
 };
@@ -22948,6 +23006,54 @@ const ENEMIES = {
     attackInterval: 1100,
 
     yaniReward: 60,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_chari_bo: {
+
+    id: "furyou_chari_bo",
+
+    unitType: "furyou_chari_bo",
+
+    name: "チャリ暴",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🚲",
+
+    image: null,
+
+    hp: 170,
+
+    attack: 30,
+
+    range: 48,
+
+    speed: 1.8,
+
+    attackInterval: 850,
+
+    yaniReward: 50,
 
     spawnOffsetX: 0,
 
