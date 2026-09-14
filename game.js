@@ -606,6 +606,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  2: {
+
+    id: 2,
+
+    year: 2,
+
+    title: "夜明け前の熱狂",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のディスコ像",
+
+      emoji: "🕺",
+
+      monumentId: "year-02",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_charitsuu" },
+
+      { delay: 4200, type: "ippan_charitsuu" },
+
+      { delay: 7000, type: "salaryman" },
+
+      { delay: 9500, type: "ippan_charitsuu" },
+
+      { delay: 12500, type: "juriana" },
+
+      { delay: 15000, type: "ippan_charitsuu" },
+
+      { delay: 17500, type: "salaryman" },
+
+      { delay: 20500, type: "ippan_charitsuu" },
+
+      { delay: 23500, type: "juriana" },
+
+      { delay: 26000, type: "ippan_charitsuu" },
+
+      { delay: 29000, type: "salaryman" },
+
+      { delay: 32000, type: "ippan_charitsuu" },
+
+      { delay: 35000, type: "juriana" },
+
+      { delay: 38500, type: "ippan_charitsuu" },
+
+      { delay: 42000, type: "bubble" }
+
+    ]
+
   }
 
 };
@@ -21580,6 +21638,54 @@ const ENEMIES = {
       }
 
     ]
+
+  },
+
+  ippan_charitsuu: {
+
+    id: "ippan_charitsuu",
+
+    unitType: "ippan_charitsuu",
+
+    name: "チャリ通学生",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🚲",
+
+    image: null,
+
+    hp: 140,
+
+    attack: 18,
+
+    range: 42,
+
+    speed: 1.35,
+
+    attackInterval: 950,
+
+    yaniReward: 35,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
 
   }
 
