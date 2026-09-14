@@ -1476,6 +1476,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  17: {
+
+    id: 17,
+
+    year: 17,
+
+    title: "音を持ち歩く日々",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の携帯音楽端末",
+
+      emoji: "🎧",
+
+      monumentId: "year-17",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3400, type: "furyou_regent" },
+
+      { delay: 5500, type: "furyou_gyaru_o" },
+
+      { delay: 7700, type: "furyou_bontan" },
+
+      { delay: 10000, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 12400, type: "furyou_regent" },
+
+      { delay: 14900, type: "furyou_jimoto_senpai" },
+
+      { delay: 17500, type: "furyou_chari_bo" },
+
+      { delay: 20200, type: "furyou_regent" },
+
+      { delay: 23000, type: "ippan_gamekid" },
+
+      { delay: 25900, type: "furyou_bontan" },
+
+      { delay: 28900, type: "furyou_gyaru_o" },
+
+      { delay: 32000, type: "ippan_garakee" },
+
+      { delay: 35500, type: "furyou_regent" },
+
+      { delay: 40500, type: "furyou_regent" }
+
+    ]
+
   }
 
 };
@@ -23160,6 +23218,54 @@ const ENEMIES = {
     attackInterval: 1200,
 
     yaniReward: 65,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_regent: {
+
+    id: "furyou_regent",
+
+    unitType: "furyou_regent",
+
+    name: "リーゼント",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🧑‍🎤",
+
+    image: null,
+
+    hp: 240,
+
+    attack: 40,
+
+    range: 58,
+
+    speed: 1.0,
+
+    attackInterval: 1000,
+
+    yaniReward: 60,
 
     spawnOffsetX: 0,
 
