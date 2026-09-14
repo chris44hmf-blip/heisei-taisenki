@@ -4943,6 +4943,8 @@ h2 {
 .timeline-body {
   flex: 1;
 
+  min-width: 0;
+
   display: flex;
   flex-direction: column;
 
@@ -4957,15 +4959,8 @@ h2 {
 
   flex: 1;
 
-  display: flex;
-
-  align-items: center;
-
-  gap: 70px;
-
-  padding:
-    25px
-    15vw;
+  min-width: 0;
+  width: 100%;
 
   overflow-x: auto;
   overflow-y: hidden;
@@ -4976,14 +4971,39 @@ h2 {
 }
 
 
+.timeline-track {
+  --timeline-node: 135px;
+  --timeline-pad: 15vw;
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 70px;
+
+  width: max-content;
+
+  min-height: 100%;
+
+  box-sizing: content-box;
+
+  padding:
+    25px
+    var(--timeline-pad);
+}
+
+
 /* 年表の線 */
 
 .timeline-line {
   position: absolute;
 
-  left: 12vw;
+  left: calc(var(--timeline-pad) + var(--timeline-node) / 2);
+  right: calc(var(--timeline-pad) + var(--timeline-node) / 2);
 
-  width: 1600px;
+  width: auto;
   height: 5px;
 
   top: 50%;
@@ -5008,7 +5028,7 @@ h2 {
 
   z-index: 2;
 
-  flex: 0 0 135px;
+  flex: 0 0 var(--timeline-node, 135px);
 
   border: none;
 

@@ -2622,7 +2622,10 @@ function renderStageSelect(options) {
 
     button.appendChild(note);
 
-    scroll.appendChild(button);
+    (
+      scroll.querySelector(".timeline-track") ||
+      scroll
+    ).appendChild(button);
 
   });
 
