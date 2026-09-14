@@ -1429,7 +1429,816 @@ function initStageProgress() {
 }
 
 
+/* =========================
+   MEDALS
+   所持とクリア接続だけ。
+   dropRate / effect は未決定のため null。
+========================= */
+
+const MEDALS = {
+
+  1: {
+    id: 1,
+    name: "バブルのメダル",
+    stageId: 1,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  2: {
+    id: 2,
+    name: "ディスコのメダル",
+    stageId: 2,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  3: {
+    id: 3,
+    name: "札束のメダル",
+    stageId: 3,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  4: {
+    id: 4,
+    name: "呼び出しベルのメダル",
+    stageId: 4,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  5: {
+    id: 5,
+    name: "蹴球のメダル",
+    stageId: 5,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  6: {
+    id: 6,
+    name: "ルーズのメダル",
+    stageId: 6,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  7: {
+    id: 7,
+    name: "プリ帳のメダル",
+    stageId: 7,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  8: {
+    id: 8,
+    name: "育成端末のメダル",
+    stageId: 8,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  9: {
+    id: 9,
+    name: "厚底のメダル",
+    stageId: 9,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  10: {
+    id: 10,
+    name: "携帯音楽のメダル",
+    stageId: 10,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  11: {
+    id: 11,
+    name: "ガラケーのメダル",
+    stageId: 11,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  12: {
+    id: 12,
+    name: "ミレニアムのメダル",
+    stageId: 12,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  13: {
+    id: 13,
+    name: "ネットのメダル",
+    stageId: 13,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  14: {
+    id: 14,
+    name: "熱狂のメダル",
+    stageId: 14,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  15: {
+    id: 15,
+    name: "写メのメダル",
+    stageId: 15,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  16: {
+    id: 16,
+    name: "ブログのメダル",
+    stageId: 16,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  17: {
+    id: 17,
+    name: "着うたのメダル",
+    stageId: 17,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  18: {
+    id: 18,
+    name: "動画のメダル",
+    stageId: 18,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  19: {
+    id: 19,
+    name: "電子音楽のメダル",
+    stageId: 19,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  20: {
+    id: 20,
+    name: "デコ電のメダル",
+    stageId: 20,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  21: {
+    id: 21,
+    name: "世代交代のメダル",
+    stageId: 21,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  22: {
+    id: 22,
+    name: "スマホのメダル",
+    stageId: 22,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  23: {
+    id: 23,
+    name: "つながりのメダル",
+    stageId: 23,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  24: {
+    id: 24,
+    name: "メッセージのメダル",
+    stageId: 24,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  25: {
+    id: 25,
+    name: "ソシャゲのメダル",
+    stageId: 25,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  26: {
+    id: 26,
+    name: "自撮りのメダル",
+    stageId: 26,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  27: {
+    id: 27,
+    name: "配信のメダル",
+    stageId: 27,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  28: {
+    id: 28,
+    name: "位置ゲーのメダル",
+    stageId: 28,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  29: {
+    id: 29,
+    name: "映えのメダル",
+    stageId: 29,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  30: {
+    id: 30,
+    name: "縦動画のメダル",
+    stageId: 30,
+    grant: "clearRoll",
+    dropRate: null,
+    effect: null
+  },
+
+  31: {
+    id: 31,
+    name: "平成のメダル",
+    stageId: 31,
+    grant: "firstFinalBossKill",
+    dropRate: null,
+    effect: null
+  }
+
+};
+
+
+const MEDAL_PROGRESS_KEY =
+  "medalProgress";
+
+
+let medalProgress = {
+  owned: {},
+  equipped: [null, null, null]
+};
+
+
+function createEmptyMedalProgress() {
+
+  return {
+    owned: {},
+    equipped: [null, null, null]
+  };
+
+}
+
+
+function isPlainObject(value) {
+
+  return (
+    !!value &&
+    typeof value === "object" &&
+    !Array.isArray(value)
+  );
+
+}
+
+
+function normalizeMedalEquipped(value) {
+
+  const slots = [null, null, null];
+
+
+  if (!Array.isArray(value)) {
+
+    return slots;
+
+  }
+
+
+  let index = 0;
+
+
+  while (index < 3) {
+
+    if (
+      index < value.length &&
+      value[index] !== undefined
+    ) {
+
+      slots[index] = value[index];
+
+    }
+
+    index += 1;
+
+  }
+
+
+  return slots;
+
+}
+
+
+function sanitizeMedalProgress(value) {
+
+  const empty =
+    createEmptyMedalProgress();
+
+
+  if (!isPlainObject(value)) {
+
+    return empty;
+
+  }
+
+
+  if (isPlainObject(value.owned)) {
+
+    Object.keys(value.owned).forEach(
+      (key) => {
+
+        const id =
+          Number(key);
+
+        const medal =
+          getMedalDef(id);
+
+
+        if (
+          medal &&
+          String(medal.id) === String(key) &&
+          value.owned[key] === true
+        ) {
+
+          empty.owned[String(medal.id)] = true;
+
+        }
+
+      }
+    );
+
+  }
+
+
+  empty.equipped =
+    normalizeMedalEquipped(
+      value.equipped
+    );
+
+
+  return empty;
+
+}
+
+
+function saveMedalProgress(progress) {
+
+  if (progress !== undefined) {
+
+    medalProgress =
+      sanitizeMedalProgress(progress);
+
+  } else {
+
+    medalProgress =
+      sanitizeMedalProgress(
+        medalProgress
+      );
+
+  }
+
+
+  localStorage.setItem(
+    MEDAL_PROGRESS_KEY,
+    JSON.stringify(medalProgress)
+  );
+
+
+  return getMedalProgress();
+
+}
+
+
+function loadMedalProgress() {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        MEDAL_PROGRESS_KEY
+      );
+
+
+    if (
+      raw === null ||
+      raw === undefined
+    ) {
+
+      return createEmptyMedalProgress();
+
+    }
+
+
+    return sanitizeMedalProgress(
+      JSON.parse(raw)
+    );
+
+  } catch (error) {
+
+  }
+
+
+  return createEmptyMedalProgress();
+
+}
+
+
+function getMedalProgress() {
+
+  return {
+    owned: Object.assign(
+      {},
+      medalProgress.owned
+    ),
+    equipped:
+      medalProgress.equipped.slice()
+  };
+
+}
+
+
+function initMedalProgress() {
+
+  medalProgress =
+    loadMedalProgress();
+
+  saveMedalProgress();
+
+}
+
+
+function getMedalDef(medalId) {
+
+  const id =
+    Number(medalId);
+
+
+  if (!Number.isInteger(id)) {
+
+    return null;
+
+  }
+
+
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      MEDALS,
+      id
+    )
+  ) {
+
+    return null;
+
+  }
+
+
+  return MEDALS[id];
+
+}
+
+
+function getMedalCount() {
+
+  return Object.keys(MEDALS).length;
+
+}
+
+
+function listMedals() {
+
+  const list = [];
+
+  let id = 1;
+
+
+  while (id <= getMedalCount()) {
+
+    const medal =
+      getMedalDef(id);
+
+
+    if (medal) {
+
+      list.push(medal);
+
+    }
+
+    id += 1;
+
+  }
+
+
+  return list;
+
+}
+
+
+function getMedalByStageId(stageId) {
+
+  const medal =
+    getMedalDef(stageId);
+
+
+  if (
+    !medal ||
+    medal.stageId !== Number(stageId)
+  ) {
+
+    return null;
+
+  }
+
+
+  return medal;
+
+}
+
+
+function ownsMedal(medalId) {
+
+  const medal =
+    getMedalDef(medalId);
+
+
+  if (!medal) {
+
+    return false;
+
+  }
+
+
+  return (
+    medalProgress.owned[
+      String(medal.id)
+    ] === true
+  );
+
+}
+
+
+function grantMedal(medalId) {
+
+  const medal =
+    getMedalDef(medalId);
+
+
+  if (!medal) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  const key =
+    String(medal.id);
+
+
+  if (
+    medalProgress.owned[key] === true
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  medalProgress.owned[key] = true;
+
+  saveMedalProgress();
+
+
+  return {
+    newlyGranted: true
+  };
+
+}
+
+
+function isPlayableDropRate(rate) {
+
+  return (
+    typeof rate === "number" &&
+    Number.isFinite(rate) &&
+    rate >= 0 &&
+    rate <= 1
+  );
+
+}
+
+
+function rollMedalOnClear(stage) {
+
+  if (
+    !stage ||
+    !Number.isInteger(stage.id)
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  const medal =
+    getMedalByStageId(stage.id);
+
+
+  if (!medal) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (medal.grant !== "clearRoll") {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (ownsMedal(medal.id)) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (medal.dropRate === null) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (!isPlayableDropRate(medal.dropRate)) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (
+    !(Math.random() < medal.dropRate)
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  return grantMedal(medal.id);
+
+}
+
+
+function isLegacyYear1Boss(enemy) {
+
+  if (!enemy) {
+
+    return false;
+
+  }
+
+
+  return (
+    enemy.type === "threePercent" ||
+    enemy.type === "boss" ||
+    enemy.id === "boss" ||
+    enemy.unitType === "threePercent"
+  );
+
+}
+
+
+function grantFinalBossMedalIfEligible(
+  enemy,
+  stage
+) {
+
+  if (
+    !enemy ||
+    enemy.role !== "finalBoss" ||
+    isLegacyYear1Boss(enemy)
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  if (
+    !stage ||
+    Number(stage.year) !== 31
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  const medal =
+    getMedalByStageId(31);
+
+
+  if (
+    !medal ||
+    medal.grant !== "firstFinalBossKill"
+  ) {
+
+    return {
+      newlyGranted: false
+    };
+
+  }
+
+
+  return grantMedal(medal.id);
+
+}
+
+
 initStageProgress();
+
+initMedalProgress();
 
 
 function getMoshCrowdEndX() {
@@ -21559,6 +22368,11 @@ function winBattle() {
       );
 
     }
+
+
+    rollMedalOnClear(
+      clearedStage
+    );
 
 
     if (
