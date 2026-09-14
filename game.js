@@ -780,6 +780,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  5: {
+
+    id: 5,
+
+    year: 5,
+
+    title: "熱狂のピッチ",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の蹴球像",
+
+      emoji: "⚽",
+
+      monumentId: "year-05",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_gamekid" },
+
+      { delay: 3600, type: "ippan_charitsuu" },
+
+      { delay: 5800, type: "ippan_gamekid" },
+
+      { delay: 8000, type: "ippan_salaryman" },
+
+      { delay: 10300, type: "ippan_tissue" },
+
+      { delay: 12600, type: "ippan_gamekid" },
+
+      { delay: 15000, type: "salaryman" },
+
+      { delay: 17400, type: "ippan_charitsuu" },
+
+      { delay: 19800, type: "ippan_gamekid" },
+
+      { delay: 22400, type: "juriana" },
+
+      { delay: 25000, type: "ippan_salaryman" },
+
+      { delay: 27800, type: "ippan_tissue" },
+
+      { delay: 30800, type: "ippan_gamekid" },
+
+      { delay: 34200, type: "bubble" },
+
+      { delay: 38800, type: "ippan_salaryman" }
+
+    ]
+
   }
 
 };
@@ -21888,6 +21946,54 @@ const ENEMIES = {
     attackInterval: 850,
 
     yaniReward: 30,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_gamekid: {
+
+    id: "ippan_gamekid",
+
+    unitType: "ippan_gamekid",
+
+    name: "ゲーセンキッズ",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🕹️",
+
+    image: null,
+
+    hp: 160,
+
+    attack: 20,
+
+    range: 70,
+
+    speed: 1.2,
+
+    attackInterval: 800,
+
+    yaniReward: 40,
 
     spawnOffsetX: 0,
 
