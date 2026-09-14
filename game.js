@@ -1186,6 +1186,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  12: {
+
+    id: 12,
+
+    year: 12,
+
+    title: "ミレニアム前夜",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の2000",
+
+      emoji: "2️⃣",
+
+      monumentId: "year-12",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 3600, type: "ippan_charitsuu" },
+
+      { delay: 5800, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 8100, type: "ippan_gamekid" },
+
+      { delay: 10500, type: "ippan_salaryman" },
+
+      { delay: 13000, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 15600, type: "ippan_tissue" },
+
+      { delay: 18300, type: "ippan_purikura" },
+
+      { delay: 21100, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 24000, type: "ippan_utsurimasu" },
+
+      { delay: 27000, type: "ippan_crt" },
+
+      { delay: 30100, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 33400, type: "ippan_prilian" },
+
+      { delay: 37000, type: "ippan_garakee" },
+
+      { delay: 42500, type: "furyou_yankee_chuugakusei" }
+
+    ]
+
   }
 
 };
@@ -22638,6 +22696,54 @@ const ENEMIES = {
     className: "battle-enemy boss-enemy",
 
     unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  furyou_yankee_chuugakusei: {
+
+    id: "furyou_yankee_chuugakusei",
+
+    unitType: "furyou_yankee_chuugakusei",
+
+    name: "ヤンキー中学生",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🧑‍🎓",
+
+    image: null,
+
+    hp: 190,
+
+    attack: 28,
+
+    range: 45,
+
+    speed: 1.15,
+
+    attackInterval: 900,
+
+    yaniReward: 45,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
 
     behaviors: []
 
