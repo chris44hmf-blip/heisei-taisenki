@@ -5865,6 +5865,8 @@ updateMoshUI();
 
   clearProjectiles();
 
+  clearAllDelayedMultiHits();
+
 
   playerBaseHp = 2000;
 enemyBaseHp = 2000;
@@ -8987,7 +8989,10 @@ const ATTACK_TYPE = {
 
   PROJECTILE_SINGLE: "projectileSingle",
 
-  PROJECTILE_AOE: "projectileAoE"
+  PROJECTILE_AOE: "projectileAoE",
+
+  DELAYED_MULTI_HIT_SINGLE:
+    "delayedMultiHitSingle"
 
 };
 
@@ -9667,6 +9672,177 @@ const CHARACTERS = {
       dashSpeed: 0.55,
 
       stopDistance: 35
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  cutting_samurai: {
+
+    id: "cutting_samurai",
+
+    name: "カッティングサムライ",
+
+    group: "ライブハウス民",
+
+    number: 26,
+
+    rarity: CHARACTER_RARITY.HEADLINER,
+
+    images:
+      getCharacterImages(
+        "cutting_samurai"
+      ),
+
+    stats: {
+
+      hp: 360,
+
+      attack: 20,
+
+      attackInterval: 3300,
+
+      speed: 0.65,
+
+      range: 150,
+
+      yaniCost: 330,
+
+      deployCooldownMs: 6000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 1200,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type:
+        ATTACK_TYPE.DELAYED_MULTI_HIT_SINGLE,
+
+      hitCount: 10,
+
+      chargeMs: 1200,
+
+      postAttackDelayMs: 200,
+
+      hitIntervalMs: 70,
+
+      effectLifetimeMs: 480,
+
+      effectImage:
+        "images/characters/cutting_samurai/cutting_samurai_effect.webp",
+
+      effectWidth: 118,
+
+      effectPatterns: [
+
+        {
+          rotation: 0,
+          offsetX: -12,
+          offsetY: -8,
+          scaleX: 0.88,
+          scaleY: 0.86
+        },
+
+        {
+          rotation: 78,
+          offsetX: 11,
+          offsetY: 6,
+          scaleX: 0.9,
+          scaleY: 0.84
+        },
+
+        {
+          rotation: -42,
+          offsetX: 5,
+          offsetY: -12,
+          scaleX: 0.86,
+          scaleY: 0.9
+        },
+
+        {
+          rotation: 112,
+          offsetX: -9,
+          offsetY: 10,
+          scaleX: 0.92,
+          scaleY: 0.85
+        },
+
+        {
+          rotation: -78,
+          offsetX: 14,
+          offsetY: -1,
+          scaleX: 0.87,
+          scaleY: 0.88
+        },
+
+        {
+          rotation: 38,
+          offsetX: -13,
+          offsetY: 8,
+          scaleX: 0.91,
+          scaleY: 0.86
+        },
+
+        {
+          rotation: -18,
+          offsetX: 8,
+          offsetY: -10,
+          scaleX: 0.85,
+          scaleY: 0.9
+        },
+
+        {
+          rotation: 98,
+          offsetX: -6,
+          offsetY: 4,
+          scaleX: 0.93,
+          scaleY: 0.84
+        },
+
+        {
+          rotation: -58,
+          offsetX: 10,
+          offsetY: 7,
+          scaleX: 0.89,
+          scaleY: 0.87
+        },
+
+        {
+          rotation: 22,
+          offsetX: -8,
+          offsetY: -5,
+          scaleX: 0.94,
+          scaleY: 0.88
+        }
+
+      ]
 
     },
 
@@ -25040,6 +25216,18 @@ function updateUnits() {
 
 
       if (
+        isDelayedMultiHitActive(unit)
+      ) {
+
+        unit.element.style.left =
+          unit.x + "px";
+
+        return;
+
+      }
+
+
+      if (
         updateHealthKnockbackMotion(
           unit
         )
@@ -25404,6 +25592,16 @@ function tryAttack(
   }
 
 
+  if (
+    playerAttack &&
+    isDelayedMultiHitActive(attacker)
+  ) {
+
+    return;
+
+  }
+
+
   const now =
     Date.now();
 
@@ -25531,6 +25729,22 @@ function tryAttack(
 
   if (
     behavior.type ===
+    ATTACK_TYPE.DELAYED_MULTI_HIT_SINGLE
+  ) {
+
+    beginDelayedMultiHitSingle(
+      attacker,
+      behavior,
+      target
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
       ATTACK_TYPE.PROJECTILE_SINGLE ||
     behavior.type ===
       ATTACK_TYPE.PROJECTILE_AOE
@@ -25563,6 +25777,474 @@ function isAttackDashActive(unit) {
     unit.attackDash &&
     unit.attackDash.active
   );
+
+}
+
+
+function isDelayedMultiHitActive(unit) {
+
+  return !!(
+    unit &&
+    unit.delayedMultiHit &&
+    unit.delayedMultiHit.active
+  );
+
+}
+
+
+function clearDelayedMultiHit(unit) {
+
+  if (
+    !unit ||
+    !unit.delayedMultiHit
+  ) {
+
+    return;
+
+  }
+
+  const state =
+    unit.delayedMultiHit;
+
+  state.active = false;
+
+  state.token += 1;
+
+  if (
+    Array.isArray(
+      state.timeoutIds
+    )
+  ) {
+
+    state.timeoutIds.forEach(
+      (timeoutId) => {
+
+        clearTimeout(timeoutId);
+
+      }
+    );
+
+  }
+
+  if (
+    Array.isArray(
+      state.effectElements
+    )
+  ) {
+
+    state.effectElements.forEach(
+      (element) => {
+
+        if (
+          element &&
+          element.parentNode
+        ) {
+
+          element.remove();
+
+        }
+
+      }
+    );
+
+  }
+
+  unit.delayedMultiHit = null;
+
+}
+
+
+function clearAllDelayedMultiHits() {
+
+  playerUnits.forEach((unit) => {
+
+    clearDelayedMultiHit(unit);
+
+  });
+
+  if (projectileLayer) {
+
+    projectileLayer
+      .querySelectorAll(
+        ".battle-slash-effect"
+      )
+      .forEach((element) => {
+
+        element.remove();
+
+      });
+
+  }
+
+}
+
+
+function spawnDelayedMultiHitSlash(
+  behavior,
+  pattern,
+  impactX,
+  lifetimeMs,
+  state
+) {
+
+  if (
+    !projectileLayer ||
+    !behavior ||
+    !behavior.effectImage ||
+    !state
+  ) {
+
+    return;
+
+  }
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-slash-effect";
+
+  const image =
+    document.createElement("img");
+
+  image.src =
+    behavior.effectImage;
+
+  image.alt = "";
+
+  const effectWidth =
+    typeof behavior.effectWidth ===
+      "number"
+      ? behavior.effectWidth
+      : 118;
+
+  image.style.width =
+    effectWidth + "px";
+
+  element.appendChild(image);
+
+  const offsetX =
+    pattern &&
+    typeof pattern.offsetX ===
+      "number"
+      ? pattern.offsetX
+      : 0;
+
+  const offsetY =
+    pattern &&
+    typeof pattern.offsetY ===
+      "number"
+      ? pattern.offsetY
+      : 0;
+
+  const rotation =
+    pattern &&
+    typeof pattern.rotation ===
+      "number"
+      ? pattern.rotation
+      : 0;
+
+  const scaleX =
+    pattern &&
+    typeof pattern.scaleX ===
+      "number"
+      ? pattern.scaleX
+      : 1;
+
+  const scaleY =
+    pattern &&
+    typeof pattern.scaleY ===
+      "number"
+      ? pattern.scaleY
+      : 1;
+
+  element.style.left =
+    (impactX + offsetX) + "px";
+
+  element.style.bottom =
+    "calc(22% + " +
+    offsetY +
+    "px)";
+
+  element.style.transform =
+    "translate(-50%, 40%) rotate(" +
+    rotation +
+    "deg) scale(" +
+    scaleX +
+    ", " +
+    scaleY +
+    ")";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  state.effectElements.push(
+    element
+  );
+
+  const removeId =
+    window.setTimeout(
+      () => {
+
+        if (element.parentNode) {
+
+          element.remove();
+
+        }
+
+      },
+      lifetimeMs
+    );
+
+  state.timeoutIds.push(removeId);
+
+}
+
+
+function beginDelayedMultiHitSingle(
+  attacker,
+  behavior,
+  target,
+  options
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    !behavior
+  ) {
+
+    return;
+
+  }
+
+  clearDelayedMultiHit(attacker);
+
+  const settings =
+    options ||
+    {};
+
+  const hitCount =
+    Number.isInteger(
+      behavior.hitCount
+    ) &&
+    behavior.hitCount > 0
+      ? behavior.hitCount
+      : 10;
+
+  const chargeMs =
+    typeof behavior.chargeMs ===
+      "number"
+      ? behavior.chargeMs
+      : 1200;
+
+  const postAttackDelayMs =
+    typeof behavior.postAttackDelayMs ===
+      "number"
+      ? behavior.postAttackDelayMs
+      : 200;
+
+  const hitIntervalMs =
+    typeof behavior.hitIntervalMs ===
+      "number"
+      ? behavior.hitIntervalMs
+      : 70;
+
+  const effectLifetimeMs =
+    typeof behavior.effectLifetimeMs ===
+      "number"
+      ? behavior.effectLifetimeMs
+      : 480;
+
+  const patterns =
+    Array.isArray(
+      behavior.effectPatterns
+    ) &&
+    behavior.effectPatterns.length > 0
+      ? behavior.effectPatterns
+      : [
+        {
+          rotation: 0,
+          offsetX: 0,
+          offsetY: 0,
+          scaleX: 1,
+          scaleY: 1
+        }
+      ];
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  const impactX =
+    towardEnemyBase
+      ? ENEMY_BASE_X
+      : (
+        target &&
+        Number.isFinite(target.x)
+          ? target.x
+          : attacker.x +
+            attacker.range
+      );
+
+  const lockedTarget =
+    towardEnemyBase
+      ? null
+      : target;
+
+  const state = {
+
+    active: true,
+
+    token: 1,
+
+    timeoutIds: [],
+
+    effectElements: []
+
+  };
+
+  attacker.delayedMultiHit =
+    state;
+
+  const scheduleHit = (
+    hitIndex,
+    delayMs
+  ) => {
+
+    const timeoutId =
+      window.setTimeout(
+        () => {
+
+          if (
+            !attacker.delayedMultiHit ||
+            attacker.delayedMultiHit !==
+              state ||
+            state.token !== 1 ||
+            !state.active
+          ) {
+
+            return;
+
+          }
+
+          if (
+            attacker.dead ||
+            !battleRunning
+          ) {
+
+            clearDelayedMultiHit(
+              attacker
+            );
+
+            return;
+
+          }
+
+          const pattern =
+            patterns[
+              hitIndex %
+              patterns.length
+            ];
+
+          spawnDelayedMultiHitSlash(
+            behavior,
+            pattern,
+            impactX,
+            effectLifetimeMs,
+            state
+          );
+
+          if (towardEnemyBase) {
+
+            enemyBaseHp -=
+              attacker.attack;
+
+            if (enemyBaseHp < 0) {
+
+              enemyBaseHp = 0;
+
+            }
+
+            updateBaseUI();
+
+            if (enemyBaseHp <= 0) {
+
+              tryResolveBattleVictory();
+
+            }
+
+          } else if (
+            lockedTarget &&
+            !lockedTarget.dead
+          ) {
+
+            damageCharacter(
+              lockedTarget,
+              attacker.attack,
+              true,
+              attacker
+            );
+
+          }
+
+          if (
+            hitIndex >=
+            hitCount - 1
+          ) {
+
+            const finishId =
+              window.setTimeout(
+                () => {
+
+                  if (
+                    attacker.delayedMultiHit ===
+                    state
+                  ) {
+
+                    clearDelayedMultiHit(
+                      attacker
+                    );
+
+                  }
+
+                },
+                effectLifetimeMs + 40
+              );
+
+            state.timeoutIds.push(
+              finishId
+            );
+
+          }
+
+        },
+        delayMs
+      );
+
+    state.timeoutIds.push(
+      timeoutId
+    );
+
+  };
+
+  for (
+    let hitIndex = 0;
+    hitIndex < hitCount;
+    hitIndex += 1
+  ) {
+
+    scheduleHit(
+      hitIndex,
+      chargeMs +
+      postAttackDelayMs +
+      hitIndex *
+      hitIntervalMs
+    );
+
+  }
 
 }
 
@@ -26477,6 +27159,25 @@ function attackEnemyBase(unit) {
   }
 
 
+  if (
+    behavior.type ===
+    ATTACK_TYPE.DELAYED_MULTI_HIT_SINGLE
+  ) {
+
+    beginDelayedMultiHitSingle(
+      unit,
+      behavior,
+      null,
+      {
+        towardEnemyBase: true
+      }
+    );
+
+    return;
+
+  }
+
+
   enemyBaseHp -=
     unit.attack;
 
@@ -26661,6 +27362,10 @@ function defeatCharacter(
     target
   );
 
+  clearDelayedMultiHit(
+    target
+  );
+
   clearHealthKnockback(
     target
   );
@@ -26793,6 +27498,8 @@ function stopBattle() {
   clearInterval(moshTimer);
 
   clearProjectiles();
+
+  clearAllDelayedMultiHits();
 
 
   /* 戦闘BGM停止 */

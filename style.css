@@ -5804,6 +5804,28 @@ h2 {
   height: auto;
 }
 
+.battle-slash-effect {
+  position: absolute;
+
+  bottom: 22%;
+
+  z-index: 5;
+
+  pointer-events: none;
+
+  transform-origin: center center;
+
+  opacity: 0.96;
+}
+
+.battle-slash-effect img {
+  display: block;
+
+  height: auto;
+
+  filter: drop-shadow(0 0 5px rgba(255, 48, 48, 0.55));
+}
+
 .battle-knockback-effect {
   position: absolute;
 
