@@ -664,6 +664,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  3: {
+
+    id: 3,
+
+    year: 3,
+
+    title: "熱気の残響",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の札束",
+
+      emoji: "💴",
+
+      monumentId: "year-03",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_salaryman" },
+
+      { delay: 4000, type: "ippan_charitsuu" },
+
+      { delay: 6500, type: "ippan_salaryman" },
+
+      { delay: 9000, type: "salaryman" },
+
+      { delay: 11500, type: "ippan_charitsuu" },
+
+      { delay: 14000, type: "ippan_salaryman" },
+
+      { delay: 17000, type: "juriana" },
+
+      { delay: 20000, type: "ippan_salaryman" },
+
+      { delay: 23000, type: "ippan_charitsuu" },
+
+      { delay: 26000, type: "salaryman" },
+
+      { delay: 29000, type: "ippan_salaryman" },
+
+      { delay: 32000, type: "juriana" },
+
+      { delay: 35000, type: "ippan_salaryman" },
+
+      { delay: 38500, type: "bubble" },
+
+      { delay: 42500, type: "ippan_salaryman" }
+
+    ]
+
   }
 
 };
@@ -21676,6 +21734,54 @@ const ENEMIES = {
     attackInterval: 950,
 
     yaniReward: 35,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  ippan_salaryman: {
+
+    id: "ippan_salaryman",
+
+    unitType: "ippan_salaryman",
+
+    name: "サラリーマン",
+
+    family: "ippan",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "💼",
+
+    image: null,
+
+    hp: 220,
+
+    attack: 24,
+
+    range: 50,
+
+    speed: 0.95,
+
+    attackInterval: 1050,
+
+    yaniReward: 45,
 
     spawnOffsetX: 0,
 
