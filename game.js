@@ -5520,6 +5520,11 @@ let deployCooldownUntil = {};
 
 let deployCooldownDurationMs = {};
 
+/* battle-local only; never persisted */
+let finalBossDefeated = false;
+
+let finalBossDefeatedUnit = null;
+
 
 function isBattleActive() {
 
@@ -5794,6 +5799,10 @@ function startBattle() {
 
   activeMedalSnapshot =
     resolveEquippedMedals();
+
+  finalBossDefeated = false;
+
+  finalBossDefeatedUnit = null;
 
 
  /* 戦闘BGMに切り替え */
@@ -25337,7 +25346,7 @@ function applyProjectileEnemyBaseDamage(
 
   if (enemyBaseHp <= 0) {
 
-    winBattle();
+    tryResolveBattleVictory();
 
   }
 
@@ -25558,7 +25567,7 @@ function attackEnemyBase(unit) {
     enemyBaseHp <= 0
   ) {
 
-    winBattle();
+    tryResolveBattleVictory();
 
   }
 
@@ -25806,6 +25815,21 @@ updateMoshUI();
   }
 
 
+  if (
+    getActiveBattleWinCondition() ===
+      "finalBossAndBaseDestroy" &&
+    target.role === "finalBoss"
+  ) {
+
+    finalBossDefeated = true;
+
+    finalBossDefeatedUnit = target;
+
+    tryResolveBattleVictory();
+
+  }
+
+
   setTimeout(
     () => {
 
@@ -25908,6 +25932,98 @@ function unlockStoryCharactersForStage(
 
     }
   );
+
+}
+
+
+function getActiveBattleWinCondition() {
+
+  const stage =
+    activeBattleStage;
+
+  if (
+    !stage ||
+    stage.winCondition == null
+  ) {
+
+    return "baseDestroy";
+
+  }
+
+  return stage.winCondition;
+
+}
+
+
+function isEnemyBaseDestroyed() {
+
+  return enemyBaseHp <= 0;
+
+}
+
+
+function isBattleVictoryConditionMet() {
+
+  const condition =
+    getActiveBattleWinCondition();
+
+  if (condition === "baseDestroy") {
+
+    return isEnemyBaseDestroyed();
+
+  }
+
+  if (
+    condition ===
+    "finalBossAndBaseDestroy"
+  ) {
+
+    return (
+      isEnemyBaseDestroyed() &&
+      finalBossDefeated === true
+    );
+
+  }
+
+  return false;
+
+}
+
+
+function tryResolveBattleVictory() {
+
+  if (!battleRunning) {
+
+    return false;
+
+  }
+
+  if (!isBattleVictoryConditionMet()) {
+
+    return false;
+
+  }
+
+  const condition =
+    getActiveBattleWinCondition();
+
+  if (
+    condition ===
+    "finalBossAndBaseDestroy"
+  ) {
+
+    grantFinalBossMedalIfEligible(
+      finalBossDefeatedUnit || {
+        role: "finalBoss"
+      },
+      activeBattleStage
+    );
+
+  }
+
+  winBattle();
+
+  return true;
 
 }
 
