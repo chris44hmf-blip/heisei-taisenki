@@ -1128,6 +1128,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  11: {
+
+    id: 11,
+
+    year: 11,
+
+    title: "折りたたむ時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の折りたたみ携帯",
+
+      emoji: "📱",
+
+      monumentId: "year-11",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "ippan_gamekid" },
+
+      { delay: 3500, type: "ippan_purikura" },
+
+      { delay: 5700, type: "ippan_charitsuu" },
+
+      { delay: 8000, type: "ippan_tissue" },
+
+      { delay: 10400, type: "ippan_salaryman" },
+
+      { delay: 12900, type: "ippan_utsurimasu" },
+
+      { delay: 15500, type: "ippan_crt" },
+
+      { delay: 18200, type: "ippan_purikura" },
+
+      { delay: 21000, type: "ippan_gamekid" },
+
+      { delay: 23900, type: "ippan_salaryman" },
+
+      { delay: 26900, type: "ippan_utsurimasu" },
+
+      { delay: 30000, type: "ippan_crt" },
+
+      { delay: 33300, type: "ippan_heisei_senshi_24" },
+
+      { delay: 37000, type: "ippan_prilian" },
+
+      { delay: 42500, type: "ippan_garakee" }
+
+    ]
+
   }
 
 };
@@ -22524,6 +22582,54 @@ const ENEMIES = {
     attackInterval: 1200,
 
     yaniReward: 150,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  ippan_garakee: {
+
+    id: "ippan_garakee",
+
+    unitType: "ippan_garakee",
+
+    name: "ガラケー",
+
+    family: "ippan",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "white",
+
+      secondary: "black"
+
+    },
+
+    emoji: "📱",
+
+    image: null,
+
+    hp: 820,
+
+    attack: 46,
+
+    range: 115,
+
+    speed: 0.5,
+
+    attackInterval: 1300,
+
+    yaniReward: 160,
 
     spawnOffsetX: 0,
 
