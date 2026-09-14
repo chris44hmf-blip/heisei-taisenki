@@ -1650,6 +1650,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  20: {
+
+    id: 20,
+
+    year: 20,
+
+    title: "デコ盛りの時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のデコ盛りガラケー",
+
+      emoji: "📱",
+
+      monumentId: "year-20",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3300, type: "furyou_oraora" },
+
+      { delay: 5300, type: "furyou_gyaru_o" },
+
+      { delay: 7400, type: "furyou_bontan" },
+
+      { delay: 9600, type: "furyou_regent" },
+
+      { delay: 11900, type: "furyou_jimoto_senpai" },
+
+      { delay: 14300, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 16800, type: "furyou_chari_bo" },
+
+      { delay: 19400, type: "furyou_oraora" },
+
+      { delay: 22100, type: "furyou_bontan" },
+
+      { delay: 24900, type: "furyou_regent" },
+
+      { delay: 27800, type: "furyou_jimoto_saikyo" },
+
+      { delay: 30900, type: "ippan_garakee" },
+
+      { delay: 34400, type: "furyou_oraora" },
+
+      { delay: 41200, type: "furyou_koshipan" }
+
+    ]
+
   }
 
 };
@@ -23478,6 +23536,54 @@ const ENEMIES = {
     attackInterval: 1350,
 
     yaniReward: 170,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy boss-enemy",
+
+    unitBoss: true,
+
+    behaviors: []
+
+  },
+
+  furyou_koshipan: {
+
+    id: "furyou_koshipan",
+
+    unitType: "furyou_koshipan",
+
+    name: "腰パンの頂点",
+
+    family: "furyou",
+
+    role: "midBoss",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "👖",
+
+    image: null,
+
+    hp: 900,
+
+    attack: 64,
+
+    range: 50,
+
+    speed: 0.72,
+
+    attackInterval: 1150,
+
+    yaniReward: 175,
 
     spawnOffsetX: 0,
 
