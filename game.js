@@ -9455,6 +9455,77 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  jizou_kids: {
+
+    id: "jizou_kids",
+
+    name: "地蔵キッズ",
+
+    group: "ライブハウス民",
+
+    number: 6,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "jizou_kids"
+      ),
+
+    stats: {
+
+      hp: 750,
+
+      attack: 12,
+
+      attackInterval: 1500,
+
+      speed: 0.30,
+
+      range: 45,
+
+      yaniCost: 180,
+
+      deployCooldownMs: 4000
+
+    },
+
+    battle: {
+
+      spriteSize: 95,
+
+      attackSpriteMs: 220,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 15,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
