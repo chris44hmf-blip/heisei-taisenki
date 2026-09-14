@@ -1244,6 +1244,64 @@ const STAGES = {
 
     ]
 
+  },
+
+  13: {
+
+    id: 13,
+
+    year: 13,
+
+    title: "ネットの向こう側",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のブラウン管PC",
+
+      emoji: "🖥️",
+
+      monumentId: "year-13",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 3400, type: "furyou_gyaru_o" },
+
+      { delay: 5500, type: "ippan_charitsuu" },
+
+      { delay: 7700, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 10000, type: "ippan_gamekid" },
+
+      { delay: 12400, type: "furyou_gyaru_o" },
+
+      { delay: 14900, type: "ippan_tissue" },
+
+      { delay: 17500, type: "ippan_purikura" },
+
+      { delay: 20200, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 23000, type: "furyou_gyaru_o" },
+
+      { delay: 25900, type: "ippan_salaryman" },
+
+      { delay: 28900, type: "ippan_utsurimasu" },
+
+      { delay: 32000, type: "ippan_garakee" },
+
+      { delay: 35500, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 40500, type: "furyou_gyaru_o" }
+
+    ]
+
   }
 
 };
@@ -22736,6 +22794,54 @@ const ENEMIES = {
     attackInterval: 900,
 
     yaniReward: 45,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    className: "battle-enemy",
+
+    unitBoss: false,
+
+    behaviors: []
+
+  },
+
+  furyou_gyaru_o: {
+
+    id: "furyou_gyaru_o",
+
+    unitType: "furyou_gyaru_o",
+
+    name: "ギャル男",
+
+    family: "furyou",
+
+    role: "normal",
+
+    palette: {
+
+      primary: "light purple",
+
+      secondary: "black"
+
+    },
+
+    emoji: "🕺",
+
+    image: null,
+
+    hp: 150,
+
+    attack: 24,
+
+    range: 50,
+
+    speed: 1.55,
+
+    attackInterval: 750,
+
+    yaniReward: 40,
 
     spawnOffsetX: 0,
 
