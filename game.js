@@ -14041,6 +14041,12 @@ let bsGachaSummaryClosing = false;
 
 let bsGachaSummaryResults = [];
 
+let bsGachaPresentationResults = [];
+
+let bsGachaSkipEnabled = false;
+
+let bsGachaSkipping = false;
+
 
 const bsGachaBack =
   document.getElementById(
@@ -14278,6 +14284,11 @@ const bsGachaSummaryClose =
       ".bs-gacha-summary-close"
     )
     : null;
+
+const bsGachaSkip =
+  document.getElementById(
+    "bs-gacha-skip"
+  );
 
 
 function getBsGachaHighestRarity(results) {
@@ -15070,11 +15081,114 @@ function exitBsGachaPresentation() {
 }
 
 
+function hideBsGachaSkip() {
+
+  bsGachaSkipEnabled = false;
+
+  if (!bsGachaSkip) {
+
+    return;
+
+  }
+
+  bsGachaSkip.hidden = true;
+
+  bsGachaSkip.disabled = true;
+
+  bsGachaSkip.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+}
+
+
+function showBsGachaSkipForTenPull() {
+
+  if (!bsGachaSkip) {
+
+    return;
+
+  }
+
+  bsGachaSkipping = false;
+
+  bsGachaSkipEnabled = true;
+
+  bsGachaSkip.disabled = false;
+
+  bsGachaSkip.hidden = false;
+
+  bsGachaSkip.setAttribute(
+    "aria-hidden",
+    "false"
+  );
+
+}
+
+
+function skipBsGachaTenPullPresentation() {
+
+  if (
+    !bsGachaSkipEnabled ||
+    bsGachaSkipping ||
+    bsGachaSummaryOpen
+  ) {
+
+    return;
+
+  }
+
+  const results =
+    Array.isArray(
+      bsGachaPresentationResults
+    )
+      ? bsGachaPresentationResults.slice()
+      : [];
+
+  if (results.length !== 10) {
+
+    return;
+
+  }
+
+  bsGachaSkipping = true;
+
+  hideBsGachaSkip();
+
+  bsGachaSequenceToken += 1;
+
+  cancelBsGachaLighting();
+
+  cancelBsGachaReveal();
+
+  clearBsGachaRevealQueue();
+
+  const opened =
+    openBsGachaSummary(results);
+
+  if (!opened) {
+
+    exitBsGachaPresentation();
+
+    setBsGachaBusy(false);
+
+  }
+
+  bsGachaSkipping = false;
+
+}
+
+
 function cancelBsGachaPullPresentation() {
 
   bsGachaSequenceToken += 1;
 
   clearBsGachaRevealQueue();
+
+  bsGachaPresentationResults = [];
+
+  hideBsGachaSkip();
 
   cancelBsGachaLighting();
 
@@ -15609,6 +15723,8 @@ function openBsGachaSummary(results) {
 
   }
 
+  hideBsGachaSkip();
+
   bsGachaSummaryResults =
     results.slice();
 
@@ -15688,6 +15804,10 @@ function finishBsGachaSummary() {
 
   clearBsGachaRevealQueue();
 
+  bsGachaPresentationResults = [];
+
+  hideBsGachaSkip();
+
   exitBsGachaPresentation();
 
   bsGachaRevealActive = false;
@@ -15755,6 +15875,8 @@ function finishBsGachaRevealSequence() {
   resetBsGachaSummary();
 
   clearBsGachaRevealQueue();
+
+  hideBsGachaSkip();
 
   exitBsGachaPresentation();
 
@@ -16126,6 +16248,8 @@ function abortBsGachaRevealSequence(
 
   clearBsGachaRevealQueue();
 
+  hideBsGachaSkip();
+
   resetBsGachaSummary();
 
   exitBsGachaPresentation();
@@ -16344,6 +16468,19 @@ function startBsGachaPullPresentation(outcome) {
     bsGachaSequenceToken + 1;
 
   bsGachaSequenceToken = token;
+
+  bsGachaPresentationResults =
+    results.slice();
+
+  if (results.length === 10) {
+
+    showBsGachaSkipForTenPull();
+
+  } else {
+
+    hideBsGachaSkip();
+
+  }
 
   playBsGachaPullPresentation(
     token,
@@ -17307,6 +17444,24 @@ if (bsGachaSummaryClose) {
       event.preventDefault();
 
       closeBsGachaSummary();
+
+    }
+  );
+
+}
+
+
+if (bsGachaSkip) {
+
+  bsGachaSkip.addEventListener(
+    "click",
+    (event) => {
+
+      event.preventDefault();
+
+      event.stopPropagation();
+
+      skipBsGachaTenPullPresentation();
 
     }
   );
