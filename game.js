@@ -1766,6 +1766,180 @@ const STAGES = {
 
     ]
 
+  },
+
+  22: {
+
+    id: 22,
+
+    year: 22,
+
+    title: "手のひらの世界",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の巨大スマホ",
+
+      emoji: "📱",
+
+      monumentId: "year-22",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3200, type: "furyou_gyaru_o" },
+
+      { delay: 5000, type: "ippan_gamekid" },
+
+      { delay: 6900, type: "furyou_oraora" },
+
+      { delay: 8900, type: "furyou_regent" },
+
+      { delay: 11000, type: "ippan_garakee" },
+
+      { delay: 13200, type: "furyou_bontan" },
+
+      { delay: 15500, type: "furyou_chari_bo" },
+
+      { delay: 17900, type: "furyou_jimoto_senpai" },
+
+      { delay: 20400, type: "furyou_oraora" },
+
+      { delay: 23000, type: "furyou_jimoto_saikyo" },
+
+      { delay: 25700, type: "ippan_prilian" },
+
+      { delay: 28600, type: "furyou_regent" },
+
+      { delay: 31800, type: "furyou_koshipan" },
+
+      { delay: 39200, type: "furyou_kaizo_chari" }
+
+    ]
+
+  },
+
+  23: {
+
+    id: 23,
+
+    year: 23,
+
+    title: "つながる時代",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金の吹き出し",
+
+      emoji: "💬",
+
+      monumentId: "year-23",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_gyaru_o" },
+
+      { delay: 3100, type: "furyou_chari_bo" },
+
+      { delay: 4800, type: "furyou_yankee_chuugakusei" },
+
+      { delay: 6600, type: "furyou_oraora" },
+
+      { delay: 8500, type: "furyou_jimoto_senpai" },
+
+      { delay: 10500, type: "furyou_regent" },
+
+      { delay: 12600, type: "ippan_purikura" },
+
+      { delay: 14800, type: "furyou_bontan" },
+
+      { delay: 17100, type: "furyou_chari_bo" },
+
+      { delay: 19500, type: "furyou_oraora" },
+
+      { delay: 22000, type: "furyou_koshipan" },
+
+      { delay: 24700, type: "ippan_garakee" },
+
+      { delay: 27600, type: "furyou_jimoto_saikyo" },
+
+      { delay: 30900, type: "furyou_regent" },
+
+      { delay: 38800, type: "furyou_kaizo_chari" }
+
+    ]
+
+  },
+
+  24: {
+
+    id: 24,
+
+    year: 24,
+
+    title: "メッセージの波",
+
+    environment: "A",
+
+    enemyBase: {
+
+      name: "黄金のチャット画面",
+
+      emoji: "💬",
+
+      monumentId: "year-24",
+
+      image: null
+
+    },
+
+    spawns: [
+
+      { delay: 1500, type: "furyou_chari_bo" },
+
+      { delay: 3000, type: "furyou_oraora" },
+
+      { delay: 4600, type: "furyou_gyaru_o" },
+
+      { delay: 6300, type: "furyou_regent" },
+
+      { delay: 8100, type: "furyou_bontan" },
+
+      { delay: 10000, type: "furyou_jimoto_senpai" },
+
+      { delay: 12000, type: "furyou_chari_bo" },
+
+      { delay: 14100, type: "furyou_oraora" },
+
+      { delay: 16300, type: "furyou_jimoto_saikyo" },
+
+      { delay: 18600, type: "furyou_gyaru_o" },
+
+      { delay: 21000, type: "furyou_koshipan" },
+
+      { delay: 23600, type: "ippan_prilian" },
+
+      { delay: 26400, type: "furyou_regent" },
+
+      { delay: 29600, type: "furyou_kaizo_chari" },
+
+      { delay: 38000, type: "furyou_jimoto_saikyo" }
+
+    ]
+
   }
 
 };
