@@ -3251,8 +3251,9 @@ function initStageProgress() {
 
 /* =========================
    MEDALS
-   所持とクリア接続だけ。
-   dropRate / effect は未決定のため null。
+   所持とクリア接続。
+   clearRoll: 全stage dropRate 0.10。
+   effect は次STEPで扱うため null。
 ========================= */
 
 const MEDALS = {
@@ -3262,7 +3263,7 @@ const MEDALS = {
     name: "バブルのメダル",
     stageId: 1,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3271,7 +3272,7 @@ const MEDALS = {
     name: "ディスコのメダル",
     stageId: 2,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3280,7 +3281,7 @@ const MEDALS = {
     name: "札束のメダル",
     stageId: 3,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3289,7 +3290,7 @@ const MEDALS = {
     name: "呼び出しベルのメダル",
     stageId: 4,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3298,7 +3299,7 @@ const MEDALS = {
     name: "蹴球のメダル",
     stageId: 5,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3307,7 +3308,7 @@ const MEDALS = {
     name: "ルーズのメダル",
     stageId: 6,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3316,7 +3317,7 @@ const MEDALS = {
     name: "プリ帳のメダル",
     stageId: 7,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3325,7 +3326,7 @@ const MEDALS = {
     name: "育成端末のメダル",
     stageId: 8,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3334,7 +3335,7 @@ const MEDALS = {
     name: "厚底のメダル",
     stageId: 9,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3343,7 +3344,7 @@ const MEDALS = {
     name: "携帯音楽のメダル",
     stageId: 10,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3352,7 +3353,7 @@ const MEDALS = {
     name: "ガラケーのメダル",
     stageId: 11,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3361,7 +3362,7 @@ const MEDALS = {
     name: "ミレニアムのメダル",
     stageId: 12,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3370,7 +3371,7 @@ const MEDALS = {
     name: "ネットのメダル",
     stageId: 13,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3379,7 +3380,7 @@ const MEDALS = {
     name: "熱狂のメダル",
     stageId: 14,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3388,7 +3389,7 @@ const MEDALS = {
     name: "写メのメダル",
     stageId: 15,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3397,7 +3398,7 @@ const MEDALS = {
     name: "ブログのメダル",
     stageId: 16,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3406,7 +3407,7 @@ const MEDALS = {
     name: "着うたのメダル",
     stageId: 17,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3415,7 +3416,7 @@ const MEDALS = {
     name: "動画のメダル",
     stageId: 18,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3424,7 +3425,7 @@ const MEDALS = {
     name: "電子音楽のメダル",
     stageId: 19,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3433,7 +3434,7 @@ const MEDALS = {
     name: "デコ電のメダル",
     stageId: 20,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3442,7 +3443,7 @@ const MEDALS = {
     name: "世代交代のメダル",
     stageId: 21,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3451,7 +3452,7 @@ const MEDALS = {
     name: "スマホのメダル",
     stageId: 22,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3460,7 +3461,7 @@ const MEDALS = {
     name: "つながりのメダル",
     stageId: 23,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3469,7 +3470,7 @@ const MEDALS = {
     name: "メッセージのメダル",
     stageId: 24,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3478,7 +3479,7 @@ const MEDALS = {
     name: "ソシャゲのメダル",
     stageId: 25,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3487,7 +3488,7 @@ const MEDALS = {
     name: "自撮りのメダル",
     stageId: 26,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3496,7 +3497,7 @@ const MEDALS = {
     name: "配信のメダル",
     stageId: 27,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3505,7 +3506,7 @@ const MEDALS = {
     name: "位置ゲーのメダル",
     stageId: 28,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3514,7 +3515,7 @@ const MEDALS = {
     name: "映えのメダル",
     stageId: 29,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3523,7 +3524,7 @@ const MEDALS = {
     name: "縦動画のメダル",
     stageId: 30,
     grant: "clearRoll",
-    dropRate: null,
+    dropRate: 0.10,
     effect: null
   },
 
@@ -3531,8 +3532,8 @@ const MEDALS = {
     id: 31,
     name: "平成のメダル",
     stageId: 31,
-    grant: "firstFinalBossKill",
-    dropRate: null,
+    grant: "clearRoll",
+    dropRate: 0.10,
     effect: null
   }
 
@@ -4557,76 +4558,6 @@ function rollMedalOnClear(stage) {
 
   if (
     !(Math.random() < medal.dropRate)
-  ) {
-
-    return {
-      newlyGranted: false
-    };
-
-  }
-
-
-  return grantMedal(medal.id);
-
-}
-
-
-function isLegacyYear1Boss(enemy) {
-
-  if (!enemy) {
-
-    return false;
-
-  }
-
-
-  return (
-    enemy.type === "threePercent" ||
-    enemy.type === "boss" ||
-    enemy.id === "boss" ||
-    enemy.unitType === "threePercent"
-  );
-
-}
-
-
-function grantFinalBossMedalIfEligible(
-  enemy,
-  stage
-) {
-
-  if (
-    !enemy ||
-    enemy.role !== "finalBoss" ||
-    isLegacyYear1Boss(enemy)
-  ) {
-
-    return {
-      newlyGranted: false
-    };
-
-  }
-
-
-  if (
-    !stage ||
-    Number(stage.year) !== 31
-  ) {
-
-    return {
-      newlyGranted: false
-    };
-
-  }
-
-
-  const medal =
-    getMedalByStageId(31);
-
-
-  if (
-    !medal ||
-    medal.grant !== "firstFinalBossKill"
   ) {
 
     return {
@@ -26109,23 +26040,6 @@ function tryResolveBattleVictory() {
   if (!isBattleVictoryConditionMet()) {
 
     return false;
-
-  }
-
-  const condition =
-    getActiveBattleWinCondition();
-
-  if (
-    condition ===
-    "finalBossAndBaseDestroy"
-  ) {
-
-    grantFinalBossMedalIfEligible(
-      finalBossDefeatedUnit || {
-        role: "finalBoss"
-      },
-      activeBattleStage
-    );
 
   }
 
