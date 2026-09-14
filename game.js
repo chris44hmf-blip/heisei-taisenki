@@ -9597,6 +9597,79 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  diver: {
+
+    id: "diver",
+
+    name: "ダイバー",
+
+    group: "ライブハウス民",
+
+    number: 8,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "diver"
+      ),
+
+    stats: {
+
+      hp: 90,
+
+      attack: 48,
+
+      attackInterval: 1600,
+
+      speed: 1.10,
+
+      range: 170,
+
+      yaniCost: 140,
+
+      deployCooldownMs: 3200
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 260,
+
+      hurtSpriteMs: 250,
+
+      deathKnockbackPx: 30,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 320
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_AOE,
+
+      aoeRadius: 65
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
@@ -25136,7 +25209,8 @@ function tryAttack(
 
     applyMeleeAoeDamage(
       attacker,
-      behavior
+      behavior,
+      target
     );
 
     return;
@@ -25173,8 +25247,57 @@ function tryAttack(
 
 function applyMeleeAoeDamage(
   attacker,
-  behavior
+  behavior,
+  primaryTarget
 ) {
+
+  const aoeRadius =
+    typeof behavior.aoeRadius ===
+      "number"
+      ? behavior.aoeRadius
+      : null;
+
+
+  if (
+    aoeRadius != null &&
+    primaryTarget &&
+    !primaryTarget.dead
+  ) {
+
+    const impactX =
+      primaryTarget.x;
+
+    enemyUnits.forEach((enemy) => {
+
+      if (enemy.dead) {
+
+        return;
+
+      }
+
+      if (
+        Math.abs(
+          enemy.x -
+          impactX
+        ) <=
+        aoeRadius
+      ) {
+
+        damageCharacter(
+          enemy,
+          attacker.attack,
+          true,
+          attacker
+        );
+
+      }
+
+    });
+
+    return;
+
+  }
+
 
   const hitRange =
     typeof behavior.hitRadius ===
