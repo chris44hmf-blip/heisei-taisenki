@@ -9664,7 +9664,9 @@ const CHARACTERS = {
 
       dashToTarget: true,
 
-      dashSpeed: 0.55
+      dashSpeed: 0.55,
+
+      stopDistance: 35
 
     },
 
@@ -25359,17 +25361,39 @@ function beginMeleeAoeDash(
   const startX =
     attacker.x;
 
-  const impactX =
+  const targetX =
     target &&
     Number.isFinite(target.x)
       ? target.x
       : startX;
 
 
+  const stopDistance =
+    typeof behavior.stopDistance ===
+      "number" &&
+    behavior.stopDistance >= 0
+      ? behavior.stopDistance
+      : 35;
+
+
+  /*
+    Ally advances rightward.
+    Stop slightly left of the enemy
+    so the diver does not pass through.
+  */
+
+  const stopX =
+    Math.max(
+      startX,
+      targetX -
+      stopDistance
+    );
+
+
   const distance =
     Math.max(
       0,
-      impactX -
+      stopX -
       startX
     );
 
@@ -25384,11 +25408,14 @@ function beginMeleeAoeDash(
 
   if (distance <= 8) {
 
+    attacker.x =
+      stopX;
+
     applyMeleeAoeDamage(
       attacker,
       behavior,
       target,
-      impactX
+      targetX
     );
 
     showUnitAttack(attacker);
@@ -25423,7 +25450,9 @@ function beginMeleeAoeDash(
 
     startX: startX,
 
-    impactX: impactX,
+    stopX: stopX,
+
+    aoeImpactX: targetX,
 
     startedAt: Date.now(),
 
@@ -25479,7 +25508,7 @@ function updateAttackDashMotion(unit) {
   unit.x =
     dash.startX +
     (
-      dash.impactX -
+      dash.stopX -
       dash.startX
     ) *
     t;
@@ -25524,14 +25553,14 @@ function finishAttackDash(unit) {
 
 
   unit.x =
-    dash.impactX;
+    dash.stopX;
 
 
   applyMeleeAoeDamage(
     unit,
     dash.behavior,
     dash.primaryTarget,
-    dash.impactX
+    dash.aoeImpactX
   );
 
 
