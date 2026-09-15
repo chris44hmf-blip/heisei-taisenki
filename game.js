@@ -5867,6 +5867,8 @@ updateMoshUI();
 
   clearAllDelayedMultiHits();
 
+  clearAllBattleStatusEffects();
+
 
   playerBaseHp = 2000;
 enemyBaseHp = 2000;
@@ -10144,6 +10146,100 @@ const CHARACTERS = {
         }
 
       ]
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  angel_voice: {
+
+    id: "angel_voice",
+
+    name: "エンゼルボイス",
+
+    group: "ライブハウス民",
+
+    number: 30,
+
+    rarity: CHARACTER_RARITY.HEADLINER,
+
+    images:
+      getCharacterImages(
+        "angel_voice"
+      ),
+
+    stats: {
+
+      hp: 320,
+
+      attack: 55,
+
+      attackInterval: 1900,
+
+      speed: 0.55,
+
+      range: 250,
+
+      yaniCost: 350,
+
+      deployCooldownMs: 6000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 240,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 18,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 175,
+
+      launchOffsetX: 35,
+
+      launchDelayMs: 100,
+
+      hitRadius: 28,
+
+      effectImage:
+        "images/characters/angel_voice/angel_voice_effect.webp",
+
+      effectWidth: 78,
+
+      onHitStatus: {
+
+        id: "timeStop",
+
+        chance: 0.30,
+
+        durationMs: 1000
+
+      }
 
     },
 
@@ -25532,6 +25628,407 @@ function updateUnits() {
 
 
 /* =========================
+   UNIT STATUS EFFECTS
+========================= */
+
+const UNIT_STATUS = {
+
+  TIME_STOP: "timeStop"
+
+};
+
+
+function ensureUnitStatuses(unit) {
+
+  if (!unit) {
+
+    return null;
+
+  }
+
+  if (
+    !unit.statuses ||
+    typeof unit.statuses !==
+      "object"
+  ) {
+
+    unit.statuses = {};
+
+  }
+
+  return unit.statuses;
+
+}
+
+
+function showTimeStopVisual(unit) {
+
+  if (
+    !unit ||
+    !unit.element
+  ) {
+
+    return;
+
+  }
+
+  unit.element.classList.add(
+    "is-time-stopped"
+  );
+
+  let overlay =
+    unit.element.querySelector(
+      ".status-time-stop"
+    );
+
+  if (overlay) {
+
+    return;
+
+  }
+
+  overlay =
+    document.createElement("div");
+
+  overlay.className =
+    "status-time-stop";
+
+  overlay.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  overlay.innerHTML =
+    '<span class="status-time-stop-ring"></span>' +
+    '<span class="status-time-stop-mark">❚❚</span>';
+
+  unit.element.appendChild(
+    overlay
+  );
+
+}
+
+
+function hideTimeStopVisual(unit) {
+
+  if (
+    !unit ||
+    !unit.element
+  ) {
+
+    return;
+
+  }
+
+  unit.element.classList.remove(
+    "is-time-stopped"
+  );
+
+  const overlay =
+    unit.element.querySelector(
+      ".status-time-stop"
+    );
+
+  if (overlay) {
+
+    overlay.remove();
+
+  }
+
+}
+
+
+function clearUnitStatusEffect(
+  unit,
+  statusId
+) {
+
+  if (
+    !unit ||
+    !statusId ||
+    !unit.statuses ||
+    !unit.statuses[statusId]
+  ) {
+
+    return;
+
+  }
+
+  delete unit.statuses[statusId];
+
+  if (
+    statusId ===
+    UNIT_STATUS.TIME_STOP
+  ) {
+
+    hideTimeStopVisual(unit);
+
+  }
+
+}
+
+
+function clearUnitStatusEffectIfExpired(
+  unit,
+  statusId,
+  token
+) {
+
+  if (
+    !unit ||
+    !unit.statuses ||
+    !unit.statuses[statusId]
+  ) {
+
+    return;
+
+  }
+
+  const entry =
+    unit.statuses[statusId];
+
+  if (entry.token !== token) {
+
+    return;
+
+  }
+
+  if (
+    Date.now() <
+    entry.expiresAt
+  ) {
+
+    return;
+
+  }
+
+  clearUnitStatusEffect(
+    unit,
+    statusId
+  );
+
+}
+
+
+function applyStatusEffect(
+  unit,
+  statusId,
+  durationMs
+) {
+
+  if (
+    !unit ||
+    unit.dead ||
+    !statusId
+  ) {
+
+    return false;
+
+  }
+
+  const duration =
+    Number(durationMs);
+
+  if (
+    !Number.isFinite(duration) ||
+    duration <= 0
+  ) {
+
+    return false;
+
+  }
+
+  const statuses =
+    ensureUnitStatuses(unit);
+
+  if (!statuses) {
+
+    return false;
+
+  }
+
+  const previous =
+    statuses[statusId];
+
+  const token =
+    previous &&
+    Number.isInteger(previous.token)
+      ? previous.token + 1
+      : 1;
+
+  const expiresAt =
+    Date.now() +
+    duration;
+
+  statuses[statusId] = {
+
+    id: statusId,
+
+    token: token,
+
+    expiresAt: expiresAt,
+
+    durationMs: duration
+
+  };
+
+  if (
+    statusId ===
+    UNIT_STATUS.TIME_STOP
+  ) {
+
+    showTimeStopVisual(unit);
+
+  }
+
+  window.setTimeout(
+    () => {
+
+      clearUnitStatusEffectIfExpired(
+        unit,
+        statusId,
+        token
+      );
+
+    },
+    duration + 16
+  );
+
+  return true;
+
+}
+
+
+function isUnitStatusActive(
+  unit,
+  statusId
+) {
+
+  if (
+    !unit ||
+    unit.dead ||
+    !statusId ||
+    !unit.statuses ||
+    !unit.statuses[statusId]
+  ) {
+
+    return false;
+
+  }
+
+  const entry =
+    unit.statuses[statusId];
+
+  if (
+    Date.now() >=
+    entry.expiresAt
+  ) {
+
+    clearUnitStatusEffect(
+      unit,
+      statusId
+    );
+
+    return false;
+
+  }
+
+  return true;
+
+}
+
+
+function clearAllStatusEffects(unit) {
+
+  if (
+    !unit ||
+    !unit.statuses
+  ) {
+
+    return;
+
+  }
+
+  Object.keys(
+    unit.statuses
+  ).forEach((statusId) => {
+
+    clearUnitStatusEffect(
+      unit,
+      statusId
+    );
+
+  });
+
+}
+
+
+function clearAllBattleStatusEffects() {
+
+  enemyUnits.forEach(
+    clearAllStatusEffects
+  );
+
+  playerUnits.forEach(
+    clearAllStatusEffects
+  );
+
+}
+
+
+function tryApplyOnHitStatus(
+  projectile,
+  target
+) {
+
+  if (
+    !projectile ||
+    !target ||
+    target.dead ||
+    !projectile.onHitStatus
+  ) {
+
+    return false;
+
+  }
+
+  const config =
+    projectile.onHitStatus;
+
+  const statusId =
+    config.id;
+
+  if (!statusId) {
+
+    return false;
+
+  }
+
+  const chance =
+    typeof config.chance ===
+      "number"
+      ? config.chance
+      : 0;
+
+  if (
+    chance <= 0 ||
+    Math.random() >= chance
+  ) {
+
+    return false;
+
+  }
+
+  return applyStatusEffect(
+    target,
+    statusId,
+    config.durationMs
+  );
+
+}
+
+
+/* =========================
    ENEMY UPDATE
 ========================= */
 
@@ -25548,6 +26045,21 @@ function updateEnemies() {
       if (
         updateHealthKnockbackMotion(
           enemy
+        )
+      ) {
+
+        enemy.element.style.left =
+          enemy.x + "px";
+
+        return;
+
+      }
+
+
+      if (
+        isUnitStatusActive(
+          enemy,
+          UNIT_STATUS.TIME_STOP
         )
       ) {
 
@@ -25791,6 +26303,19 @@ function tryAttack(
   if (
     isHealthKnockbackActive(
       attacker
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    !playerAttack &&
+    isUnitStatusActive(
+      attacker,
+      UNIT_STATUS.TIME_STOP
     )
   ) {
 
@@ -26992,7 +27517,22 @@ function spawnProjectile(
 
     baseDamaged: false,
 
-    source: attacker
+    source: attacker,
+
+    onHitStatus:
+      behavior.onHitStatus
+        ? {
+
+          id: behavior.onHitStatus.id,
+
+          chance:
+            behavior.onHitStatus.chance,
+
+          durationMs:
+            behavior.onHitStatus.durationMs
+
+        }
+        : null
 
   });
 
@@ -27106,6 +27646,15 @@ function applyProjectileImpact(
         true,
         projectile.source
       );
+
+      if (!hitEnemy.dead) {
+
+        tryApplyOnHitStatus(
+          projectile,
+          hitEnemy
+        );
+
+      }
 
     }
 
@@ -27424,6 +27973,18 @@ function attackPlayerBase(enemy) {
   }
 
 
+  if (
+    isUnitStatusActive(
+      enemy,
+      UNIT_STATUS.TIME_STOP
+    )
+  ) {
+
+    return;
+
+  }
+
+
   const now =
     Date.now();
 
@@ -27583,6 +28144,10 @@ function defeatCharacter(
     target
   );
 
+  clearAllStatusEffects(
+    target
+  );
+
   clearHealthKnockback(
     target
   );
@@ -27717,6 +28282,8 @@ function stopBattle() {
   clearProjectiles();
 
   clearAllDelayedMultiHits();
+
+  clearAllBattleStatusEffects();
 
 
   /* 戦闘BGM停止 */
