@@ -9854,6 +9854,116 @@ const CHARACTERS = {
 
   },
 
+  shugen_knight: {
+
+    id: "shugen_knight",
+
+    name: "シューゲンナイト",
+
+    group: "ライブハウス民",
+
+    number: 27,
+
+    rarity: CHARACTER_RARITY.HEADLINER,
+
+    images:
+      getCharacterImages(
+        "shugen_knight"
+      ),
+
+    stats: {
+
+      hp: 600,
+
+      attack: 70,
+
+      attackInterval: 2800,
+
+      speed: 0.22,
+
+      range: 330,
+
+      yaniCost: 400,
+
+      deployCooldownMs: 7000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 260,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_AOE,
+
+      projectileSpeed: 150,
+
+      aoeRadius: 80,
+
+      launchOffsetX: 45,
+
+      launchDelayMs: 120,
+
+      hitRadius: 36,
+
+      effectImage:
+        "images/characters/shugen_knight/shugen_knight_effect.webp",
+
+      effectWidth: 168
+
+    },
+
+    traits: {
+
+      attackKnockback: {
+
+        chance: 0.30,
+
+        distance: 45,
+
+        durationMs: 200
+
+      },
+
+      healthKnockback: {
+
+        thresholds: [0.50],
+
+        distance: 100,
+
+        durationMs: 220
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   walking_death: {
 
     id: "walking_death",
