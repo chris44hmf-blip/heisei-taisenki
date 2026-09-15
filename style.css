@@ -5804,6 +5804,10 @@ h2 {
   height: auto;
 }
 
+.battle-projectile-cycling img {
+  filter: drop-shadow(0 0 6px rgba(255, 48, 48, 0.55));
+}
+
 .battle-slash-effect {
   position: absolute;
 

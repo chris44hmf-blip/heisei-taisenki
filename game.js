@@ -8999,6 +8999,8 @@ const ATTACK_TYPE = {
 
   PROJECTILE_AOE: "projectileAoE",
 
+  CYCLING_PROJECTILE: "cyclingProjectile",
+
   DELAYED_MULTI_HIT_SINGLE:
     "delayedMultiHitSingle"
 
@@ -9036,8 +9038,190 @@ function isProjectileAttackType(behavior) {
     type ===
       ATTACK_TYPE.PROJECTILE_SINGLE ||
     type ===
-      ATTACK_TYPE.PROJECTILE_AOE
+      ATTACK_TYPE.PROJECTILE_AOE ||
+    type ===
+      ATTACK_TYPE.CYCLING_PROJECTILE
   );
+
+}
+
+
+function getCyclingProjectileStages(
+  behavior
+) {
+
+  if (
+    !behavior ||
+    !Array.isArray(
+      behavior.stages
+    ) ||
+    behavior.stages.length < 1
+  ) {
+
+    return null;
+
+  }
+
+  return behavior.stages;
+
+}
+
+
+function getUnitAttackStageIndex(
+  unit,
+  behavior
+) {
+
+  const stages =
+    getCyclingProjectileStages(
+      behavior
+    );
+
+  if (!stages) {
+
+    return 0;
+
+  }
+
+  const raw =
+    Number(
+      unit &&
+      unit.currentAttackStage
+    ) || 0;
+
+  const index =
+    Math.floor(raw) %
+    stages.length;
+
+  return index < 0
+    ? index + stages.length
+    : index;
+
+}
+
+
+function getCyclingProjectileStage(
+  unit,
+  behavior
+) {
+
+  const stages =
+    getCyclingProjectileStages(
+      behavior
+    );
+
+  if (!stages) {
+
+    return null;
+
+  }
+
+  return stages[
+    getUnitAttackStageIndex(
+      unit,
+      behavior
+    )
+  ];
+
+}
+
+
+function advanceUnitAttackStage(
+  unit,
+  behavior
+) {
+
+  const stages =
+    getCyclingProjectileStages(
+      behavior
+    );
+
+  if (
+    !unit ||
+    !stages
+  ) {
+
+    return;
+
+  }
+
+  unit.currentAttackStage =
+    (
+      getUnitAttackStageIndex(
+        unit,
+        behavior
+      ) + 1
+    ) %
+    stages.length;
+
+}
+
+
+function applyAttackSelfRecoil(
+  unit,
+  distance,
+  durationMs
+) {
+
+  if (
+    !unit ||
+    unit.dead ||
+    !(
+      typeof distance ===
+        "number" &&
+      distance > 0
+    )
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    isHealthKnockbackActive(unit)
+  ) {
+
+    return false;
+
+  }
+
+  const duration =
+    typeof durationMs ===
+      "number" &&
+    durationMs > 0
+      ? durationMs
+      : 200;
+
+  const isPlayer =
+    playerUnits.indexOf(unit) !==
+    -1;
+
+  const startX =
+    unit.x;
+
+  const rawTargetX =
+    isPlayer
+      ? startX - distance
+      : startX + distance;
+
+  unit.knockbackStartX =
+    startX;
+
+  unit.knockbackTargetX =
+    clampHealthKnockbackX(
+      unit,
+      rawTargetX
+    );
+
+  unit.knockbackStartedAt =
+    Date.now();
+
+  unit.knockbackDurationMs =
+    duration;
+
+  // Shot recoil: slide only.
+  // Do not force the hurt sprite.
+  return true;
 
 }
 
@@ -10611,6 +10795,116 @@ const CHARACTERS = {
         durationMs: 220
 
       }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  reimei_chris: {
+
+    id: "reimei_chris",
+
+    name: "《黎明》Chris",
+
+    group: "LEGEND",
+
+    number: 34,
+
+    rarity: CHARACTER_RARITY.LEGEND,
+
+    images:
+      getCharacterImages(
+        "reimei_chris"
+      ),
+
+    stats: {
+
+      hp: 450,
+
+      attack: 85,
+
+      attackInterval: 1800,
+
+      speed: 0.80,
+
+      range: 230,
+
+      yaniCost: 500,
+
+      deployCooldownMs: 8000
+
+    },
+
+    battle: {
+
+      spriteSize: 108,
+
+      attackSpriteMs: 340,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type:
+        ATTACK_TYPE.CYCLING_PROJECTILE,
+
+      projectileSpeed: 195,
+
+      launchOffsetX: 36,
+
+      launchDelayMs: 100,
+
+      hitRadius: 28,
+
+      stages: [
+
+        {
+          effectImage:
+            "images/characters/reimei_chris/reimei_chris_effect_1.webp",
+          effectWidth: 76,
+          damageMultiplier: 1.00,
+          pierceTargetCount: 1
+        },
+
+        {
+          effectImage:
+            "images/characters/reimei_chris/reimei_chris_effect_2.webp",
+          effectWidth: 100,
+          damageMultiplier: 1.25,
+          pierceTargetCount: 2
+        },
+
+        {
+          effectImage:
+            "images/characters/reimei_chris/reimei_chris_effect_3.webp",
+          effectWidth: 152,
+          damageMultiplier: 1.75,
+          pierceTargetCount: 4,
+          selfRecoilDistance: 60,
+          selfRecoilDurationMs: 200
+        }
+
+      ]
 
     },
 
@@ -28701,10 +28995,9 @@ function tryAttack(
 
 
   if (
-    behavior.type ===
-      ATTACK_TYPE.PROJECTILE_SINGLE ||
-    behavior.type ===
-      ATTACK_TYPE.PROJECTILE_AOE
+    isProjectileAttackType(
+      behavior
+    )
   ) {
 
     scheduleProjectile(
@@ -29610,11 +29903,23 @@ function scheduleProjectile(
     options ||
     {};
 
+  const cyclingStage =
+    behavior &&
+    behavior.type ===
+      ATTACK_TYPE.CYCLING_PROJECTILE
+      ? getCyclingProjectileStage(
+          attacker,
+          behavior
+        )
+      : null;
+
   pendingProjectiles.push({
 
     unit: attacker,
 
     behavior: behavior,
+
+    cyclingStage: cyclingStage,
 
     launchAt:
       Date.now() +
@@ -29639,33 +29944,212 @@ function scheduleProjectile(
 }
 
 
+function resolveProjectileShotConfig(
+  behavior,
+  cyclingStage
+) {
+
+  const stage =
+    cyclingStage ||
+    null;
+
+  const effectImage =
+    (
+      stage &&
+      stage.effectImage
+    ) ||
+    (
+      behavior &&
+      behavior.effectImage
+    ) ||
+    null;
+
+  const effectWidth =
+    typeof (
+      stage &&
+      stage.effectWidth
+    ) === "number"
+      ? stage.effectWidth
+      : (
+        typeof (
+          behavior &&
+          behavior.effectWidth
+        ) === "number"
+          ? behavior.effectWidth
+          : 80
+      );
+
+  const projectileSpeed =
+    typeof (
+      stage &&
+      stage.projectileSpeed
+    ) === "number"
+      ? stage.projectileSpeed
+      : (
+        typeof (
+          behavior &&
+          behavior.projectileSpeed
+        ) === "number"
+          ? behavior.projectileSpeed
+          : 180
+      );
+
+  const hitRadius =
+    typeof (
+      stage &&
+      stage.hitRadius
+    ) === "number"
+      ? stage.hitRadius
+      : (
+        typeof (
+          behavior &&
+          behavior.hitRadius
+        ) === "number"
+          ? behavior.hitRadius
+          : 24
+      );
+
+  const aoeRadius =
+    typeof (
+      stage &&
+      stage.aoeRadius
+    ) === "number"
+      ? stage.aoeRadius
+      : (
+        typeof (
+          behavior &&
+          behavior.aoeRadius
+        ) === "number"
+          ? behavior.aoeRadius
+          : 0
+      );
+
+  const launchOffsetX =
+    typeof (
+      stage &&
+      stage.launchOffsetX
+    ) === "number"
+      ? stage.launchOffsetX
+      : (
+        typeof (
+          behavior &&
+          behavior.launchOffsetX
+        ) === "number"
+          ? behavior.launchOffsetX
+          : 32
+      );
+
+  const damageMultiplier =
+    typeof (
+      stage &&
+      stage.damageMultiplier
+    ) === "number" &&
+    stage.damageMultiplier > 0
+      ? stage.damageMultiplier
+      : 1;
+
+  const pierceTargetCount =
+    Number.isInteger(
+      stage &&
+      stage.pierceTargetCount
+    ) &&
+    stage.pierceTargetCount > 0
+      ? stage.pierceTargetCount
+      : 1;
+
+  const selfRecoilDistance =
+    typeof (
+      stage &&
+      stage.selfRecoilDistance
+    ) === "number"
+      ? stage.selfRecoilDistance
+      : 0;
+
+  const selfRecoilDurationMs =
+    typeof (
+      stage &&
+      stage.selfRecoilDurationMs
+    ) === "number"
+      ? stage.selfRecoilDurationMs
+      : 200;
+
+  const onHitStatus =
+    (
+      stage &&
+      stage.onHitStatus
+    ) ||
+    (
+      behavior &&
+      behavior.onHitStatus
+    ) ||
+    null;
+
+  return {
+
+    effectImage: effectImage,
+
+    effectWidth: effectWidth,
+
+    projectileSpeed: projectileSpeed,
+
+    hitRadius: hitRadius,
+
+    aoeRadius: aoeRadius,
+
+    launchOffsetX: launchOffsetX,
+
+    damageMultiplier:
+      damageMultiplier,
+
+    pierceTargetCount:
+      pierceTargetCount,
+
+    selfRecoilDistance:
+      selfRecoilDistance,
+
+    selfRecoilDurationMs:
+      selfRecoilDurationMs,
+
+    onHitStatus: onHitStatus
+
+  };
+
+}
+
+
 function spawnProjectile(
   attacker,
   behavior,
   originX,
   range,
-  towardEnemyBase
+  towardEnemyBase,
+  cyclingStage
 ) {
 
   if (
     !projectileLayer ||
-    !behavior ||
-    !behavior.effectImage
+    !behavior
   ) {
 
     return;
 
   }
 
-  const offsetX =
-    typeof behavior.launchOffsetX ===
-      "number"
-      ? behavior.launchOffsetX
-      : 32;
+  const shot =
+    resolveProjectileShotConfig(
+      behavior,
+      cyclingStage
+    );
+
+  if (!shot.effectImage) {
+
+    return;
+
+  }
 
   const startX =
     originX +
-    offsetX;
+    shot.launchOffsetX;
 
   const maxX =
     towardEnemyBase
@@ -29673,28 +30157,47 @@ function spawnProjectile(
       : originX +
         range;
 
+  const attackPower =
+    getUnitAttackPower(
+      attacker
+    );
+
+  const resolvedAttack =
+    roundCharacterStat(
+      attackPower *
+      shot.damageMultiplier
+    );
+
   const element =
     document.createElement("div");
 
   element.className =
     "battle-projectile";
 
+  if (
+    behavior.type ===
+    ATTACK_TYPE.CYCLING_PROJECTILE
+  ) {
+
+    element.classList.add(
+      "battle-projectile-cycling"
+    );
+
+  }
+
   const image =
     document.createElement("img");
 
   image.src =
-    behavior.effectImage;
+    shot.effectImage;
 
   image.alt = "";
 
-  const effectWidth =
-    typeof behavior.effectWidth ===
-      "number"
-      ? behavior.effectWidth
-      : 80;
-
   image.style.width =
-    effectWidth + "px";
+    shot.effectWidth + "px";
+
+  // Effects already face RIGHT.
+  // No rotate/flip.
 
   element.appendChild(image);
 
@@ -29713,25 +30216,25 @@ function spawnProjectile(
 
     maxX: maxX,
 
-    speed:
-      typeof behavior.projectileSpeed ===
-        "number"
-        ? behavior.projectileSpeed
-        : 180,
+    speed: shot.projectileSpeed,
 
-    hitRadius:
-      typeof behavior.hitRadius ===
-        "number"
-        ? behavior.hitRadius
-        : 24,
+    hitRadius: shot.hitRadius,
 
-    aoeRadius:
-      typeof behavior.aoeRadius ===
-        "number"
-        ? behavior.aoeRadius
-        : 0,
+    aoeRadius: shot.aoeRadius,
 
-    attack: attacker.attack,
+    attack: attackPower,
+
+    attackPower: attackPower,
+
+    damageMultiplier:
+      shot.damageMultiplier,
+
+    resolvedAttack: resolvedAttack,
+
+    pierceTargetCount:
+      shot.pierceTargetCount,
+
+    hitEnemies: new Set(),
 
     type: behavior.type,
 
@@ -29743,21 +30246,46 @@ function spawnProjectile(
     source: attacker,
 
     onHitStatus:
-      behavior.onHitStatus
+      shot.onHitStatus
         ? {
 
-          id: behavior.onHitStatus.id,
+          id: shot.onHitStatus.id,
 
           chance:
-            behavior.onHitStatus.chance,
+            shot.onHitStatus.chance,
 
           durationMs:
-            behavior.onHitStatus.durationMs
+            shot.onHitStatus.durationMs
 
         }
         : null
 
   });
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.CYCLING_PROJECTILE
+  ) {
+
+    // Stage advances on fire, not hit.
+    advanceUnitAttackStage(
+      attacker,
+      behavior
+    );
+
+    if (
+      shot.selfRecoilDistance > 0
+    ) {
+
+      applyAttackSelfRecoil(
+        attacker,
+        shot.selfRecoilDistance,
+        shot.selfRecoilDurationMs
+      );
+
+    }
+
+  }
 
 }
 
@@ -29825,9 +30353,24 @@ function findFirstProjectileHit(
     ) +
     projectile.hitRadius;
 
+  const hitEnemies =
+    projectile.hitEnemies instanceof
+      Set
+      ? projectile.hitEnemies
+      : null;
+
   enemyUnits.forEach((enemy) => {
 
     if (enemy.dead) {
+
+      return;
+
+    }
+
+    if (
+      hitEnemies &&
+      hitEnemies.has(enemy)
+    ) {
 
       return;
 
@@ -29858,11 +30401,34 @@ function getProjectileAttackPower(
 
   if (
     projectile &&
+    Number.isFinite(
+      projectile.resolvedAttack
+    )
+  ) {
+
+    return projectile.resolvedAttack;
+
+  }
+
+  if (
+    projectile &&
     projectile.source
   ) {
 
-    return getUnitAttackPower(
-      projectile.source
+    const base =
+      getUnitAttackPower(
+        projectile.source
+      );
+
+    const multiplier =
+      typeof projectile.damageMultiplier ===
+        "number" &&
+      projectile.damageMultiplier > 0
+        ? projectile.damageMultiplier
+        : 1;
+
+    return roundCharacterStat(
+      base * multiplier
     );
 
   }
@@ -29883,7 +30449,9 @@ function applyProjectileImpact(
 
   if (
     projectile.type ===
-    ATTACK_TYPE.PROJECTILE_SINGLE
+      ATTACK_TYPE.PROJECTILE_SINGLE ||
+    projectile.type ===
+      ATTACK_TYPE.CYCLING_PROJECTILE
   ) {
 
     if (hitEnemy) {
@@ -30008,7 +30576,9 @@ function updateProjectiles() {
         pending.behavior,
         pending.originX,
         pending.range,
-        pending.towardEnemyBase
+        pending.towardEnemyBase,
+        pending.cyclingStage ||
+          null
       );
 
     }
@@ -30058,6 +30628,43 @@ function updateProjectiles() {
         projectile.x,
         hit
       );
+
+      if (
+        !(
+          projectile.hitEnemies instanceof
+            Set
+        )
+      ) {
+
+        projectile.hitEnemies =
+          new Set();
+
+      }
+
+      projectile.hitEnemies.add(
+        hit
+      );
+
+      const pierceLimit =
+        Number.isInteger(
+          projectile.pierceTargetCount
+        ) &&
+        projectile.pierceTargetCount > 0
+          ? projectile.pierceTargetCount
+          : 1;
+
+      if (
+        projectile.type ===
+          ATTACK_TYPE.CYCLING_PROJECTILE &&
+        projectile.hitEnemies.size <
+          pierceLimit
+      ) {
+
+        remaining.push(projectile);
+
+        return;
+
+      }
 
       removeProjectile(projectile);
 
