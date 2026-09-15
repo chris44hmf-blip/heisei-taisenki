@@ -9875,6 +9875,97 @@ const CHARACTERS = {
 
   },
 
+  deisui_niki: {
+
+    id: "deisui_niki",
+
+    name: "泥酔ニキ",
+
+    group: "IPPANJIN",
+
+    number: 9,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "deisui_niki"
+      ),
+
+    stats: {
+
+      hp: 260,
+
+      attack: 38,
+
+      attackInterval: 1100,
+
+      speed: 0.85,
+
+      range: 45,
+
+      yaniCost: 130,
+
+      deployCooldownMs: 2500
+
+    },
+
+    battle: {
+
+      spriteSize: 98,
+
+      attackSpriteMs: 260,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 28,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 360
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE,
+
+      lungeDistance: 55,
+
+      lungeDurationMs: 240,
+
+      lungeStopGap: 12
+
+    },
+
+    traits: {
+
+      staggerWalk: {
+
+        minMultiplier: 0.75,
+
+        maxMultiplier: 1.25,
+
+        periodMs: 1100
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
@@ -24031,10 +24122,16 @@ function spawnCharacter(characterId) {
 
     knockbackDurationMs: 0,
 
+    staggerWalkPhaseMs: 0,
+
+    currentAttackStage: 0,
+
     dead: false
 
   };
 
+
+  initUnitStaggerWalkPhase(unit);
 
   playerUnits.push(unit);
 
@@ -24065,6 +24162,127 @@ function getHealthKnockbackTrait(unit) {
   }
 
   return unit.traits.healthKnockback;
+
+}
+
+
+function getStaggerWalkTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.staggerWalk
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.staggerWalk;
+
+}
+
+
+function initUnitStaggerWalkPhase(unit) {
+
+  const trait =
+    getStaggerWalkTrait(unit);
+
+  if (!trait || !unit) {
+
+    return;
+
+  }
+
+  const periodMs =
+    typeof trait.periodMs ===
+      "number" &&
+    trait.periodMs > 0
+      ? trait.periodMs
+      : 1100;
+
+  // Phase offset only — average
+  // move speed stays at base.
+  unit.staggerWalkPhaseMs =
+    Math.floor(
+      Math.random() *
+      periodMs
+    );
+
+}
+
+
+function getUnitMoveSpeed(unit) {
+
+  const base =
+    Number(
+      unit &&
+      unit.speed
+    ) || 0;
+
+  const trait =
+    getStaggerWalkTrait(unit);
+
+  if (!trait) {
+
+    return base;
+
+  }
+
+  const periodMs =
+    typeof trait.periodMs ===
+      "number" &&
+    trait.periodMs > 0
+      ? trait.periodMs
+      : 1100;
+
+  const minMultiplier =
+    typeof trait.minMultiplier ===
+      "number"
+      ? trait.minMultiplier
+      : 0.75;
+
+  const maxMultiplier =
+    typeof trait.maxMultiplier ===
+      "number"
+      ? trait.maxMultiplier
+      : 1.25;
+
+  const phaseMs =
+    Number(
+      unit.staggerWalkPhaseMs
+    ) || 0;
+
+  const cycle =
+    (
+      (
+        Date.now() +
+        phaseMs
+      ) %
+      periodMs
+    ) /
+    periodMs;
+
+  // Smooth sine: always > 0, mean 1.0
+  // when min/max are symmetric.
+  const wave =
+    0.5 +
+    0.5 *
+    Math.sin(
+      cycle *
+      Math.PI *
+      2
+    );
+
+  const multiplier =
+    minMultiplier +
+    (
+      maxMultiplier -
+      minMultiplier
+    ) *
+    wave;
+
+  return base * multiplier;
 
 }
 
@@ -26394,7 +26612,9 @@ function updateUnits() {
         ) {
 
           unit.x +=
-            unit.speed;
+            getUnitMoveSpeed(
+              unit
+            );
 
         } else {
 
@@ -26428,7 +26648,9 @@ function updateUnits() {
         ) {
 
           unit.x +=
-            unit.speed;
+            getUnitMoveSpeed(
+              unit
+            );
 
         } else {
 
@@ -28892,6 +29114,23 @@ function tryAttack(
   }
 
 
+  if (
+    playerAttack &&
+    behavior &&
+    hasMeleeLunge(behavior)
+  ) {
+
+    beginMeleeLunge(
+      attacker,
+      behavior,
+      target
+    );
+
+    return;
+
+  }
+
+
   showUnitAttack(
     attacker
   );
@@ -29516,6 +29755,222 @@ function clearAttackDash(unit) {
 }
 
 
+function hasMeleeLunge(behavior) {
+
+  return !!(
+    behavior &&
+    typeof behavior.lungeDistance ===
+      "number" &&
+    behavior.lungeDistance > 0
+  );
+
+}
+
+
+function beginMeleeLunge(
+  attacker,
+  behavior,
+  target,
+  options
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    isAttackDashActive(attacker)
+  ) {
+
+    return;
+
+  }
+
+  const settings =
+    options ||
+    {};
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  const startX =
+    attacker.x;
+
+  const lungeDistance =
+    behavior.lungeDistance;
+
+  const stopGap =
+    typeof behavior.lungeStopGap ===
+      "number" &&
+    behavior.lungeStopGap >= 0
+      ? behavior.lungeStopGap
+      : 12;
+
+  const durationMs =
+    typeof behavior.lungeDurationMs ===
+      "number" &&
+    behavior.lungeDurationMs > 0
+      ? behavior.lungeDurationMs
+      : 240;
+
+  let stopX =
+    startX +
+    lungeDistance;
+
+  if (towardEnemyBase) {
+
+    stopX =
+      Math.min(
+        stopX,
+        ENEMY_BASE_X -
+        stopGap
+      );
+
+  } else if (
+    target &&
+    Number.isFinite(target.x)
+  ) {
+
+    // Do not pass through the target.
+    stopX =
+      Math.min(
+        stopX,
+        target.x -
+        stopGap
+      );
+
+  }
+
+  stopX =
+    Math.max(
+      startX,
+      stopX
+    );
+
+  clearUnitSpriteTimer(attacker);
+
+  setUnitSprite(
+    attacker,
+    "attack"
+  );
+
+  if (
+    stopX - startX <=
+    2
+  ) {
+
+    attacker.x =
+      stopX;
+
+    resolveMeleeLungeImpact(
+      attacker,
+      behavior,
+      towardEnemyBase
+        ? null
+        : target,
+      towardEnemyBase
+    );
+
+    showUnitAttack(attacker);
+
+    return;
+
+  }
+
+  attacker.attackDash = {
+
+    active: true,
+
+    mode: "lunge",
+
+    startX: startX,
+
+    stopX: stopX,
+
+    startedAt: Date.now(),
+
+    durationMs: durationMs,
+
+    behavior: behavior,
+
+    primaryTarget:
+      towardEnemyBase
+        ? null
+        : (
+          target ||
+          null
+        ),
+
+    towardEnemyBase:
+      towardEnemyBase
+
+  };
+
+}
+
+
+function resolveMeleeLungeImpact(
+  attacker,
+  behavior,
+  primaryTarget,
+  towardEnemyBase
+) {
+
+  if (
+    !attacker ||
+    attacker.dead
+  ) {
+
+    return;
+
+  }
+
+  if (towardEnemyBase) {
+
+    enemyBaseHp -=
+      getUnitAttackPower(
+        attacker
+      );
+
+    updateBaseUI();
+
+    noteUnitAttackSuccess(
+      attacker
+    );
+
+    if (enemyBaseHp <= 0) {
+
+      tryResolveBattleVictory();
+
+    }
+
+    return;
+
+  }
+
+  if (
+    !primaryTarget ||
+    primaryTarget.dead
+  ) {
+
+    // Target died mid-lunge:
+    // cancel damage, no retarget.
+    return;
+
+  }
+
+  damageCharacter(
+    primaryTarget,
+    getUnitAttackPower(
+      attacker
+    ),
+    true,
+    attacker
+  );
+
+}
+
+
 function beginMeleeAoeDash(
   attacker,
   behavior,
@@ -29623,6 +30078,8 @@ function beginMeleeAoeDash(
 
     active: true,
 
+    mode: "aoeDash",
+
     startX: startX,
 
     stopX: stopX,
@@ -29635,7 +30092,9 @@ function beginMeleeAoeDash(
 
     behavior: behavior,
 
-    primaryTarget: target || null
+    primaryTarget: target || null,
+
+    towardEnemyBase: false
 
   };
 
@@ -29731,12 +30190,30 @@ function finishAttackDash(unit) {
     dash.stopX;
 
 
-  applyMeleeAoeDamage(
-    unit,
-    dash.behavior,
-    dash.primaryTarget,
-    dash.aoeImpactX
-  );
+  if (
+    dash.mode === "lunge" ||
+    hasMeleeLunge(dash.behavior)
+  ) {
+
+    resolveMeleeLungeImpact(
+      unit,
+      dash.behavior,
+      dash.primaryTarget,
+      Boolean(
+        dash.towardEnemyBase
+      )
+    );
+
+  } else {
+
+    applyMeleeAoeDamage(
+      unit,
+      dash.behavior,
+      dash.primaryTarget,
+      dash.aoeImpactX
+    );
+
+  }
 
 
   clearAttackDash(unit);
@@ -30828,6 +31305,24 @@ function attackEnemyBase(unit) {
   ) {
 
     beginDropAoeAttack(
+      unit,
+      behavior,
+      null,
+      {
+        towardEnemyBase: true
+      }
+    );
+
+    return;
+
+  }
+
+
+  if (
+    hasMeleeLunge(behavior)
+  ) {
+
+    beginMeleeLunge(
       unit,
       behavior,
       null,
