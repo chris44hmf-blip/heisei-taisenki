@@ -5757,6 +5757,8 @@ let lastProjectileUpdateAt = 0;
 
 let attackKnockbackEffects = [];
 
+let activeDropAoeEffects = [];
+
 
 /* 拠点 */
 
@@ -8991,6 +8993,8 @@ const ATTACK_TYPE = {
 
   FRONT_AOE: "frontAoE",
 
+  DROP_AOE: "dropAoE",
+
   PROJECTILE_SINGLE: "projectileSingle",
 
   PROJECTILE_AOE: "projectileAoE",
@@ -10485,6 +10489,124 @@ const CHARACTERS = {
           }
 
         ],
+
+        durationMs: 220
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  reimei_kairi: {
+
+    id: "reimei_kairi",
+
+    name: "《黎明》カイリ",
+
+    group: "LEGEND",
+
+    number: 33,
+
+    rarity: CHARACTER_RARITY.LEGEND,
+
+    images:
+      getCharacterImages(
+        "reimei_kairi"
+      ),
+
+    stats: {
+
+      hp: 500,
+
+      attack: 105,
+
+      attackInterval: 2500,
+
+      speed: 0.65,
+
+      range: 260,
+
+      yaniCost: 520,
+
+      deployCooldownMs: 8000
+
+    },
+
+    battle: {
+
+      spriteSize: 108,
+
+      attackSpriteMs: 360,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.DROP_AOE,
+
+      aoeRadius: 80,
+
+      pullDistance: 25,
+
+      spawnDelayMs: 80,
+
+      fallDurationMs: 800,
+
+      fallDistancePx: 185,
+
+      effectImage:
+        "images/characters/reimei_kairi/reimei_kairi_effect.webp",
+
+      effectWidth: 110,
+
+      // Source tip points RIGHT;
+      // rotate 90deg CW so tip faces ground.
+      effectRotateDeg: 90,
+
+      effectOffsetY: 0,
+
+      impactFlashMs: 280,
+
+      onHitStatus: {
+
+        id: "timeStop",
+
+        chance: 0.30,
+
+        durationMs: 1000
+
+      }
+
+    },
+
+    traits: {
+
+      healthKnockback: {
+
+        thresholds: [0.40],
+
+        distance: 120,
 
         durationMs: 220
 
@@ -27379,6 +27501,663 @@ function applyFrontAoeEnemyBaseAttack(
 }
 
 
+function pullUnitTowardX(
+  unit,
+  centerX,
+  maxDistance
+) {
+
+  if (
+    !unit ||
+    unit.dead ||
+    !Number.isFinite(centerX)
+  ) {
+
+    return 0;
+
+  }
+
+  const limit =
+    typeof maxDistance ===
+      "number" &&
+    maxDistance > 0
+      ? maxDistance
+      : 0;
+
+  if (limit <= 0) {
+
+    return 0;
+
+  }
+
+  const dx =
+    centerX -
+    unit.x;
+
+  const distance =
+    Math.abs(dx);
+
+  if (distance <= 0) {
+
+    return 0;
+
+  }
+
+  const move =
+    Math.min(
+      limit,
+      distance
+    );
+
+  unit.x +=
+    Math.sign(dx) *
+    move;
+
+  if (unit.element) {
+
+    unit.element.style.left =
+      unit.x + "px";
+
+  }
+
+  return move;
+
+}
+
+
+function getDropAoeTargetsAt(
+  impactX,
+  aoeRadius
+) {
+
+  const radius =
+    typeof aoeRadius ===
+      "number"
+      ? aoeRadius
+      : 80;
+
+  const targets = [];
+
+  enemyUnits.forEach((enemy) => {
+
+    if (
+      !enemy ||
+      enemy.dead
+    ) {
+
+      return;
+
+    }
+
+    if (
+      Math.abs(
+        enemy.x -
+        impactX
+      ) <=
+      radius
+    ) {
+
+      targets.push(enemy);
+
+    }
+
+  });
+
+  return targets;
+
+}
+
+
+function applyDropAoeOnHitStatus(
+  targets,
+  statusConfig
+) {
+
+  if (
+    !statusConfig ||
+    !statusConfig.id ||
+    !Array.isArray(targets)
+  ) {
+
+    return;
+
+  }
+
+  targets.forEach((target) => {
+
+    if (
+      !target ||
+      target.dead
+    ) {
+
+      return;
+
+    }
+
+    tryApplyOnHitStatus(
+      {
+        onHitStatus:
+          statusConfig
+      },
+      target
+    );
+
+  });
+
+}
+
+
+function spawnDropAoeImpactFlash(
+  impactX,
+  offsetY,
+  lifetimeMs
+) {
+
+  if (!projectileLayer) {
+
+    return;
+
+  }
+
+  const flash =
+    document.createElement("div");
+
+  flash.className =
+    "battle-drop-aoe-impact";
+
+  flash.style.left =
+    impactX + "px";
+
+  flash.style.bottom =
+    "calc(22% + " +
+    offsetY +
+    "px)";
+
+  projectileLayer.appendChild(
+    flash
+  );
+
+  window.setTimeout(
+    () => {
+
+      if (flash.parentNode) {
+
+        flash.remove();
+
+      }
+
+    },
+    lifetimeMs
+  );
+
+}
+
+
+function removeDropAoeEffect(effect) {
+
+  if (!effect) {
+
+    return;
+
+  }
+
+  effect.resolved = true;
+
+  if (
+    effect.animation &&
+    typeof effect.animation.cancel ===
+      "function"
+  ) {
+
+    try {
+
+      effect.animation.cancel();
+
+    } catch (error) {
+
+      // Ignore cancelled animations.
+
+    }
+
+  }
+
+  if (
+    effect.element &&
+    effect.element.parentNode
+  ) {
+
+    effect.element.remove();
+
+  }
+
+  activeDropAoeEffects =
+    activeDropAoeEffects.filter(
+      (entry) =>
+        entry !== effect
+    );
+
+}
+
+
+function clearDropAoeEffects() {
+
+  activeDropAoeEffects
+    .slice()
+    .forEach(
+      removeDropAoeEffect
+    );
+
+  activeDropAoeEffects = [];
+
+}
+
+
+function resolveDropAoeImpact(
+  drop
+) {
+
+  if (
+    !drop ||
+    drop.resolved
+  ) {
+
+    return;
+
+  }
+
+  drop.resolved = true;
+
+  spawnDropAoeImpactFlash(
+    drop.impactX,
+    drop.effectOffsetY,
+    drop.impactFlashMs
+  );
+
+  if (drop.towardEnemyBase) {
+
+    enemyBaseHp -=
+      drop.attackPower;
+
+    updateBaseUI();
+
+    if (
+      drop.source &&
+      !drop.source.dead
+    ) {
+
+      noteUnitAttackSuccess(
+        drop.source
+      );
+
+    }
+
+    if (enemyBaseHp <= 0) {
+
+      tryResolveBattleVictory();
+
+    }
+
+    window.setTimeout(
+      () => {
+
+        removeDropAoeEffect(drop);
+
+      },
+      drop.impactFlashMs
+    );
+
+    return;
+
+  }
+
+  const targets =
+    getDropAoeTargetsAt(
+      drop.impactX,
+      drop.aoeRadius
+    );
+
+  targets.forEach((enemy) => {
+
+    pullUnitTowardX(
+      enemy,
+      drop.impactX,
+      drop.pullDistance
+    );
+
+  });
+
+  targets.forEach((enemy) => {
+
+    if (
+      !enemy ||
+      enemy.dead
+    ) {
+
+      return;
+
+    }
+
+    damageCharacter(
+      enemy,
+      drop.attackPower,
+      true,
+      drop.source
+    );
+
+  });
+
+  applyDropAoeOnHitStatus(
+    targets,
+    drop.onHitStatus
+  );
+
+  if (
+    drop.source &&
+    !drop.source.dead
+  ) {
+
+    noteUnitAttackSuccess(
+      drop.source
+    );
+
+  }
+
+  window.setTimeout(
+    () => {
+
+      removeDropAoeEffect(drop);
+
+    },
+    drop.impactFlashMs
+  );
+
+}
+
+
+function beginDropAoeAttack(
+  attacker,
+  behavior,
+  target,
+  options
+) {
+
+  if (
+    !attacker ||
+    !behavior ||
+    !projectileLayer
+  ) {
+
+    return;
+
+  }
+
+  const settings =
+    options ||
+    {};
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  // Snapshot impact at attack start.
+  // Do not track the original target.
+  const impactX =
+    towardEnemyBase
+      ? ENEMY_BASE_X
+      : (
+        target &&
+        Number.isFinite(target.x)
+          ? target.x
+          : attacker.x +
+            (
+              Number(attacker.range) ||
+              0
+            )
+      );
+
+  const attackPower =
+    getUnitAttackPower(
+      attacker
+    );
+
+  const spawnDelayMs =
+    typeof behavior.spawnDelayMs ===
+      "number"
+      ? behavior.spawnDelayMs
+      : 80;
+
+  const fallDurationMs =
+    typeof behavior.fallDurationMs ===
+      "number"
+      ? behavior.fallDurationMs
+      : 800;
+
+  const fallDistancePx =
+    typeof behavior.fallDistancePx ===
+      "number"
+      ? behavior.fallDistancePx
+      : 185;
+
+  const aoeRadius =
+    typeof behavior.aoeRadius ===
+      "number"
+      ? behavior.aoeRadius
+      : 80;
+
+  const pullDistance =
+    typeof behavior.pullDistance ===
+      "number"
+      ? behavior.pullDistance
+      : 0;
+
+  const effectWidth =
+    typeof behavior.effectWidth ===
+      "number"
+      ? behavior.effectWidth
+      : 110;
+
+  const effectRotateDeg =
+    typeof behavior.effectRotateDeg ===
+      "number"
+      ? behavior.effectRotateDeg
+      : 90;
+
+  const effectOffsetY =
+    typeof behavior.effectOffsetY ===
+      "number"
+      ? behavior.effectOffsetY
+      : 0;
+
+  const impactFlashMs =
+    typeof behavior.impactFlashMs ===
+      "number"
+      ? behavior.impactFlashMs
+      : 280;
+
+  const onHitStatus =
+    behavior.onHitStatus
+      ? {
+
+        id: behavior.onHitStatus.id,
+
+        chance:
+          behavior.onHitStatus.chance,
+
+        durationMs:
+          behavior.onHitStatus.durationMs
+
+      }
+      : null;
+
+  const drop = {
+
+    resolved: false,
+
+    impactX: impactX,
+
+    attackPower: attackPower,
+
+    aoeRadius: aoeRadius,
+
+    pullDistance: pullDistance,
+
+    towardEnemyBase:
+      towardEnemyBase,
+
+    source: attacker,
+
+    onHitStatus: onHitStatus,
+
+    effectOffsetY: effectOffsetY,
+
+    impactFlashMs: impactFlashMs,
+
+    element: null,
+
+    animation: null
+
+  };
+
+  activeDropAoeEffects.push(drop);
+
+  window.setTimeout(
+    () => {
+
+      if (
+        drop.resolved ||
+        activeDropAoeEffects.indexOf(
+          drop
+        ) < 0 ||
+        !projectileLayer ||
+        !behavior.effectImage
+      ) {
+
+        return;
+
+      }
+
+      const element =
+        document.createElement(
+          "div"
+        );
+
+      element.className =
+        "battle-drop-aoe-effect";
+
+      const image =
+        document.createElement(
+          "img"
+        );
+
+      image.src =
+        behavior.effectImage;
+
+      image.alt = "";
+
+      image.style.width =
+        effectWidth + "px";
+
+      image.style.transform =
+        "rotate(" +
+        effectRotateDeg +
+        "deg)";
+
+      element.appendChild(image);
+
+      element.style.left =
+        impactX + "px";
+
+      element.style.bottom =
+        "calc(22% + " +
+        effectOffsetY +
+        "px)";
+
+      element.style.transform =
+        "translate(-50%, 0) translateY(-" +
+        fallDistancePx +
+        "px)";
+
+      projectileLayer.appendChild(
+        element
+      );
+
+      drop.element = element;
+
+      // Fall translate only on the
+      // wrapper; tip-down rotate stays
+      // on the image for the full fall.
+      const animation =
+        element.animate(
+          [
+            {
+              transform:
+                "translate(-50%, 0) translateY(-" +
+                fallDistancePx +
+                "px)"
+            },
+            {
+              transform:
+                "translate(-50%, 0) translateY(0px)"
+            }
+          ],
+          {
+            duration:
+              fallDurationMs,
+            // Mild ease-in: slow start,
+            // slight late accel. Avoid
+            // extreme end warp.
+            easing:
+              "cubic-bezier(0.40, 0.00, 0.70, 1.00)",
+            fill: "forwards"
+          }
+        );
+
+      drop.animation =
+        animation;
+
+      const finishFall =
+        () => {
+
+          resolveDropAoeImpact(
+            drop
+          );
+
+        };
+
+      if (
+        animation &&
+        typeof animation.finished ===
+          "object" &&
+        animation.finished &&
+        typeof animation.finished.then ===
+          "function"
+      ) {
+
+        animation.finished
+          .then(
+            finishFall
+          )
+          .catch(
+            finishFall
+          );
+
+      } else {
+
+        window.setTimeout(
+          finishFall,
+          fallDurationMs
+        );
+
+      }
+
+    },
+    spawnDelayMs
+  );
+
+}
+
+
 function tryApplyOnHitStatus(
   projectile,
   target
@@ -27882,6 +28661,22 @@ function tryAttack(
     applyFrontAoeDamage(
       attacker,
       behavior
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.DROP_AOE
+  ) {
+
+    beginDropAoeAttack(
+      attacker,
+      behavior,
+      target
     );
 
     return;
@@ -29002,6 +29797,8 @@ function clearProjectiles() {
 
   clearAttackKnockbackEffects();
 
+  clearDropAoeEffects();
+
 }
 
 
@@ -29411,6 +30208,25 @@ function attackEnemyBase(unit) {
     applyFrontAoeEnemyBaseAttack(
       unit,
       behavior
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.DROP_AOE
+  ) {
+
+    beginDropAoeAttack(
+      unit,
+      behavior,
+      null,
+      {
+        towardEnemyBase: true
+      }
     );
 
     return;

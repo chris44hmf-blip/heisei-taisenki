@@ -5830,6 +5830,70 @@ h2 {
   filter: drop-shadow(0 0 8px rgba(255, 196, 64, 0.55));
 }
 
+.battle-drop-aoe-effect {
+  position: absolute;
+
+  bottom: 22%;
+
+  z-index: 6;
+
+  pointer-events: none;
+
+  will-change: transform;
+}
+
+.battle-drop-aoe-effect img {
+  display: block;
+
+  height: auto;
+
+  transform-origin: center center;
+
+  filter: drop-shadow(0 0 10px rgba(64, 168, 255, 0.65));
+}
+
+.battle-drop-aoe-impact {
+  position: absolute;
+
+  z-index: 5;
+
+  width: 88px;
+
+  height: 88px;
+
+  pointer-events: none;
+
+  transform: translate(-50%, 35%);
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(170, 220, 255, 0.85);
+
+  box-shadow:
+    0 0 14px rgba(80, 170, 255, 0.55),
+    inset 0 0 18px rgba(120, 200, 255, 0.35);
+
+  animation: drop-aoe-impact-flash 280ms ease-out forwards;
+}
+
+@keyframes drop-aoe-impact-flash {
+  0% {
+    opacity: 0.95;
+    transform: translate(-50%, 35%) scale(0.55);
+  }
+
+  55% {
+    opacity: 0.7;
+    transform: translate(-50%, 35%) scale(1.15);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, 35%) scale(1.35);
+  }
+}
+
+
 .battle-knockback-effect {
   position: absolute;
 
