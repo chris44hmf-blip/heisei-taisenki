@@ -10046,6 +10046,113 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  twin_devil: {
+
+    id: "twin_devil",
+
+    name: "ツインデビル",
+
+    group: "ライブハウス民",
+
+    number: 29,
+
+    rarity: CHARACTER_RARITY.HEADLINER,
+
+    images:
+      getCharacterImages(
+        "twin_devil"
+      ),
+
+    stats: {
+
+      hp: 400,
+
+      attack: 25,
+
+      attackInterval: 850,
+
+      speed: 1.05,
+
+      range: 75,
+
+      yaniCost: 300,
+
+      deployCooldownMs: 5000
+
+    },
+
+    battle: {
+
+      spriteSize: 110,
+
+      attackSpriteMs: 240,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 18,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type:
+        ATTACK_TYPE.DELAYED_MULTI_HIT_SINGLE,
+
+      hitCount: 2,
+
+      chargeMs: 0,
+
+      postAttackDelayMs: 0,
+
+      hitIntervalMs: 120,
+
+      effectLifetimeMs: 300,
+
+      effectImage:
+        "images/characters/twin_devil/twin_devil_effect.webp",
+
+      effectWidth: 140,
+
+      effectPatterns: [
+
+        {
+          rotation: 0,
+          offsetX: 16,
+          offsetY: -6,
+          scaleX: 0.96,
+          scaleY: 0.92
+        },
+
+        {
+          rotation: 0,
+          offsetX: 28,
+          offsetY: -4,
+          scaleX: 1.08,
+          scaleY: 1
+        }
+
+      ]
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
