@@ -8989,6 +8989,8 @@ const ATTACK_TYPE = {
 
   MELEE_AOE: "meleeAoE",
 
+  FRONT_AOE: "frontAoE",
+
   PROJECTILE_SINGLE: "projectileSingle",
 
   PROJECTILE_AOE: "projectileAoE",
@@ -10249,6 +10251,116 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  reimei_sena: {
+
+    id: "reimei_sena",
+
+    name: "《黎明》せな",
+
+    group: "LEGEND",
+
+    number: 31,
+
+    rarity: CHARACTER_RARITY.LEGEND,
+
+    images:
+      getCharacterImages(
+        "reimei_sena"
+      ),
+
+    stats: {
+
+      hp: 520,
+
+      attack: 150,
+
+      attackInterval: 2400,
+
+      speed: 0.85,
+
+      range: 135,
+
+      yaniCost: 500,
+
+      deployCooldownMs: 8000
+
+    },
+
+    battle: {
+
+      spriteSize: 108,
+
+      attackSpriteMs: 360,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.FRONT_AOE,
+
+      forwardOffset: 90,
+
+      aoeRadius: 82,
+
+      effectImage:
+        "images/characters/reimei_sena/reimei_sena_effect.webp",
+
+      effectWidth: 170,
+
+      effectLifetimeMs: 420,
+
+      effectScaleX: -1,
+
+      effectOffsetY: -8
+
+    },
+
+    conditionalBuffs: [
+
+      {
+
+        condition: {
+
+          type: "hpRatioAtMost",
+
+          value: 0.50
+
+        },
+
+        buff: {
+
+          id: "attackUp",
+
+          multiplier: 1.50
+
+        }
+
+      }
+
+    ],
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
@@ -10269,7 +10381,8 @@ const CHARACTER_FORM_DATA_KEYS = [
   "battle",
   "ui",
   "attackBehavior",
-  "traits"
+  "traits",
+  "conditionalBuffs"
 ];
 
 
@@ -23242,6 +23355,7 @@ function spawnCharacter(characterId) {
     </div>
 
     <div class="unit-body">
+      <div class="unit-buff-icons" aria-hidden="true"></div>
       <img
         class="unit-sprite"
         src="${formImages.idle}"
@@ -23342,6 +23456,13 @@ function spawnCharacter(characterId) {
       data.traits ||
       {},
 
+    conditionalBuffs:
+      form.conditionalBuffs ||
+      data.conditionalBuffs ||
+      [],
+
+    activeBuffs: {},
+
     triggeredHealthKnockbacks:
       new Set(),
 
@@ -23359,6 +23480,8 @@ function spawnCharacter(characterId) {
 
 
   playerUnits.push(unit);
+
+  refreshUnitConditionalBuffs(unit);
 
   return unit;
 
@@ -25976,6 +26099,577 @@ function clearAllBattleStatusEffects() {
 }
 
 
+/* =========================
+   COMMON UNIT BUFF FOUNDATION
+========================= */
+
+const UNIT_BUFF = {
+
+  ATTACK_UP: "attackUp"
+
+};
+
+
+const UNIT_BUFF_ICON = {
+
+  [UNIT_BUFF.ATTACK_UP]:
+    "images/ui/buffs/attack_up.webp"
+
+};
+
+
+function ensureUnitActiveBuffs(unit) {
+
+  if (!unit) {
+
+    return null;
+
+  }
+
+  if (
+    !unit.activeBuffs ||
+    typeof unit.activeBuffs !==
+      "object"
+  ) {
+
+    unit.activeBuffs = {};
+
+  }
+
+  return unit.activeBuffs;
+
+}
+
+
+function getUnitConditionalBuffDefs(
+  unit
+) {
+
+  if (
+    !unit ||
+    !Array.isArray(
+      unit.conditionalBuffs
+    )
+  ) {
+
+    return [];
+
+  }
+
+  return unit.conditionalBuffs;
+
+}
+
+
+function isBuffConditionMet(
+  unit,
+  condition
+) {
+
+  if (
+    !unit ||
+    !condition ||
+    typeof condition !== "object"
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    condition.type ===
+    "hpRatioAtMost"
+  ) {
+
+    const maxHp =
+      Number(unit.maxHp);
+
+    const hp =
+      Number(unit.hp);
+
+    const threshold =
+      Number(condition.value);
+
+    if (
+      !Number.isFinite(maxHp) ||
+      maxHp <= 0 ||
+      !Number.isFinite(hp) ||
+      !Number.isFinite(threshold)
+    ) {
+
+      return false;
+
+    }
+
+    return (hp / maxHp) <= threshold;
+
+  }
+
+  return false;
+
+}
+
+
+function getUnitBuffMultiplier(
+  unit,
+  buffId
+) {
+
+  const active =
+    ensureUnitActiveBuffs(unit);
+
+  if (
+    !active ||
+    !buffId ||
+    !active[buffId]
+  ) {
+
+    return 1;
+
+  }
+
+  const multiplier =
+    Number(
+      active[buffId].multiplier
+    );
+
+  if (
+    !Number.isFinite(multiplier) ||
+    multiplier <= 0
+  ) {
+
+    return 1;
+
+  }
+
+  return multiplier;
+
+}
+
+
+function getUnitAttackPower(unit) {
+
+  const base =
+    Number(
+      unit &&
+      unit.attack
+    ) || 0;
+
+  const multiplier =
+    getUnitBuffMultiplier(
+      unit,
+      UNIT_BUFF.ATTACK_UP
+    );
+
+  return roundCharacterStat(
+    base * multiplier
+  );
+
+}
+
+
+function getUnitBuffIconHost(unit) {
+
+  if (
+    !unit ||
+    !unit.element
+  ) {
+
+    return null;
+
+  }
+
+  return unit.element.querySelector(
+    ".unit-buff-icons"
+  );
+
+}
+
+
+function syncUnitBuffVisuals(unit) {
+
+  const host =
+    getUnitBuffIconHost(unit);
+
+  if (!host) {
+
+    return;
+
+  }
+
+  const active =
+    ensureUnitActiveBuffs(unit) ||
+    {};
+
+  const desiredIds =
+    Object.keys(active);
+
+  [...host.children].forEach(
+    (child) => {
+
+      const buffId =
+        child.dataset &&
+        child.dataset.buffId;
+
+      if (
+        !buffId ||
+        !active[buffId]
+      ) {
+
+        child.remove();
+
+      }
+
+    }
+  );
+
+  desiredIds.forEach((buffId) => {
+
+    let icon =
+      host.querySelector(
+        '[data-buff-id="' +
+        buffId +
+        '"]'
+      );
+
+    if (icon) {
+
+      return;
+
+    }
+
+    const src =
+      UNIT_BUFF_ICON[buffId];
+
+    if (!src) {
+
+      return;
+
+    }
+
+    icon =
+      document.createElement("img");
+
+    icon.className =
+      "unit-buff-icon is-appear";
+
+    icon.dataset.buffId =
+      buffId;
+
+    icon.src = src;
+
+    icon.alt = "";
+
+    icon.draggable = false;
+
+    icon.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+    host.appendChild(icon);
+
+    window.setTimeout(
+      () => {
+
+        if (
+          icon.isConnected
+        ) {
+
+          icon.classList.remove(
+            "is-appear"
+          );
+
+        }
+
+      },
+      320
+    );
+
+  });
+
+}
+
+
+function clearUnitBuffVisuals(unit) {
+
+  const host =
+    getUnitBuffIconHost(unit);
+
+  if (!host) {
+
+    return;
+
+  }
+
+  host.innerHTML = "";
+
+}
+
+
+function clearAllUnitBuffs(unit) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  unit.activeBuffs = {};
+
+  clearUnitBuffVisuals(unit);
+
+}
+
+
+function refreshUnitConditionalBuffs(
+  unit
+) {
+
+  if (
+    !unit ||
+    unit.dead
+  ) {
+
+    return;
+
+  }
+
+  const active =
+    ensureUnitActiveBuffs(unit);
+
+  if (!active) {
+
+    return;
+
+  }
+
+  const next = {};
+
+  getUnitConditionalBuffDefs(
+    unit
+  ).forEach((entry) => {
+
+    if (
+      !entry ||
+      !entry.buff ||
+      !entry.buff.id
+    ) {
+
+      return;
+
+    }
+
+    if (
+      !isBuffConditionMet(
+        unit,
+        entry.condition
+      )
+    ) {
+
+      return;
+
+    }
+
+    const buffId =
+      entry.buff.id;
+
+    const multiplier =
+      Number(
+        entry.buff.multiplier
+      );
+
+    next[buffId] = {
+
+      id: buffId,
+
+      multiplier:
+        Number.isFinite(
+          multiplier
+        ) &&
+        multiplier > 0
+          ? multiplier
+          : 1
+
+    };
+
+  });
+
+  unit.activeBuffs = next;
+
+  syncUnitBuffVisuals(unit);
+
+}
+
+
+function spawnFrontAoeEffect(
+  attacker,
+  behavior,
+  impactX
+) {
+
+  if (
+    !projectileLayer ||
+    !behavior ||
+    !behavior.effectImage
+  ) {
+
+    return;
+
+  }
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-slash-effect battle-front-aoe-effect";
+
+  const image =
+    document.createElement("img");
+
+  image.src =
+    behavior.effectImage;
+
+  image.alt = "";
+
+  const effectWidth =
+    typeof behavior.effectWidth ===
+      "number"
+      ? behavior.effectWidth
+      : 160;
+
+  image.style.width =
+    effectWidth + "px";
+
+  element.appendChild(image);
+
+  const offsetY =
+    typeof behavior.effectOffsetY ===
+      "number"
+      ? behavior.effectOffsetY
+      : 0;
+
+  const scaleX =
+    typeof behavior.effectScaleX ===
+      "number"
+      ? behavior.effectScaleX
+      : 1;
+
+  const scaleY =
+    typeof behavior.effectScaleY ===
+      "number"
+      ? behavior.effectScaleY
+      : 1;
+
+  element.style.left =
+    impactX + "px";
+
+  element.style.bottom =
+    "calc(22% + " +
+    offsetY +
+    "px)";
+
+  element.style.transform =
+    "translate(-50%, 40%) scale(" +
+    scaleX +
+    ", " +
+    scaleY +
+    ")";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  const lifetimeMs =
+    typeof behavior.effectLifetimeMs ===
+      "number"
+      ? behavior.effectLifetimeMs
+      : 400;
+
+  window.setTimeout(
+    () => {
+
+      if (element.parentNode) {
+
+        element.remove();
+
+      }
+
+    },
+    lifetimeMs
+  );
+
+}
+
+
+function applyFrontAoeDamage(
+  attacker,
+  behavior
+) {
+
+  const forwardOffset =
+    typeof behavior.forwardOffset ===
+      "number"
+      ? behavior.forwardOffset
+      : 90;
+
+  const aoeRadius =
+    typeof behavior.aoeRadius ===
+      "number"
+      ? behavior.aoeRadius
+      : 80;
+
+  const impactX =
+    attacker.x +
+    forwardOffset;
+
+  spawnFrontAoeEffect(
+    attacker,
+    behavior,
+    impactX
+  );
+
+  const attackPower =
+    getUnitAttackPower(
+      attacker
+    );
+
+  enemyUnits.forEach((enemy) => {
+
+    if (enemy.dead) {
+
+      return;
+
+    }
+
+    if (enemy.x < attacker.x) {
+
+      return;
+
+    }
+
+    if (
+      Math.abs(
+        enemy.x -
+        impactX
+      ) <=
+      aoeRadius
+    ) {
+
+      damageCharacter(
+        enemy,
+        attackPower,
+        true,
+        attacker
+      );
+
+    }
+
+  });
+
+}
+
+
 function tryApplyOnHitStatus(
   projectile,
   target
@@ -26471,6 +27165,21 @@ function tryAttack(
 
   if (
     behavior.type ===
+    ATTACK_TYPE.FRONT_AOE
+  ) {
+
+    applyFrontAoeDamage(
+      attacker,
+      behavior
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
     ATTACK_TYPE.DELAYED_MULTI_HIT_SINGLE
   ) {
 
@@ -26504,7 +27213,7 @@ function tryAttack(
 
   damageCharacter(
     target,
-    attacker.attack,
+    getUnitAttackPower(attacker),
     true,
     attacker
   );
@@ -26902,7 +27611,9 @@ function beginDelayedMultiHitSingle(
           if (towardEnemyBase) {
 
             enemyBaseHp -=
-              attacker.attack;
+              getUnitAttackPower(
+                attacker
+              );
 
             if (enemyBaseHp < 0) {
 
@@ -26925,7 +27636,9 @@ function beginDelayedMultiHitSingle(
 
             damageCharacter(
               lockedTarget,
-              attacker.attack,
+              getUnitAttackPower(
+                attacker
+              ),
               true,
               attacker
             );
@@ -27324,7 +28037,9 @@ function applyMeleeAoeDamage(
 
           damageCharacter(
             enemy,
-            attacker.attack,
+            getUnitAttackPower(
+              attacker
+            ),
             true,
             attacker
           );
@@ -27365,7 +28080,9 @@ function applyMeleeAoeDamage(
 
       damageCharacter(
         enemy,
-        attacker.attack,
+        getUnitAttackPower(
+          attacker
+        ),
         true,
         attacker
       );
@@ -27627,6 +28344,29 @@ function findFirstProjectileHit(
 }
 
 
+function getProjectileAttackPower(
+  projectile
+) {
+
+  if (
+    projectile &&
+    projectile.source
+  ) {
+
+    return getUnitAttackPower(
+      projectile.source
+    );
+
+  }
+
+  return Number(
+    projectile &&
+    projectile.attack
+  ) || 0;
+
+}
+
+
 function applyProjectileImpact(
   projectile,
   impactX,
@@ -27642,7 +28382,9 @@ function applyProjectileImpact(
 
       damageCharacter(
         hitEnemy,
-        projectile.attack,
+        getProjectileAttackPower(
+          projectile
+        ),
         true,
         projectile.source
       );
@@ -27681,7 +28423,9 @@ function applyProjectileImpact(
 
       damageCharacter(
         enemy,
-        projectile.attack,
+        getProjectileAttackPower(
+          projectile
+        ),
         true,
         projectile.source
       );
@@ -27709,7 +28453,9 @@ function applyProjectileEnemyBaseDamage(
   projectile.baseDamaged = true;
 
   enemyBaseHp -=
-    projectile.attack;
+    getProjectileAttackPower(
+      projectile
+    );
 
   updateBaseUI();
 
@@ -28076,6 +28822,15 @@ function damageCharacter(
     hpPercent + "%";
 
 
+  if (isAllyUnit(target)) {
+
+    refreshUnitConditionalBuffs(
+      target
+    );
+
+  }
+
+
   target.element
     .classList.add(
       "damaged"
@@ -28145,6 +28900,10 @@ function defeatCharacter(
   );
 
   clearAllStatusEffects(
+    target
+  );
+
+  clearAllUnitBuffs(
     target
   );
 
