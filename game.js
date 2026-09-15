@@ -10375,6 +10375,129 @@ const CHARACTERS = {
 
     }
 
+  },
+
+  reimei_kaede: {
+
+    id: "reimei_kaede",
+
+    name: "《黎明》楓",
+
+    group: "LEGEND",
+
+    number: 32,
+
+    rarity: CHARACTER_RARITY.LEGEND,
+
+    images:
+      getCharacterImages(
+        "reimei_kaede"
+      ),
+
+    stats: {
+
+      hp: 620,
+
+      attack: 58,
+
+      attackInterval: 550,
+
+      speed: 1.35,
+
+      range: 70,
+
+      yaniCost: 480,
+
+      deployCooldownMs: 7500
+
+    },
+
+    battle: {
+
+      spriteSize: 112,
+
+      attackSpriteMs: 200,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 22,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.FRONT_AOE,
+
+      forwardOffset: 50,
+
+      aoeRadius: 50,
+
+      effectImage:
+        "images/characters/reimei_kaede/reimei_kaede_effect.webp",
+
+      effectWidth: 118,
+
+      effectLifetimeMs: 240,
+
+      effectOffsetY: -4
+
+    },
+
+    traits: {
+
+      bpmOver: {
+
+        intervals: [
+          550,
+          500,
+          450,
+          400
+        ],
+
+        resetAfterMs: 2000,
+
+        iconAtLevel: 3
+
+      },
+
+      healthKnockback: {
+
+        thresholds: [
+
+          {
+            ratio: 0.60,
+            distance: 90
+          },
+
+          {
+            ratio: 0.30,
+            distance: 140
+          }
+
+        ],
+
+        durationMs: 220
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
   }
 
 };
@@ -23477,6 +23600,10 @@ function spawnCharacter(characterId) {
 
     activeBuffs: {},
 
+    bpmLevel: 0,
+
+    bpmLastHitAt: 0,
+
     triggeredHealthKnockbacks:
       new Set(),
 
@@ -23647,6 +23774,88 @@ function startHealthKnockback(
 }
 
 
+function getHealthKnockbackSteps(trait) {
+
+  if (!trait) {
+
+    return [];
+
+  }
+
+  const raw =
+    Array.isArray(trait.thresholds)
+      ? trait.thresholds
+      : [];
+
+  const fallbackDistance =
+    typeof trait.distance ===
+      "number"
+      ? trait.distance
+      : 70;
+
+  const steps = [];
+
+  raw.forEach((entry) => {
+
+    if (
+      typeof entry === "number"
+    ) {
+
+      if (!Number.isFinite(entry)) {
+
+        return;
+
+      }
+
+      steps.push({
+        ratio: entry,
+        distance: fallbackDistance
+      });
+
+      return;
+
+    }
+
+    if (
+      !entry ||
+      typeof entry !== "object"
+    ) {
+
+      return;
+
+    }
+
+    const ratio =
+      Number(
+        entry.ratio != null
+          ? entry.ratio
+          : entry.threshold
+      );
+
+    if (!Number.isFinite(ratio)) {
+
+      return;
+
+    }
+
+    const distance =
+      typeof entry.distance ===
+        "number"
+        ? entry.distance
+        : fallbackDistance;
+
+    steps.push({
+      ratio: ratio,
+      distance: distance
+    });
+
+  });
+
+  return steps;
+
+}
+
+
 function applyHealthKnockbackAfterDamage(
   unit,
   previousHpRatio
@@ -23700,57 +23909,47 @@ function applyHealthKnockbackAfterDamage(
       ? previousHpRatio
       : ratio;
 
-  const thresholds =
-    Array.isArray(trait.thresholds)
-      ? trait.thresholds
-      : [];
+  const steps =
+    getHealthKnockbackSteps(trait);
 
-  let crossedAny = false;
+  const crossedSteps = [];
 
-  thresholds.forEach(
-    (threshold) => {
+  steps.forEach((step) => {
 
-      const value =
-        Number(threshold);
+    const value =
+      step.ratio;
 
-      if (!Number.isFinite(value)) {
+    // Future heal: allow the same
+    // threshold to fire again after
+    // recovering above it.
+    if (ratio > value) {
 
-        return;
+      unit.triggeredHealthKnockbacks.delete(
+        value
+      );
 
-      }
-
-      // Future heal: allow the same
-      // threshold to fire again after
-      // recovering above it.
-      if (ratio > value) {
-
-        unit.triggeredHealthKnockbacks.delete(
-          value
-        );
-
-        return;
-
-      }
-
-      // Trigger only when crossing
-      // downward: previous > T && now <= T
-      if (
-        prevRatio > value &&
-        ratio <= value
-      ) {
-
-        unit.triggeredHealthKnockbacks.add(
-          value
-        );
-
-        crossedAny = true;
-
-      }
+      return;
 
     }
-  );
 
-  if (!crossedAny) {
+    // Trigger only when crossing
+    // downward: previous > T && now <= T
+    if (
+      prevRatio > value &&
+      ratio <= value
+    ) {
+
+      unit.triggeredHealthKnockbacks.add(
+        value
+      );
+
+      crossedSteps.push(step);
+
+    }
+
+  });
+
+  if (!crossedSteps.length) {
 
     return;
 
@@ -23764,9 +23963,27 @@ function applyHealthKnockbackAfterDamage(
 
   }
 
+  // If multiple thresholds cross in
+  // one hit, use the lowest ratio
+  // step only (largest retreat).
+  let chosen = crossedSteps[0];
+
+  crossedSteps.forEach((step) => {
+
+    if (step.ratio < chosen.ratio) {
+
+      chosen = step;
+
+    }
+
+  });
+
   startHealthKnockback(
     unit,
-    trait
+    {
+      distance: chosen.distance,
+      durationMs: trait.durationMs
+    }
   );
 
 }
@@ -25728,9 +25945,20 @@ function updateUnits() {
         unit.element.style.left =
           unit.x + "px";
 
+        updateUnitBpmOver(
+          unit,
+          Date.now()
+        );
+
         return;
 
       }
+
+
+      updateUnitBpmOver(
+        unit,
+        Date.now()
+      );
 
 
       const target =
@@ -26161,7 +26389,9 @@ function clearAllBattleStatusEffects() {
 
 const UNIT_BUFF = {
 
-  ATTACK_UP: "attackUp"
+  ATTACK_UP: "attackUp",
+
+  ATTACK_SPEED_UP: "attackSpeedUp"
 
 };
 
@@ -26169,7 +26399,10 @@ const UNIT_BUFF = {
 const UNIT_BUFF_ICON = {
 
   [UNIT_BUFF.ATTACK_UP]:
-    "images/ui/buffs/attack_up.webp"
+    "images/ui/buffs/attack_up.webp",
+
+  [UNIT_BUFF.ATTACK_SPEED_UP]:
+    "images/ui/buffs/attack_speed_up.webp"
 
 };
 
@@ -26324,6 +26557,367 @@ function getUnitAttackPower(unit) {
 }
 
 
+/* =========================
+   BPM OVER / ATTACK SPEED
+========================= */
+
+function getBpmOverTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.bpmOver
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.bpmOver;
+
+}
+
+
+function getBpmOverIntervals(trait) {
+
+  if (
+    !trait ||
+    !Array.isArray(trait.intervals) ||
+    !trait.intervals.length
+  ) {
+
+    return null;
+
+  }
+
+  return trait.intervals;
+
+}
+
+
+function getUnitAttackInterval(unit) {
+
+  const base =
+    Number(
+      unit &&
+      unit.attackInterval
+    ) || 0;
+
+  const trait =
+    getBpmOverTrait(unit);
+
+  const intervals =
+    getBpmOverIntervals(trait);
+
+  if (!intervals) {
+
+    return base;
+
+  }
+
+  const level =
+    Math.max(
+      0,
+      Math.min(
+        Number(unit.bpmLevel) || 0,
+        intervals.length - 1
+      )
+    );
+
+  const value =
+    Number(intervals[level]);
+
+  if (
+    !Number.isFinite(value) ||
+    value <= 0
+  ) {
+
+    return base;
+
+  }
+
+  return value;
+
+}
+
+
+function getUnitAttackSpeedMultiplier(
+  unit
+) {
+
+  const base =
+    Number(
+      unit &&
+      unit.attackInterval
+    ) || 0;
+
+  const current =
+    getUnitAttackInterval(unit);
+
+  if (
+    !Number.isFinite(base) ||
+    base <= 0 ||
+    !Number.isFinite(current) ||
+    current <= 0
+  ) {
+
+    return 1;
+
+  }
+
+  return base / current;
+
+}
+
+
+function getBpmOverIconLevel(trait) {
+
+  const intervals =
+    getBpmOverIntervals(trait);
+
+  if (!intervals) {
+
+    return 0;
+
+  }
+
+  if (
+    typeof trait.iconAtLevel ===
+      "number"
+  ) {
+
+    return Math.max(
+      0,
+      Math.min(
+        trait.iconAtLevel,
+        intervals.length - 1
+      )
+    );
+
+  }
+
+  return intervals.length - 1;
+
+}
+
+
+function applyBpmOverBuffToActiveMap(
+  unit,
+  activeMap
+) {
+
+  const trait =
+    getBpmOverTrait(unit);
+
+  if (
+    !trait ||
+    !activeMap
+  ) {
+
+    return;
+
+  }
+
+  const level =
+    Number(unit.bpmLevel) || 0;
+
+  const iconLevel =
+    getBpmOverIconLevel(trait);
+
+  if (level < iconLevel) {
+
+    return;
+
+  }
+
+  activeMap[
+    UNIT_BUFF.ATTACK_SPEED_UP
+  ] = {
+
+    id: UNIT_BUFF.ATTACK_SPEED_UP,
+
+    multiplier:
+      getUnitAttackSpeedMultiplier(
+        unit
+      ),
+
+    source: "bpm"
+
+  };
+
+}
+
+
+function syncUnitBpmOverVisual(unit) {
+
+  if (
+    !unit ||
+    unit.dead
+  ) {
+
+    return;
+
+  }
+
+  const active =
+    ensureUnitActiveBuffs(unit) ||
+    {};
+
+  const next = {};
+
+  Object.keys(active).forEach(
+    (buffId) => {
+
+      if (
+        active[buffId] &&
+        active[buffId].source !==
+          "bpm"
+      ) {
+
+        next[buffId] =
+          active[buffId];
+
+      }
+
+    }
+  );
+
+  applyBpmOverBuffToActiveMap(
+    unit,
+    next
+  );
+
+  unit.activeBuffs = next;
+
+  syncUnitBuffVisuals(unit);
+
+}
+
+
+function clearUnitBpmOver(unit) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  unit.bpmLevel = 0;
+
+  unit.bpmLastHitAt = 0;
+
+  if (
+    unit.activeBuffs &&
+    unit.activeBuffs[
+      UNIT_BUFF.ATTACK_SPEED_UP
+    ] &&
+    unit.activeBuffs[
+      UNIT_BUFF.ATTACK_SPEED_UP
+    ].source === "bpm"
+  ) {
+
+    delete unit.activeBuffs[
+      UNIT_BUFF.ATTACK_SPEED_UP
+    ];
+
+  }
+
+  syncUnitBuffVisuals(unit);
+
+}
+
+
+function noteUnitAttackSuccess(unit) {
+
+  if (
+    !unit ||
+    unit.dead
+  ) {
+
+    return;
+
+  }
+
+  const trait =
+    getBpmOverTrait(unit);
+
+  const intervals =
+    getBpmOverIntervals(trait);
+
+  if (!intervals) {
+
+    return;
+
+  }
+
+  const maxLevel =
+    intervals.length - 1;
+
+  const current =
+    Math.max(
+      0,
+      Number(unit.bpmLevel) || 0
+    );
+
+  unit.bpmLevel =
+    Math.min(
+      maxLevel,
+      current + 1
+    );
+
+  unit.bpmLastHitAt =
+    Date.now();
+
+  syncUnitBpmOverVisual(unit);
+
+}
+
+
+function updateUnitBpmOver(unit, now) {
+
+  const trait =
+    getBpmOverTrait(unit);
+
+  if (
+    !trait ||
+    !unit ||
+    unit.dead
+  ) {
+
+    return;
+
+  }
+
+  const level =
+    Number(unit.bpmLevel) || 0;
+
+  if (level <= 0) {
+
+    return;
+
+  }
+
+  const resetAfterMs =
+    typeof trait.resetAfterMs ===
+      "number"
+      ? trait.resetAfterMs
+      : 2000;
+
+  const lastHit =
+    Number(unit.bpmLastHitAt) || 0;
+
+  if (
+    now - lastHit >=
+    resetAfterMs
+  ) {
+
+    clearUnitBpmOver(unit);
+
+  }
+
+}
+
+
 function getUnitBuffIconHost(unit) {
 
   if (
@@ -26473,6 +27067,10 @@ function clearAllUnitBuffs(unit) {
 
   unit.activeBuffs = {};
 
+  unit.bpmLevel = 0;
+
+  unit.bpmLastHitAt = 0;
+
   clearUnitBuffVisuals(unit);
 
 }
@@ -26545,11 +27143,18 @@ function refreshUnitConditionalBuffs(
         ) &&
         multiplier > 0
           ? multiplier
-          : 1
+          : 1,
+
+      source: "conditional"
 
     };
 
   });
+
+  applyBpmOverBuffToActiveMap(
+    unit,
+    next
+  );
 
   unit.activeBuffs = next;
 
@@ -26723,6 +27328,10 @@ function applyFrontAoeDamage(
 
   });
 
+  noteUnitAttackSuccess(
+    attacker
+  );
+
 }
 
 
@@ -26756,6 +27365,10 @@ function applyFrontAoeEnemyBaseAttack(
     );
 
   updateBaseUI();
+
+  noteUnitAttackSuccess(
+    attacker
+  );
 
   if (enemyBaseHp <= 0) {
 
@@ -27150,7 +27763,9 @@ function tryAttack(
 
   attacker.attackCooldown =
     now +
-    attacker.attackInterval;
+    getUnitAttackInterval(
+      attacker
+    );
 
 
   attacker.element
@@ -28717,7 +29332,9 @@ function attackEnemyBase(unit) {
 
   unit.attackCooldown =
     now +
-    unit.attackInterval;
+    getUnitAttackInterval(
+      unit
+    );
 
 
   unit.element
