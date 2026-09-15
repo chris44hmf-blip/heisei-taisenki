@@ -10355,6 +10355,20 @@ const CHARACTERS = {
 
     ],
 
+    traits: {
+
+      healthKnockback: {
+
+        thresholds: [0.50],
+
+        distance: 100,
+
+        durationMs: 220
+
+      }
+
+    },
+
     unlock: {
 
       type: "gacha"
@@ -23634,7 +23648,8 @@ function startHealthKnockback(
 
 
 function applyHealthKnockbackAfterDamage(
-  unit
+  unit,
+  previousHpRatio
 ) {
 
   const trait =
@@ -23662,9 +23677,28 @@ function applyHealthKnockbackAfterDamage(
 
   }
 
+  const maxHp =
+    Number(unit.maxHp);
+
+  if (
+    !Number.isFinite(maxHp) ||
+    maxHp <= 0
+  ) {
+
+    return;
+
+  }
+
   const ratio =
     unit.hp /
-    unit.maxHp;
+    maxHp;
+
+  const prevRatio =
+    Number.isFinite(
+      previousHpRatio
+    )
+      ? previousHpRatio
+      : ratio;
 
   const thresholds =
     Array.isArray(trait.thresholds)
@@ -23676,15 +23710,37 @@ function applyHealthKnockbackAfterDamage(
   thresholds.forEach(
     (threshold) => {
 
+      const value =
+        Number(threshold);
+
+      if (!Number.isFinite(value)) {
+
+        return;
+
+      }
+
+      // Future heal: allow the same
+      // threshold to fire again after
+      // recovering above it.
+      if (ratio > value) {
+
+        unit.triggeredHealthKnockbacks.delete(
+          value
+        );
+
+        return;
+
+      }
+
+      // Trigger only when crossing
+      // downward: previous > T && now <= T
       if (
-        ratio <= threshold &&
-        !unit.triggeredHealthKnockbacks.has(
-          threshold
-        )
+        prevRatio > value &&
+        ratio <= value
       ) {
 
         unit.triggeredHealthKnockbacks.add(
-          threshold
+          value
         );
 
         crossedAny = true;
@@ -28803,6 +28859,13 @@ function damageCharacter(
   }
 
 
+  const previousHpRatio =
+    Number(target.maxHp) > 0
+      ? target.hp /
+        target.maxHp
+      : 0;
+
+
   target.hp -= damage;
 
 
@@ -28869,7 +28932,8 @@ function damageCharacter(
 
 
   applyHealthKnockbackAfterDamage(
-    target
+    target,
+    previousHpRatio
   );
 
   tryApplyAttackKnockback(
