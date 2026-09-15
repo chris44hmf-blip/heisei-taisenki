@@ -29395,3 +29395,726 @@ if (window.visualViewport) {
   );
 
 }
+
+
+/* =========================
+   Global tap-note UI feedback
+   (passive visual only)
+========================= */
+
+const TAP_NOTE_ASSETS = [
+  "images/ui/tap_notes/tap_note_1.webp",
+  "images/ui/tap_notes/tap_note_2.webp",
+  "images/ui/tap_notes/tap_note_3.webp"
+];
+
+const TAP_NOTE_MAX_ACTIVE = 28;
+
+const TAP_NOTE_LONG_PRESS_MS = 300;
+
+const TAP_NOTE_EMIT_MS = 120;
+
+const TAP_NOTE_DRAG_CANCEL_PX = 14;
+
+const tapNoteActiveEls = [];
+
+const tapNotePointerIds = new Set();
+
+let tapNoteSession = null;
+
+let tapNoteImagesReady = false;
+
+
+function prefersTapNoteReducedMotion() {
+
+  return !!(
+    window.matchMedia &&
+    window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches
+  );
+
+}
+
+
+function preloadTapNoteAssets() {
+
+  let loaded = 0;
+
+  TAP_NOTE_ASSETS.forEach((src) => {
+
+    const img = new Image();
+
+    img.onload =
+    img.onerror = () => {
+
+      loaded += 1;
+
+      if (
+        loaded >=
+        TAP_NOTE_ASSETS.length
+      ) {
+
+        tapNoteImagesReady = true;
+
+      }
+
+    };
+
+    img.src = src;
+
+  });
+
+}
+
+
+function pickTapNoteAsset() {
+
+  return TAP_NOTE_ASSETS[
+    Math.floor(
+      Math.random() *
+      TAP_NOTE_ASSETS.length
+    )
+  ];
+
+}
+
+
+function clampTapNotePoint(x, y) {
+
+  const margin = 10;
+
+  const maxX =
+    Math.max(
+      margin,
+      window.innerWidth - margin
+    );
+
+  const maxY =
+    Math.max(
+      margin,
+      window.innerHeight - margin
+    );
+
+  return {
+    x: Math.min(maxX, Math.max(margin, x)),
+    y: Math.min(maxY, Math.max(margin, y))
+  };
+
+}
+
+
+function cleanupTapNoteEl(el) {
+
+  const idx =
+    tapNoteActiveEls.indexOf(el);
+
+  if (idx >= 0) {
+
+    tapNoteActiveEls.splice(idx, 1);
+
+  }
+
+  if (el && el.parentNode) {
+
+    el.parentNode.removeChild(el);
+
+  }
+
+}
+
+
+function enforceTapNoteDomCap() {
+
+  while (
+    tapNoteActiveEls.length >=
+    TAP_NOTE_MAX_ACTIVE
+  ) {
+
+    const oldest =
+      tapNoteActiveEls.shift();
+
+    if (oldest) {
+
+      if (oldest._tapNoteAnim) {
+
+        try {
+
+          oldest._tapNoteAnim.cancel();
+
+        } catch (e) {}
+
+      }
+
+      if (oldest.parentNode) {
+
+        oldest.parentNode.removeChild(
+          oldest
+        );
+
+      }
+
+    }
+
+  }
+
+}
+
+
+function spawnTapNoteAt(
+  clientX,
+  clientY,
+  mode
+) {
+
+  const reduced =
+    prefersTapNoteReducedMotion();
+
+  const point =
+    clampTapNotePoint(
+      clientX,
+      clientY
+    );
+
+  enforceTapNoteDomCap();
+
+  const el =
+    document.createElement("img");
+
+  el.className = "tap-note-effect";
+  el.src = pickTapNoteAsset();
+  el.alt = "";
+  el.draggable = false;
+  el.setAttribute(
+    "aria-hidden",
+    "true"
+  );
+
+  const size =
+    reduced ? 24 : 26;
+
+  const half = size / 2;
+
+  const rot =
+    (Math.random() * 20) - 10;
+
+  const scalePeak =
+    mode === "long"
+      ? 0.92 + Math.random() * 0.18
+      : 1.02 + Math.random() * 0.16;
+
+  const scaleEnd =
+    mode === "long"
+      ? 0.78 + Math.random() * 0.12
+      : 0.82 + Math.random() * 0.1;
+
+  let dx;
+  let dy;
+  let duration;
+
+  if (mode === "tap-left") {
+
+    dx = -10 - Math.random() * 10;
+    dy = -28 - Math.random() * 14;
+    duration =
+      reduced
+        ? 360
+        : 520 + Math.random() * 100;
+
+  } else if (mode === "tap-right") {
+
+    dx = 10 + Math.random() * 10;
+    dy = -28 - Math.random() * 14;
+    duration =
+      reduced
+        ? 360
+        : 520 + Math.random() * 100;
+
+  } else {
+
+    const side =
+      Math.random() < 0.5 ? -1 : 1;
+
+    dx =
+      side *
+      (6 + Math.random() * 12);
+
+    dy =
+      -18 - Math.random() * 16;
+
+    duration =
+      reduced
+        ? 300
+        : 420 + Math.random() * 120;
+
+  }
+
+  if (reduced) {
+
+    dx *= 0.35;
+    dy *= 0.45;
+
+  }
+
+  const x0 = point.x - half;
+  const y0 = point.y - half;
+
+  el.style.width = size + "px";
+  el.style.height = size + "px";
+  el.style.transform =
+    "translate3d(" +
+    x0 +
+    "px," +
+    y0 +
+    "px,0) scale(0.55) rotate(" +
+    rot +
+    "deg)";
+
+  document.body.appendChild(el);
+
+  tapNoteActiveEls.push(el);
+
+  const anim = el.animate(
+    [
+      {
+        opacity: 0,
+        transform:
+          "translate3d(" +
+          x0 +
+          "px," +
+          y0 +
+          "px,0) scale(0.55) rotate(" +
+          rot +
+          "deg)"
+      },
+      {
+        opacity: 1,
+        transform:
+          "translate3d(" +
+          (x0 + dx * 0.32) +
+          "px," +
+          (y0 + dy * 0.22) +
+          "px,0) scale(" +
+          scalePeak +
+          ") rotate(" +
+          rot +
+          "deg)",
+        offset: 0.18
+      },
+      {
+        opacity: 0,
+        transform:
+          "translate3d(" +
+          (x0 + dx) +
+          "px," +
+          (y0 + dy) +
+          "px,0) scale(" +
+          scaleEnd +
+          ") rotate(" +
+          rot +
+          "deg)"
+      }
+    ],
+    {
+      duration: duration,
+      easing: "ease-out",
+      fill: "forwards"
+    }
+  );
+
+  el._tapNoteAnim = anim;
+
+  anim.finished.then(
+    () => {
+      cleanupTapNoteEl(el);
+    },
+    () => {
+      cleanupTapNoteEl(el);
+    }
+  );
+
+}
+
+
+function spawnTapNotePair(
+  clientX,
+  clientY
+) {
+
+  spawnTapNoteAt(
+    clientX - 4,
+    clientY - 2,
+    "tap-left"
+  );
+
+  spawnTapNoteAt(
+    clientX + 4,
+    clientY - 2,
+    "tap-right"
+  );
+
+}
+
+
+function clearTapNoteSessionTimers() {
+
+  if (!tapNoteSession) {
+
+    return;
+
+  }
+
+  if (
+    tapNoteSession.longTimer != null
+  ) {
+
+    clearTimeout(
+      tapNoteSession.longTimer
+    );
+
+    tapNoteSession.longTimer = null;
+
+  }
+
+  if (
+    tapNoteSession.emitTimer != null
+  ) {
+
+    clearInterval(
+      tapNoteSession.emitTimer
+    );
+
+    tapNoteSession.emitTimer = null;
+
+  }
+
+}
+
+
+function stopTapNoteLongEmit() {
+
+  if (!tapNoteSession) {
+
+    return;
+
+  }
+
+  if (
+    tapNoteSession.emitTimer != null
+  ) {
+
+    clearInterval(
+      tapNoteSession.emitTimer
+    );
+
+    tapNoteSession.emitTimer = null;
+
+  }
+
+}
+
+
+function cancelTapNoteSession() {
+
+  if (!tapNoteSession) {
+
+    return;
+
+  }
+
+  clearTapNoteSessionTimers();
+
+  tapNoteSession.cancelled = true;
+
+  tapNoteSession = null;
+
+}
+
+
+function emitLongPressTapNote() {
+
+  if (
+    !tapNoteSession ||
+    tapNoteSession.cancelled
+  ) {
+
+    return;
+
+  }
+
+  spawnTapNoteAt(
+    tapNoteSession.x,
+    tapNoteSession.y,
+    "long"
+  );
+
+}
+
+
+function beginTapNoteLongPress() {
+
+  if (
+    !tapNoteSession ||
+    tapNoteSession.cancelled ||
+    tapNoteSession.dragged
+  ) {
+
+    return;
+
+  }
+
+  tapNoteSession.isLong = true;
+
+  tapNoteSession.longTimer = null;
+
+  emitLongPressTapNote();
+
+  tapNoteSession.emitTimer =
+    setInterval(
+      emitLongPressTapNote,
+      TAP_NOTE_EMIT_MS
+    );
+
+}
+
+
+function startTapNoteSession(event) {
+
+  cancelTapNoteSession();
+
+  tapNoteSession = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    startX: event.clientX,
+    startY: event.clientY,
+    isLong: false,
+    dragged: false,
+    cancelled: false,
+    longTimer: null,
+    emitTimer: null
+  };
+
+  tapNoteSession.longTimer =
+    setTimeout(
+      beginTapNoteLongPress,
+      TAP_NOTE_LONG_PRESS_MS
+    );
+
+}
+
+
+function updateTapNoteSessionMove(
+  event
+) {
+
+  if (
+    !tapNoteSession ||
+    tapNoteSession.pointerId !==
+      event.pointerId
+  ) {
+
+    return;
+
+  }
+
+  tapNoteSession.x = event.clientX;
+  tapNoteSession.y = event.clientY;
+
+  if (tapNoteSession.isLong) {
+
+    return;
+
+  }
+
+  const dist = Math.hypot(
+    event.clientX -
+      tapNoteSession.startX,
+    event.clientY -
+      tapNoteSession.startY
+  );
+
+  if (dist >= TAP_NOTE_DRAG_CANCEL_PX) {
+
+    tapNoteSession.dragged = true;
+
+    clearTapNoteSessionTimers();
+
+    tapNoteSession.cancelled = true;
+
+    tapNoteSession = null;
+
+  }
+
+}
+
+
+function endTapNoteSession(event) {
+
+  if (
+    !tapNoteSession ||
+    tapNoteSession.pointerId !==
+      event.pointerId
+  ) {
+
+    return;
+
+  }
+
+  const session = tapNoteSession;
+
+  const wasLong = session.isLong;
+
+  const wasCancelled =
+    session.cancelled ||
+    session.dragged;
+
+  const x = session.x;
+  const y = session.y;
+
+  clearTapNoteSessionTimers();
+
+  tapNoteSession = null;
+
+  if (wasLong || wasCancelled) {
+
+    return;
+
+  }
+
+  spawnTapNotePair(x, y);
+
+}
+
+
+function setupGlobalTapNotes() {
+
+  preloadTapNoteAssets();
+
+  const opts = {
+    capture: true,
+    passive: true
+  };
+
+  window.addEventListener(
+    "pointerdown",
+    (event) => {
+
+      if (
+        event.pointerType === "mouse" &&
+        event.button !== 0
+      ) {
+
+        return;
+
+      }
+
+      tapNotePointerIds.add(
+        event.pointerId
+      );
+
+      if (tapNotePointerIds.size > 1) {
+
+        cancelTapNoteSession();
+
+        return;
+
+      }
+
+      startTapNoteSession(event);
+
+    },
+    opts
+  );
+
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+
+      if (
+        tapNotePointerIds.size > 1
+      ) {
+
+        return;
+
+      }
+
+      updateTapNoteSessionMove(event);
+
+    },
+    opts
+  );
+
+  const onPointerEnd = (event) => {
+
+    tapNotePointerIds.delete(
+      event.pointerId
+    );
+
+    if (tapNotePointerIds.size > 1) {
+
+      cancelTapNoteSession();
+
+      return;
+
+    }
+
+    if (tapNotePointerIds.size === 0) {
+
+      endTapNoteSession(event);
+
+      return;
+
+    }
+
+    // One finger left after multi-touch: do not resume notes.
+    cancelTapNoteSession();
+
+  };
+
+  window.addEventListener(
+    "pointerup",
+    onPointerEnd,
+    opts
+  );
+
+  window.addEventListener(
+    "pointercancel",
+    onPointerEnd,
+    opts
+  );
+
+  window.addEventListener(
+    "blur",
+    () => {
+
+      tapNotePointerIds.clear();
+
+      cancelTapNoteSession();
+
+    }
+  );
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+
+      if (
+        document.visibilityState ===
+        "hidden"
+      ) {
+
+        tapNotePointerIds.clear();
+
+        cancelTapNoteSession();
+
+      }
+
+    }
+  );
+
+}
+
+
+setupGlobalTapNotes();
+

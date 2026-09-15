@@ -8571,6 +8571,43 @@ h3,
   font-synthesis: none;
 }
 
+/* =========================
+   Global tap-note UI feedback
+========================= */
+
+.tap-note-effect {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 10050;
+  opacity: 0;
+  will-change: transform, opacity;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+@media (min-width: 900px) {
+  .tap-note-effect {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tap-note-effect {
+    width: 24px;
+    height: 24px;
+  }
+}
+
 /* HOME画面
 → sena_menu.webp
 
