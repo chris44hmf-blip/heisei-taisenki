@@ -26726,6 +26726,46 @@ function applyFrontAoeDamage(
 }
 
 
+function applyFrontAoeEnemyBaseAttack(
+  attacker,
+  behavior
+) {
+
+  const forwardOffset =
+    typeof behavior.forwardOffset ===
+      "number"
+      ? behavior.forwardOffset
+      : 90;
+
+  const impactX =
+    attacker.x +
+    forwardOffset;
+
+  // Shared FRONT_AOE visual only.
+  // Base damage stays single-hit and
+  // does not also AoE-hit enemies.
+  spawnFrontAoeEffect(
+    attacker,
+    behavior,
+    impactX
+  );
+
+  enemyBaseHp -=
+    getUnitAttackPower(
+      attacker
+    );
+
+  updateBaseUI();
+
+  if (enemyBaseHp <= 0) {
+
+    tryResolveBattleVictory();
+
+  }
+
+}
+
+
 function tryApplyOnHitStatus(
   projectile,
   target
@@ -28739,6 +28779,21 @@ function attackEnemyBase(unit) {
       {
         towardEnemyBase: true
       }
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.FRONT_AOE
+  ) {
+
+    applyFrontAoeEnemyBaseAttack(
+      unit,
+      behavior
     );
 
     return;
