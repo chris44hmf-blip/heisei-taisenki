@@ -544,9 +544,9 @@ let currentBattleMode =
   BATTLE_MODE.NORMAL;
 
 const TRAINING_DUMMY_POSITIONS = [
-  520,
-  650,
-  780
+  600,
+  660,
+  720
 ];
 
 const TRAINING_DUMMY_RESPAWN_MS = 700;
@@ -24250,15 +24250,49 @@ function createBattleUnitCard(character) {
 
   if (menuImage) {
 
-    menuImage.style.transform =
-      "scale(" +
+    const menuScale =
       getCharacterMenuScale(
         form
-      ) +
-      ")";
+      );
 
-    menuImage.style.transformOrigin =
-      "center center";
+    if (isTrainingBattle()) {
+
+      // iOS Safari: transform inside
+      // overflow-x scroll can hide imgs.
+      // Size via width/height instead.
+      menuImage.style.width =
+        (
+          menuScale * 100
+        ) + "%";
+
+      menuImage.style.height =
+        (
+          menuScale * 100
+        ) + "%";
+
+      menuImage.style.maxWidth =
+        "100%";
+
+      menuImage.style.maxHeight =
+        "100%";
+
+      menuImage.style.objectFit =
+        "contain";
+
+      menuImage.style.transform =
+        "none";
+
+    } else {
+
+      menuImage.style.transform =
+        "scale(" +
+        menuScale +
+        ")";
+
+      menuImage.style.transformOrigin =
+        "center center";
+
+    }
 
   }
 
