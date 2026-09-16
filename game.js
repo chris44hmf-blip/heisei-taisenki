@@ -5757,6 +5757,10 @@ let lastProjectileUpdateAt = 0;
 
 let attackKnockbackEffects = [];
 
+let activeGoodsScatterParticles = [];
+
+const GOODS_SCATTER_PARTICLE_CAP = 24;
+
 let activeDropAoeEffects = [];
 
 
@@ -9953,6 +9957,97 @@ const CHARACTERS = {
         maxMultiplier: 1.25,
 
         periodMs: 1100
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  buppan_gachiota: {
+
+    id: "buppan_gachiota",
+
+    name: "物販ガチオタ",
+
+    group: "IPPANJIN",
+
+    number: 10,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "buppan_gachiota"
+      ),
+
+    stats: {
+
+      hp: 500,
+
+      attack: 45,
+
+      attackInterval: 1500,
+
+      speed: 0.45,
+
+      range: 45,
+
+      yaniCost: 180,
+
+      deployCooldownMs: 3500
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 280,
+
+      hurtSpriteMs: 320,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 360
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    traits: {
+
+      knockbackResistance: {
+
+        attackMultiplier: 0.50
+
+      },
+
+      goodsScatter: {
+
+        minCount: 2,
+
+        maxCount: 4,
+
+        lifetimeMs: 400
 
       }
 
@@ -24640,6 +24735,348 @@ function getAttackKnockbackTrait(unit) {
 }
 
 
+function getKnockbackResistanceTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.knockbackResistance
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.knockbackResistance;
+
+}
+
+
+function getAttackKnockbackResistanceMultiplier(
+  unit
+) {
+
+  const trait =
+    getKnockbackResistanceTrait(
+      unit
+    );
+
+  if (!trait) {
+
+    return 1;
+
+  }
+
+  const multiplier =
+    typeof trait.attackMultiplier ===
+      "number"
+      ? trait.attackMultiplier
+      : 1;
+
+  if (
+    !Number.isFinite(
+      multiplier
+    ) ||
+    multiplier < 0
+  ) {
+
+    return 1;
+
+  }
+
+  return multiplier;
+
+}
+
+
+function getGoodsScatterTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.goodsScatter
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.goodsScatter;
+
+}
+
+
+function removeGoodsScatterParticle(
+  particle
+) {
+
+  if (!particle) {
+
+    return;
+
+  }
+
+  if (
+    particle.animation &&
+    typeof particle.animation.cancel ===
+      "function"
+  ) {
+
+    try {
+
+      particle.animation.cancel();
+
+    } catch (error) {
+
+      // Ignore cancelled animations.
+
+    }
+
+  }
+
+  if (
+    particle.element &&
+    particle.element.parentNode
+  ) {
+
+    particle.element.remove();
+
+  }
+
+  activeGoodsScatterParticles =
+    activeGoodsScatterParticles.filter(
+      (entry) =>
+        entry !== particle
+    );
+
+}
+
+
+function clearGoodsScatterParticles() {
+
+  activeGoodsScatterParticles
+    .slice()
+    .forEach(
+      removeGoodsScatterParticle
+    );
+
+  activeGoodsScatterParticles = [];
+
+}
+
+
+function spawnGoodsScatterParticles(
+  unit
+) {
+
+  const trait =
+    getGoodsScatterTrait(unit);
+
+  if (
+    !trait ||
+    !unit ||
+    unit.dead ||
+    !projectileLayer
+  ) {
+
+    return;
+
+  }
+
+  if (
+    activeGoodsScatterParticles.length >=
+    GOODS_SCATTER_PARTICLE_CAP
+  ) {
+
+    removeGoodsScatterParticle(
+      activeGoodsScatterParticles[0]
+    );
+
+  }
+
+  const minCount =
+    Number.isInteger(
+      trait.minCount
+    ) &&
+    trait.minCount > 0
+      ? trait.minCount
+      : 2;
+
+  const maxCount =
+    Number.isInteger(
+      trait.maxCount
+    ) &&
+    trait.maxCount >= minCount
+      ? trait.maxCount
+      : 4;
+
+  const count =
+    minCount +
+    Math.floor(
+      Math.random() *
+      (
+        maxCount -
+        minCount +
+        1
+      )
+    );
+
+  const lifetimeMs =
+    typeof trait.lifetimeMs ===
+      "number" &&
+    trait.lifetimeMs > 0
+      ? trait.lifetimeMs
+      : 400;
+
+  const shapes = [
+    "bag",
+    "card",
+    "box",
+    "strip"
+  ];
+
+  const directions = [
+    { dx: -28, dy: -42 },
+    { dx: 0, dy: -52 },
+    { dx: 28, dy: -38 },
+    { dx: -36, dy: -18 },
+    { dx: 34, dy: -22 },
+    { dx: -18, dy: -48 },
+    { dx: 22, dy: -46 }
+  ];
+
+  for (
+    let i = 0;
+    i < count;
+    i += 1
+  ) {
+
+    const element =
+      document.createElement("div");
+
+    const shape =
+      shapes[
+        Math.floor(
+          Math.random() *
+          shapes.length
+        )
+      ];
+
+    element.className =
+      "battle-goods-scatter-particle battle-goods-scatter-" +
+      shape;
+
+    element.style.left =
+      unit.x + "px";
+
+    element.style.bottom =
+      "calc(14% + 18px)";
+
+    projectileLayer.appendChild(
+      element
+    );
+
+    const dir =
+      directions[
+        Math.floor(
+          Math.random() *
+          directions.length
+        )
+      ];
+
+    const fallY =
+      12 +
+      Math.floor(
+        Math.random() * 16
+      );
+
+    const particle = {
+
+      element: element,
+
+      animation: null
+
+    };
+
+    activeGoodsScatterParticles.push(
+      particle
+    );
+
+    const animation =
+      element.animate(
+        [
+          {
+            transform:
+              "translate(-50%, 0) scale(1)",
+            opacity: 0.95
+          },
+          {
+            transform:
+              "translate(calc(-50% + " +
+              dir.dx +
+              "px), " +
+              dir.dy +
+              "px) scale(0.92)",
+            opacity: 0.85
+          },
+          {
+            transform:
+              "translate(calc(-50% + " +
+              dir.dx +
+              "px), calc(" +
+              (
+                dir.dy +
+                fallY
+              ) +
+              "px)) scale(0.78)",
+            opacity: 0
+          }
+        ],
+        {
+          duration: lifetimeMs,
+          easing:
+            "cubic-bezier(0.25, 0.8, 0.35, 1)",
+          fill: "forwards"
+        }
+      );
+
+    particle.animation =
+      animation;
+
+    const finish =
+      () => {
+
+        removeGoodsScatterParticle(
+          particle
+        );
+
+      };
+
+    if (
+      animation &&
+      animation.finished &&
+      typeof animation.finished.then ===
+        "function"
+    ) {
+
+      animation.finished
+        .then(finish)
+        .catch(finish);
+
+    } else {
+
+      window.setTimeout(
+        finish,
+        lifetimeMs + 16
+      );
+
+    }
+
+  }
+
+}
+
+
 function tryApplyAttackKnockback(
   source,
   target
@@ -24679,9 +25116,30 @@ function tryApplyAttackKnockback(
 
   }
 
+  const baseDistance =
+    typeof trait.distance ===
+      "number"
+      ? trait.distance
+      : 70;
+
+  const resistance =
+    getAttackKnockbackResistanceMultiplier(
+      target
+    );
+
+  const adjustedTrait = {
+
+    ...trait,
+
+    distance:
+      baseDistance *
+      resistance
+
+  };
+
   startHealthKnockback(
     target,
-    trait
+    adjustedTrait
   );
 
   spawnAttackKnockbackEffect(
@@ -30804,6 +31262,8 @@ function clearProjectiles() {
 
   clearDropAoeEffects();
 
+  clearGoodsScatterParticles();
+
 }
 
 
@@ -31530,6 +31990,29 @@ function damageCharacter(
     source,
     target
   );
+
+  if (
+    isAllyUnit(target) &&
+    getGoodsScatterTrait(target)
+  ) {
+
+    if (
+      !isHealthKnockbackActive(
+        target
+      )
+    ) {
+
+      showUnitKnockbackHurt(
+        target
+      );
+
+    }
+
+    spawnGoodsScatterParticles(
+      target
+    );
+
+  }
 
 }
 
