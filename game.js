@@ -185,6 +185,14 @@ menuButtons.forEach((button) => {
 
       }
 
+      if (menu === "rehearsal") {
+
+        startTrainingBattle();
+
+        return;
+
+      }
+
       if (menu === "gacha") {
 
         openGachaLobby();
@@ -523,6 +531,55 @@ const CAMERA_EDGE_PADDING = 80;
 const ALLY_SPAWN_OFFSET = 30;
 
 const ENEMY_SPAWN_OFFSET = 80;
+
+const BATTLE_MODE = {
+
+  NORMAL: "normal",
+
+  TRAINING: "training"
+
+};
+
+let currentBattleMode =
+  BATTLE_MODE.NORMAL;
+
+const TRAINING_DUMMY_POSITIONS = [
+  520,
+  650,
+  780
+];
+
+const TRAINING_DUMMY_RESPAWN_MS = 700;
+
+const DAMAGE_NUMBER_LIFETIME_MS = 480;
+
+const DAMAGE_NUMBER_CAP = 36;
+
+let activeDamageNumbers = [];
+
+const TRAINING_STAGE = {
+
+  id: "training",
+
+  year: null,
+
+  title: "訓練所",
+
+  environment: null,
+
+  enemyBase: {
+
+    name: "リハスタ壁",
+
+    emoji: "🧱"
+
+  },
+
+  spawns: [],
+
+  winCondition: "none"
+
+};
 
 const MOSH_CROWD_OFFSCREEN_PX = 450;
 
@@ -2555,8 +2612,20 @@ function updateBattleStageHeader(stage) {
 
   if (yearEl) {
 
-    yearEl.textContent =
-      formatHeiseiYear(stage.year);
+    if (
+      stage.id === "training" ||
+      isTrainingBattle()
+    ) {
+
+      yearEl.textContent =
+        "訓練所";
+
+    } else {
+
+      yearEl.textContent =
+        formatHeiseiYear(stage.year);
+
+    }
 
   }
 
@@ -5772,11 +5841,739 @@ let playerBaseMaxHp = 2000;
 let enemyBaseHp = 2000;
 let enemyBaseMaxHp = 2000;
 
+function isTrainingBattle() {
+
+  return (
+    currentBattleMode ===
+    BATTLE_MODE.TRAINING
+  );
+
+}
+
+
+function getTrainingCharacterIds() {
+
+  return Object.keys(CHARACTERS)
+    .map((id) => CHARACTERS[id])
+    .filter(
+      (character) =>
+        character &&
+        typeof character.number ===
+          "number" &&
+        character.images &&
+        character.images.menu
+    )
+    .sort(
+      (a, b) =>
+        a.number -
+        b.number
+    )
+    .map(
+      (character) =>
+        character.id
+    );
+
+}
+
+
+function syncBattleModeUi() {
+
+  if (!battleScreen) {
+
+    return;
+
+  }
+
+  const training =
+    isTrainingBattle();
+
+  battleScreen.classList.toggle(
+    "is-training",
+    training
+  );
+
+  const subtitle =
+    document.getElementById(
+      "battle-training-subtitle"
+    );
+
+  const resetButton =
+    document.getElementById(
+      "battle-training-reset"
+    );
+
+  const exitButton =
+    document.getElementById(
+      "battle-training-exit"
+    );
+
+  const pauseButton =
+    document.getElementById(
+      "battle-pause-button"
+    );
+
+  if (subtitle) {
+
+    subtitle.hidden = !training;
+
+  }
+
+  if (resetButton) {
+
+    resetButton.hidden = !training;
+
+  }
+
+  if (exitButton) {
+
+    exitButton.hidden = !training;
+
+  }
+
+  if (pauseButton) {
+
+    pauseButton.hidden = training;
+
+  }
+
+  if (smokingButton) {
+
+    smokingButton.hidden = training;
+
+  }
+
+  const moshPanel =
+    document.querySelector(
+      ".mosh-panel"
+    );
+
+  if (moshPanel) {
+
+    moshPanel.hidden = training;
+
+  }
+
+}
+
+
+function clearDamageNumbers() {
+
+  activeDamageNumbers
+    .slice()
+    .forEach(
+      removeDamageNumber
+    );
+
+  activeDamageNumbers = [];
+
+}
+
+
+function removeDamageNumber(entry) {
+
+  if (!entry) {
+
+    return;
+
+  }
+
+  if (
+    entry.element &&
+    entry.element.parentNode
+  ) {
+
+    entry.element.remove();
+
+  }
+
+  activeDamageNumbers =
+    activeDamageNumbers.filter(
+      (item) =>
+        item !== entry
+    );
+
+}
+
+
+function spawnDamageNumber(
+  target,
+  damage
+) {
+
+  if (
+    !isTrainingBattle() ||
+    !projectileLayer ||
+    !target ||
+    !Number.isFinite(damage) ||
+    damage <= 0
+  ) {
+
+    return;
+
+  }
+
+  while (
+    activeDamageNumbers.length >=
+    DAMAGE_NUMBER_CAP
+  ) {
+
+    removeDamageNumber(
+      activeDamageNumbers[0]
+    );
+
+  }
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-damage-number";
+
+  element.textContent =
+    String(
+      Math.round(damage)
+    );
+
+  const x =
+    Number.isFinite(target.x)
+      ? target.x
+      : 0;
+
+  element.style.left =
+    x + "px";
+
+  element.style.bottom =
+    "calc(22% + 48px)";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  const entry = {
+
+    element: element
+
+  };
+
+  activeDamageNumbers.push(entry);
+
+  window.setTimeout(
+    () => {
+
+      removeDamageNumber(entry);
+
+    },
+    DAMAGE_NUMBER_LIFETIME_MS
+  );
+
+}
+
+
+function styleTrainingDummy(enemy) {
+
+  if (
+    !enemy ||
+    !enemy.element
+  ) {
+
+    return;
+
+  }
+
+  enemy.element.classList.add(
+    "battle-training-dummy"
+  );
+
+  const body =
+    enemy.element.querySelector(
+      ".enemy-body"
+    );
+
+  if (body) {
+
+    body.innerHTML =
+      '<div class="training-dummy-figure" aria-hidden="true">' +
+      '<span class="training-dummy-head"></span>' +
+      '<span class="training-dummy-torso"></span>' +
+      '<span class="training-dummy-base"></span>' +
+      "</div>";
+
+  }
+
+}
+
+
+function spawnTrainingDummies() {
+
+  TRAINING_DUMMY_POSITIONS.forEach(
+    (worldX) => {
+
+      const enemy =
+        spawnEnemyFromDef(
+          getEnemyDef(
+            "training_dummy"
+          )
+        );
+
+      if (!enemy) {
+
+        return;
+
+      }
+
+      enemy.x = worldX;
+
+      enemy.homeX = worldX;
+
+      enemy.trainingDummy = true;
+
+      enemy.speed = 0;
+
+      enemy.attack = 0;
+
+      if (enemy.element) {
+
+        enemy.element.style.left =
+          worldX + "px";
+
+      }
+
+      styleTrainingDummy(enemy);
+
+    }
+  );
+
+}
+
+
+function respawnTrainingDummy(enemy) {
+
+  if (
+    !enemy ||
+    !enemy.trainingDummy
+  ) {
+
+    return;
+
+  }
+
+  const homeX =
+    Number.isFinite(enemy.homeX)
+      ? enemy.homeX
+      : enemy.x;
+
+  enemy.dead = false;
+
+  enemy.hp = enemy.maxHp;
+
+  enemy.x = homeX;
+
+  enemy.speed = 0;
+
+  enemy.attack = 0;
+
+  enemy.attackCooldown = 0;
+
+  clearAllStatusEffects(enemy);
+
+  clearHealthKnockback(enemy);
+
+  if (enemy.hpBar) {
+
+    enemy.hpBar.style.width =
+      "100%";
+
+  }
+
+  if (enemy.element) {
+
+    enemy.element.classList.remove(
+      "defeated"
+    );
+
+    enemy.element.style.left =
+      homeX + "px";
+
+    enemy.element.style.opacity =
+      "";
+
+    enemy.element.style.transform =
+      "";
+
+  }
+
+  styleTrainingDummy(enemy);
+
+  if (
+    enemyUnits.indexOf(enemy) ===
+    -1
+  ) {
+
+    enemyUnits.push(enemy);
+
+  }
+
+}
+
+
+function clearTrainingUnitStates() {
+
+  playerUnits.slice().forEach(
+    (unit) => {
+
+      if (!unit) {
+
+        return;
+
+      }
+
+      clearAttackDash(unit);
+
+      clearDelayedMultiHit(unit);
+
+      clearAllStatusEffects(unit);
+
+      clearAllUnitBuffs(unit);
+
+      clearHealthKnockback(unit);
+
+      clearUnitSpriteTimer(unit);
+
+      clearUnitBpmOver(unit);
+
+      unit.currentAttackStage = 0;
+
+      unit.triggeredHealthKnockbacks =
+        new Set();
+
+      if (
+        unit.element &&
+        unit.element.parentNode
+      ) {
+
+        unit.element.remove();
+
+      }
+
+    }
+  );
+
+  playerUnits = [];
+
+  enemyUnits.slice().forEach(
+    (enemy) => {
+
+      if (
+        enemy &&
+        enemy.element &&
+        enemy.element.parentNode
+      ) {
+
+        enemy.element.remove();
+
+      }
+
+    }
+  );
+
+  enemyUnits = [];
+
+  clearProjectiles();
+
+  clearAllDelayedMultiHits();
+
+  clearAllBattleStatusEffects();
+
+  clearDamageNumbers();
+
+  clearGoodsScatterParticles();
+
+}
+
+
+function resetTrainingBattle() {
+
+  if (!isTrainingBattle()) {
+
+    return;
+
+  }
+
+  clearTrainingUnitStates();
+
+  deployCooldownUntil = {};
+
+  deployCooldownDurationMs = {};
+
+  if (unitLayer) {
+
+    unitLayer.innerHTML = "";
+
+  }
+
+  if (projectileLayer) {
+
+    projectileLayer
+      .querySelectorAll(
+        ".battle-damage-number"
+      )
+      .forEach(
+        (node) => {
+          node.remove();
+        }
+      );
+
+  }
+
+  yani = 999999;
+
+  yaniMax = 999999;
+
+  yaniSpeed = 0;
+
+  smokingLevel = 1;
+
+  smokingCost = 200;
+
+  playerBaseHp = 999999;
+
+  playerBaseMaxHp = 999999;
+
+  enemyBaseHp = 999999;
+
+  enemyBaseMaxHp = 999999;
+
+  moshGauge = 0;
+
+  moshActive = false;
+
+  updateMoshUI();
+
+  spawnTrainingDummies();
+
+  cameraX = 0;
+
+  zoom = 1;
+
+  applyCamera();
+
+  updateBattleUI();
+
+  updateBaseUI();
+
+}
+
+
+function exitTrainingBattle() {
+
+  if (!isTrainingBattle()) {
+
+    showScreen(homeScreen);
+
+    return;
+
+  }
+
+  stopBattle();
+
+  clearTrainingUnitStates();
+
+  clearDamageNumbers();
+
+  currentBattleMode =
+    BATTLE_MODE.NORMAL;
+
+  activeBattleStage = null;
+
+  syncBattleModeUi();
+
+  if (unitLayer) {
+
+    unitLayer.innerHTML = "";
+
+  }
+
+  showScreen(homeScreen);
+
+}
+
+
+function startTrainingBattle() {
+
+  currentBattleMode =
+    BATTLE_MODE.TRAINING;
+
+  activeBattleStage =
+    TRAINING_STAGE;
+
+  activeMedalSnapshot =
+    resolveEquippedMedals();
+
+  finalBossDefeated = false;
+
+  finalBossDefeatedUnit = null;
+
+  menuBgm.pause();
+
+  menuBgm.currentTime = 0;
+
+  battleBgm.currentTime = 0;
+
+  battleBgm
+    .play()
+    .catch(
+      (error) => {
+
+        console.log(
+          "戦闘BGM再生エラー:",
+          error
+        );
+
+      }
+    );
+
+  yani = 999999;
+
+  yaniMax = 999999;
+
+  yaniSpeed = 0;
+
+  smokingLevel = 1;
+
+  smokingCost = 200;
+
+  battleRunning = true;
+
+  isBattlePaused = false;
+
+  battlePausedAt = 0;
+
+  hideBattlePauseMenu();
+
+  deployCooldownUntil = {};
+
+  deployCooldownDurationMs = {};
+
+  battleCardPage = 0;
+
+  cameraX = 0;
+
+  zoom = 1;
+
+  applyCamera();
+
+  applyStageEnvironment(
+    TRAINING_STAGE.environment
+  );
+
+  updateBattleStageHeader(
+    TRAINING_STAGE
+  );
+
+  syncBattleModeUi();
+
+  moshGauge = 0;
+
+  moshActive = false;
+
+  updateMoshUI();
+
+  clearTrainingUnitStates();
+
+  if (unitLayer) {
+
+    unitLayer.innerHTML = "";
+
+  }
+
+  playerBaseHp = 999999;
+
+  playerBaseMaxHp = 999999;
+
+  enemyBaseHp = 999999;
+
+  enemyBaseMaxHp = 999999;
+
+  clearInterval(yaniTimer);
+
+  clearInterval(battleTimer);
+
+  clearEnemySpawnTimers();
+
+  clearInterval(moshTimer);
+
+  renderBattleUnitCards();
+
+  updateBattleUI();
+
+  applyStageEnemyBase(
+    TRAINING_STAGE
+  );
+
+  updateBaseUI();
+
+  showScreen(battleScreen);
+
+  spawnTrainingDummies();
+
+  yaniTimer =
+    setInterval(
+      () => {
+
+        if (!isBattleActive()) {
+
+          return;
+
+        }
+
+        // Training: YANI stays infinite.
+        updateBattleUI();
+
+      },
+      250
+    );
+
+  battleTimer =
+    setInterval(
+      () => {
+
+        if (!isBattleActive()) {
+
+          return;
+
+        }
+
+        updateEnemySpawns();
+
+        updateUnits();
+
+        updateEnemies();
+
+        updateProjectiles();
+
+        updateAttackKnockbackEffects();
+
+        updateUnitCardAvailability();
+
+      },
+      30
+    );
+
+  return true;
+
+}
+
+
 /* =========================
    START BATTLE
 ========================= */
 
 function startBattle() {
+
+  currentBattleMode =
+    BATTLE_MODE.NORMAL;
+
+  syncBattleModeUi();
 
   const stage =
     getCurrentStage();
@@ -5997,11 +6794,27 @@ moshTimer =
 
 function updateBattleUI() {
 
-  yaniNowText.textContent =
-    Math.floor(yani);
+  if (isTrainingBattle()) {
 
-  yaniMaxText.textContent =
-    yaniMax;
+    yaniNowText.textContent =
+      "∞";
+
+    if (yaniMaxText) {
+
+      yaniMaxText.textContent =
+        "∞";
+
+    }
+
+  } else {
+
+    yaniNowText.textContent =
+      Math.floor(yani);
+
+    yaniMaxText.textContent =
+      yaniMax;
+
+  }
 
   smokingLevelText.textContent =
     smokingLevel;
@@ -6177,6 +6990,12 @@ smokingButton.addEventListener(
   () => {
 
     if (!isBattleActive()) {
+
+      return;
+
+    }
+
+    if (isTrainingBattle()) {
 
       return;
 
@@ -23366,6 +24185,37 @@ function createBattleUnitCard(character) {
   card.dataset.unit =
     character.id;
 
+  const costLabel =
+    isTrainingBattle()
+      ? "∞"
+      : (
+        "🚬 " +
+        yaniCost
+      );
+
+  const rarityLabel =
+    getRarityLabel(
+      getCharacterRarity(
+        character
+      )
+    ) || "★";
+
+  const rarityStars =
+    rarityLabel.split(" ")[0] ||
+    "★";
+
+  const metaLabel =
+    isTrainingBattle()
+      ? (
+        "No." +
+        String(
+          character.number
+        ).padStart(3, "0") +
+        " " +
+        rarityStars
+      )
+      : character.name;
+
 
   card.innerHTML = `
 
@@ -23378,11 +24228,11 @@ function createBattleUnitCard(character) {
     </span>
 
     <strong>
-      ${character.name}
+      ${metaLabel}
     </strong>
 
     <small class="unit-card-cost">
-      🚬 ${yaniCost}
+      ${costLabel}
     </small>
 
     <span class="unit-card-cooldown" hidden>
@@ -23477,6 +24327,43 @@ function renderBattleUnitCards() {
     "";
 
 
+  if (isTrainingBattle()) {
+
+    const ids =
+      getTrainingCharacterIds();
+
+    ids.forEach(
+      (characterId) => {
+
+        if (
+          !characterId ||
+          !CHARACTERS[characterId]
+        ) {
+
+          return;
+
+        }
+
+        container.appendChild(
+          createBattleUnitCard(
+            CHARACTERS[
+              characterId
+            ]
+          )
+        );
+
+      }
+    );
+
+    updateUnitCardAvailability();
+
+    updateBattleCardPageDots();
+
+    return;
+
+  }
+
+
   let slotIndex = 0;
 
   while (
@@ -23524,6 +24411,22 @@ function renderBattleUnitCards() {
 
 function getBattleCardPageMax() {
 
+  if (isTrainingBattle()) {
+
+    const count =
+      getTrainingCharacterIds()
+        .length;
+
+    return Math.max(
+      0,
+      Math.ceil(
+        count /
+        BATTLE_DECK_FRONT_SIZE
+      ) - 1
+    );
+
+  }
+
   return Math.floor(
     BATTLE_DECK_SIZE /
     BATTLE_DECK_FRONT_SIZE
@@ -23534,20 +24437,81 @@ function getBattleCardPageMax() {
 
 function updateBattleCardPageDots() {
 
-  const dots =
-    document.querySelectorAll(
+  const host =
+    document.querySelector(
+      ".page-indicator"
+    );
+
+  if (!host) {
+
+    return;
+
+  }
+
+  if (isTrainingBattle()) {
+
+    host.hidden = true;
+
+    return;
+
+  }
+
+  host.hidden = false;
+
+  const maxPage =
+    getBattleCardPageMax();
+
+  const needed =
+    maxPage + 1;
+
+  let dots =
+    host.querySelectorAll(
       ".page-dot"
     );
 
+  while (dots.length < needed) {
 
-  dots.forEach((dot) => {
+    const button =
+      document.createElement(
+        "button"
+      );
 
-    const page =
-      Number(dot.dataset.cardPage);
+    button.type =
+      "button";
+
+    button.className =
+      "page-dot";
+
+    button.dataset.cardPage =
+      String(dots.length);
+
+    host.appendChild(button);
+
+    dots =
+      host.querySelectorAll(
+        ".page-dot"
+      );
+
+  }
+
+  dots.forEach((dot, index) => {
+
+    if (index > maxPage) {
+
+      dot.hidden = true;
+
+      return;
+
+    }
+
+    dot.hidden = false;
+
+    dot.dataset.cardPage =
+      String(index);
 
     dot.classList.toggle(
       "active",
-      page === battleCardPage
+      index === battleCardPage
     );
 
   });
@@ -23589,6 +24553,46 @@ function updateUnitCardAvailability() {
 
 
     if (!character) {
+
+      return;
+
+    }
+
+
+    if (isTrainingBattle()) {
+
+      card.classList.remove(
+        "not-enough"
+      );
+
+      card.classList.remove(
+        "on-cooldown"
+      );
+
+      card.disabled = false;
+
+      const cooldownBar =
+        card.querySelector(
+          ".unit-card-cooldown"
+        );
+
+      const cooldownFill =
+        card.querySelector(
+          ".unit-card-cooldown-fill"
+        );
+
+      if (cooldownBar) {
+
+        cooldownBar.hidden = true;
+
+      }
+
+      if (cooldownFill) {
+
+        cooldownFill.style.width =
+          "0%";
+
+      }
 
       return;
 
@@ -23750,6 +24754,7 @@ if (battleUnitCards) {
 
 
       if (
+        !isTrainingBattle() &&
         !isCharacterOwned(
           character.id
         )
@@ -23772,7 +24777,10 @@ if (battleUnitCards) {
         ) || 0;
 
 
-      if (yani < yaniCost) {
+      if (
+        !isTrainingBattle() &&
+        yani < yaniCost
+      ) {
 
         return;
 
@@ -23780,6 +24788,7 @@ if (battleUnitCards) {
 
 
       if (
+        !isTrainingBattle() &&
         isCharacterOnCooldown(
           character.id
         )
@@ -23790,15 +24799,23 @@ if (battleUnitCards) {
       }
 
 
-      yani -= yaniCost;
+      if (!isTrainingBattle()) {
+
+        yani -= yaniCost;
+
+      }
 
       spawnCharacter(
         character.id
       );
 
-      beginDeployCooldown(
-        character.id
-      );
+      if (!isTrainingBattle()) {
+
+        beginDeployCooldown(
+          character.id
+        );
+
+      }
 
       updateBattleUI();
 
@@ -23836,6 +24853,14 @@ function setupBattleCardPageSwipe() {
     "touchstart",
     (event) => {
 
+      if (isTrainingBattle()) {
+
+        cardPageSwipe = null;
+
+        return;
+
+      }
+
       if (event.touches.length !== 1) {
 
         cardPageSwipe = null;
@@ -23865,6 +24890,12 @@ function setupBattleCardPageSwipe() {
   cards.addEventListener(
     "touchmove",
     (event) => {
+
+      if (isTrainingBattle()) {
+
+        return;
+
+      }
 
       if (
         !cardPageSwipe ||
@@ -23902,6 +24933,14 @@ function setupBattleCardPageSwipe() {
   cards.addEventListener(
     "touchend",
     (event) => {
+
+      if (isTrainingBattle()) {
+
+        cardPageSwipe = null;
+
+        return;
+
+      }
 
       if (!cardPageSwipe) {
 
@@ -25530,6 +26569,47 @@ function showUnitKnockbackHurt(unit) {
 ========================= */
 
 const ENEMIES = {
+
+  training_dummy: {
+
+    id: "training_dummy",
+
+    unitType: "training_dummy",
+
+    name: "練習人形",
+
+    family: "training",
+
+    role: "dummy",
+
+    palette: null,
+
+    emoji: "🧍",
+
+    image: null,
+
+    hp: 999999,
+
+    attack: 0,
+
+    range: 0,
+
+    speed: 0,
+
+    attackInterval: 999999,
+
+    yaniReward: 0,
+
+    spawnOffsetX: 0,
+
+    attackKind: "none",
+
+    className:
+      "battle-enemy battle-training-dummy",
+
+    behaviors: []
+
+  },
 
   salaryman: {
 
@@ -29199,6 +30279,23 @@ function updateEnemies() {
 
 
       if (
+        enemy.trainingDummy ||
+        enemy.attackKind === "none" ||
+        (
+          Number(enemy.attack) ||
+          0
+        ) <= 0
+      ) {
+
+        enemy.element.style.left =
+          enemy.x + "px";
+
+        return;
+
+      }
+
+
+      if (
         updateHealthKnockbackMotion(
           enemy
         )
@@ -31935,6 +33032,20 @@ function damageCharacter(
     hpPercent + "%";
 
 
+  if (
+    playerAttack &&
+    !isAllyUnit(target) &&
+    damage > 0
+  ) {
+
+    spawnDamageNumber(
+      target,
+      damage
+    );
+
+  }
+
+
   if (isAllyUnit(target)) {
 
     refreshUnitConditionalBuffs(
@@ -32069,8 +33180,37 @@ function defeatCharacter(
 
 
   if (
+    isTrainingBattle() &&
+    target &&
+    target.trainingDummy
+  ) {
+
+    window.setTimeout(
+      () => {
+
+        if (!isTrainingBattle()) {
+
+          return;
+
+        }
+
+        respawnTrainingDummy(
+          target
+        );
+
+      },
+      TRAINING_DUMMY_RESPAWN_MS
+    );
+
+    return;
+
+  }
+
+
+  if (
     playerAttack &&
-    target.yaniReward
+    target.yaniReward &&
+    !isTrainingBattle()
   ) {
 
     yani +=
@@ -32180,6 +33320,19 @@ function stopBattle() {
   clearAllDelayedMultiHits();
 
   clearAllBattleStatusEffects();
+
+  clearDamageNumbers();
+
+  clearGoodsScatterParticles();
+
+  if (isTrainingBattle()) {
+
+    currentBattleMode =
+      BATTLE_MODE.NORMAL;
+
+    syncBattleModeUi();
+
+  }
 
 
   /* 戦闘BGM停止 */
@@ -32310,6 +33463,12 @@ function tryResolveBattleVictory() {
 
   }
 
+  if (isTrainingBattle()) {
+
+    return false;
+
+  }
+
   if (!isBattleVictoryConditionMet()) {
 
     return false;
@@ -32326,6 +33485,11 @@ function tryResolveBattleVictory() {
 function winBattle() {
 
   if (!battleRunning) {
+    return;
+  }
+
+  if (isTrainingBattle()) {
+
     return;
   }
 
@@ -32424,6 +33588,11 @@ function loseBattle() {
     return;
   }
 
+  if (isTrainingBattle()) {
+
+    return;
+  }
+
 
   stopBattle();
 
@@ -32515,6 +33684,47 @@ if (battlePauseResume) {
   );
 
 }
+
+
+const battleTrainingReset =
+  document.getElementById(
+    "battle-training-reset"
+  );
+
+const battleTrainingExit =
+  document.getElementById(
+    "battle-training-exit"
+  );
+
+
+if (battleTrainingReset) {
+
+  battleTrainingReset.addEventListener(
+    "click",
+    () => {
+
+      resetTrainingBattle();
+
+    }
+  );
+
+}
+
+
+if (battleTrainingExit) {
+
+  battleTrainingExit.addEventListener(
+    "click",
+    () => {
+
+      exitTrainingBattle();
+
+    }
+  );
+
+}
+
+
 /* =========================
    STAGE SPAWNS
 ========================= */

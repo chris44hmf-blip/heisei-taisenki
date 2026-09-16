@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=buppan-gachiota-1">
+  <link rel="stylesheet" href="style.css?v=rehearsal-studio-2">
 </head>
 
 <body>
@@ -214,6 +214,12 @@
         <button class="menu-button sortie" data-menu="sortie">
           <span>⚔️</span>
           出陣
+        </button>
+
+        <button class="menu-button rehearsal" data-menu="rehearsal">
+          <span>🎛</span>
+          訓練所
+          <small class="menu-button-sub">REHEARSAL STUDIO</small>
         </button>
 
         <button class="menu-button" data-menu="gacha">
@@ -1513,17 +1519,44 @@
     <div class="battle-stage-name">
       <small id="battle-stage-year">平成元年</small>
       <strong id="battle-stage-title" hidden></strong>
+      <span
+        id="battle-training-subtitle"
+        class="battle-training-subtitle"
+        hidden
+      >REHEARSAL STUDIO</span>
     </div>
 
     <div class="battle-center"></div>
 
-    <button
-      id="battle-pause-button"
-      class="battle-pause-button"
-      type="button"
-    >
-      ポーズ
-    </button>
+    <div class="battle-header-actions">
+
+      <button
+        id="battle-training-reset"
+        class="battle-training-reset"
+        type="button"
+        hidden
+      >
+        RESET
+      </button>
+
+      <button
+        id="battle-training-exit"
+        class="battle-training-exit"
+        type="button"
+        hidden
+      >
+        退出
+      </button>
+
+      <button
+        id="battle-pause-button"
+        class="battle-pause-button"
+        type="button"
+      >
+        ポーズ
+      </button>
+
+    </div>
 
   </header>
 
@@ -1612,18 +1645,19 @@
 
       <div class="yani-display">
 
-        🚬
+        <span class="yani-icon" aria-hidden="true">🚬</span>
+
         <strong id="yani-now">
           0
         </strong>
 
-        /
+        <span class="yani-sep">/</span>
 
         <span id="yani-max">
           1000
         </span>
 
-        ヤニ
+        <span class="yani-unit">ヤニ</span>
 
       </div>
 
@@ -2053,7 +2087,7 @@
   </div>
 
 
-  <script src="game.js?v=buppan-gachiota-1"></script>
+  <script src="game.js?v=rehearsal-studio-2"></script>
 
 </body>
 </html>
