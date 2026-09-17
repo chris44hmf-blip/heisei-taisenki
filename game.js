@@ -543,19 +543,69 @@ const BATTLE_MODE = {
 let currentBattleMode =
   BATTLE_MODE.NORMAL;
 
-const TRAINING_DUMMY_POSITIONS = [
-  600,
-  660,
-  720
-];
-
-const TRAINING_DUMMY_RESPAWN_MS = 700;
-
 const DAMAGE_NUMBER_LIFETIME_MS = 480;
 
 const DAMAGE_NUMBER_CAP = 36;
 
 let activeDamageNumbers = [];
+
+const TRAINING_ENEMY_LEVEL_MIN = 1;
+
+const TRAINING_ENEMY_LEVEL_MAX = 10;
+
+const TRAINING_ENEMY_TYPES = {
+
+  MELEE: "training_melee",
+
+  HEAVY: "training_heavy",
+
+  RANGED: "training_ranged"
+
+};
+
+const TRAINING_ENEMY_CARD_ORDER = [
+  TRAINING_ENEMY_TYPES.MELEE,
+  TRAINING_ENEMY_TYPES.HEAVY,
+  TRAINING_ENEMY_TYPES.RANGED
+];
+
+const TRAINING_ENEMY_CARD_META = {
+
+  training_melee: {
+
+    shortLabel: "近接",
+
+    fullLabel: "近接人形"
+
+  },
+
+  training_heavy: {
+
+    shortLabel: "重量",
+
+    fullLabel: "重量人形"
+
+  },
+
+  training_ranged: {
+
+    shortLabel: "射撃",
+
+    fullLabel: "射撃人形"
+
+  }
+
+};
+
+let trainingEnemyLevels = {
+
+  training_melee: TRAINING_ENEMY_LEVEL_MIN,
+
+  training_heavy: TRAINING_ENEMY_LEVEL_MIN,
+
+  training_ranged: TRAINING_ENEMY_LEVEL_MIN
+
+};
 
 const TRAINING_STAGE = {
 
@@ -5953,6 +6003,23 @@ function syncBattleModeUi() {
 
   }
 
+  const enemyCards =
+    document.getElementById(
+      "battle-training-enemy-cards"
+    );
+
+  if (enemyCards) {
+
+    enemyCards.hidden = !training;
+
+  }
+
+  if (training) {
+
+    renderTrainingEnemyCards();
+
+  }
+
 }
 
 
@@ -6069,7 +6136,207 @@ function spawnDamageNumber(
 }
 
 
-function styleTrainingDummy(enemy) {
+function resetTrainingEnemyLevels() {
+
+  TRAINING_ENEMY_CARD_ORDER.forEach(
+    (type) => {
+
+      trainingEnemyLevels[type] =
+        TRAINING_ENEMY_LEVEL_MIN;
+
+    }
+  );
+
+}
+
+
+function getTrainingEnemySelectedLevel(
+  type
+) {
+
+  const level =
+    Number(
+      trainingEnemyLevels[type]
+    );
+
+  if (
+    !Number.isInteger(level)
+  ) {
+
+    return TRAINING_ENEMY_LEVEL_MIN;
+
+  }
+
+  if (
+    level < TRAINING_ENEMY_LEVEL_MIN
+  ) {
+
+    return TRAINING_ENEMY_LEVEL_MIN;
+
+  }
+
+  if (
+    level > TRAINING_ENEMY_LEVEL_MAX
+  ) {
+
+    return TRAINING_ENEMY_LEVEL_MAX;
+
+  }
+
+  return level;
+
+}
+
+
+function adjustTrainingEnemyLevel(
+  type,
+  delta
+) {
+
+  if (
+    !isTrainingBattle() ||
+    !TRAINING_ENEMY_CARD_META[type]
+  ) {
+
+    return;
+
+  }
+
+  const next =
+    getTrainingEnemySelectedLevel(
+      type
+    ) +
+    Number(delta || 0);
+
+  if (
+    next < TRAINING_ENEMY_LEVEL_MIN ||
+    next > TRAINING_ENEMY_LEVEL_MAX
+  ) {
+
+    return;
+
+  }
+
+  trainingEnemyLevels[type] =
+    next;
+
+  syncTrainingEnemyCardLevels();
+
+}
+
+
+function syncTrainingEnemyCardLevels() {
+
+  TRAINING_ENEMY_CARD_ORDER.forEach(
+    (type) => {
+
+      const levelEl =
+        document.querySelector(
+          '[data-training-enemy-level="' +
+            type +
+            '"]'
+        );
+
+      if (levelEl) {
+
+        levelEl.textContent =
+          "Lv." +
+          getTrainingEnemySelectedLevel(
+            type
+          );
+
+      }
+
+    }
+  );
+
+}
+
+
+function renderTrainingEnemyCards() {
+
+  const host =
+    document.getElementById(
+      "battle-training-enemy-cards"
+    );
+
+  if (!host) {
+
+    return;
+
+  }
+
+  if (host.dataset.ready === "1") {
+
+    syncTrainingEnemyCardLevels();
+
+    return;
+
+  }
+
+  host.innerHTML = "";
+
+  TRAINING_ENEMY_CARD_ORDER.forEach(
+    (type) => {
+
+      const meta =
+        TRAINING_ENEMY_CARD_META[
+          type
+        ];
+
+      const card =
+        document.createElement(
+          "div"
+        );
+
+      card.className =
+        "battle-training-enemy-card";
+
+      card.dataset.trainingEnemy =
+        type;
+
+      card.innerHTML =
+        '<button type="button" class="battle-training-enemy-card-spawn" data-training-enemy="' +
+        type +
+        '" aria-label="' +
+        meta.fullLabel +
+        'を召喚">' +
+        '<span class="battle-training-enemy-card-title">' +
+        meta.shortLabel +
+        "</span>" +
+        "</button>" +
+        '<span class="battle-training-enemy-card-controls">' +
+        '<button type="button" class="battle-training-enemy-lv-btn" data-training-enemy-delta="-1" data-training-enemy-type="' +
+        type +
+        '" aria-label="レベルを下げる">−</button>' +
+        '<span class="battle-training-enemy-lv" data-training-enemy-level="' +
+        type +
+        '">Lv.' +
+        getTrainingEnemySelectedLevel(
+          type
+        ) +
+        "</span>" +
+        '<button type="button" class="battle-training-enemy-lv-btn" data-training-enemy-delta="1" data-training-enemy-type="' +
+        type +
+        '" aria-label="レベルを上げる">＋</button>' +
+        "</span>";
+
+      host.appendChild(card);
+
+    }
+  );
+
+  host.dataset.ready = "1";
+
+  syncTrainingEnemyCardLevels();
+
+}
+
+
+function styleTrainingEnemy(
+  enemy,
+  def
+) {
 
   if (
     !enemy ||
@@ -6080,8 +6347,19 @@ function styleTrainingDummy(enemy) {
 
   }
 
+  const visual =
+    (
+      def &&
+      def.trainingVisual
+    ) ||
+    "melee";
+
   enemy.element.classList.add(
-    "battle-training-dummy"
+    "battle-training-enemy"
+  );
+
+  enemy.element.classList.add(
+    "battle-training-" + visual
   );
 
   const body =
@@ -6092,9 +6370,12 @@ function styleTrainingDummy(enemy) {
   if (body) {
 
     body.innerHTML =
-      '<div class="training-dummy-figure" aria-hidden="true">' +
+      '<div class="training-dummy-figure training-dummy-' +
+      visual +
+      '" aria-hidden="true">' +
       '<span class="training-dummy-head"></span>' +
       '<span class="training-dummy-torso"></span>' +
+      '<span class="training-dummy-arm"></span>' +
       '<span class="training-dummy-base"></span>' +
       "</div>";
 
@@ -6103,80 +6384,74 @@ function styleTrainingDummy(enemy) {
 }
 
 
-function spawnTrainingDummies() {
-
-  TRAINING_DUMMY_POSITIONS.forEach(
-    (worldX) => {
-
-      const enemy =
-        spawnEnemyFromDef(
-          getEnemyDef(
-            "training_dummy"
-          )
-        );
-
-      if (!enemy) {
-
-        return;
-
-      }
-
-      enemy.x = worldX;
-
-      enemy.homeX = worldX;
-
-      enemy.trainingDummy = true;
-
-      enemy.speed = 0;
-
-      enemy.attack = 0;
-
-      if (enemy.element) {
-
-        enemy.element.style.left =
-          worldX + "px";
-
-      }
-
-      styleTrainingDummy(enemy);
-
-    }
-  );
-
-}
-
-
-function respawnTrainingDummy(enemy) {
+function spawnTrainingEnemyFromCard(
+  type
+) {
 
   if (
-    !enemy ||
-    !enemy.trainingDummy
+    !isTrainingBattle() ||
+    !isBattleActive()
   ) {
 
-    return;
+    return null;
 
   }
 
-  const homeX =
-    Number.isFinite(enemy.homeX)
-      ? enemy.homeX
-      : enemy.x;
+  const def =
+    getEnemyDef(type);
 
-  enemy.dead = false;
+  if (
+    !def ||
+    def.family !== "training"
+  ) {
 
-  enemy.hp = enemy.maxHp;
+    return null;
 
-  enemy.x = homeX;
+  }
 
-  enemy.speed = 0;
+  const level =
+    getTrainingEnemySelectedLevel(
+      type
+    );
 
-  enemy.attack = 0;
+  const multiplier =
+    getLevelStatMultiplier(
+      level
+    );
 
-  enemy.attackCooldown = 0;
+  const enemy =
+    spawnEnemyFromDef(def);
 
-  clearAllStatusEffects(enemy);
+  if (!enemy) {
 
-  clearHealthKnockback(enemy);
+    return null;
+
+  }
+
+  enemy.trainingEnemy = true;
+
+  enemy.trainingLevel = level;
+
+  enemy.yaniReward = 0;
+
+  enemy.maxHp =
+    Math.max(
+      1,
+      roundCharacterStat(
+        def.hp * multiplier
+      )
+    );
+
+  enemy.hp =
+    enemy.maxHp;
+
+  enemy.attack =
+    Math.max(
+      0,
+      roundCharacterStat(
+        def.attack * multiplier
+      )
+    );
 
   if (enemy.hpBar) {
 
@@ -6185,33 +6460,24 @@ function respawnTrainingDummy(enemy) {
 
   }
 
-  if (enemy.element) {
+  styleTrainingEnemy(enemy, def);
 
-    enemy.element.classList.remove(
-      "defeated"
+  const label =
+    enemy.element &&
+    enemy.element.querySelector(
+      ".enemy-label"
     );
 
-    enemy.element.style.left =
-      homeX + "px";
+  if (label) {
 
-    enemy.element.style.opacity =
-      "";
-
-    enemy.element.style.transform =
-      "";
+    label.textContent =
+      def.name +
+      " Lv." +
+      level;
 
   }
 
-  styleTrainingDummy(enemy);
-
-  if (
-    enemyUnits.indexOf(enemy) ===
-    -1
-  ) {
-
-    enemyUnits.push(enemy);
-
-  }
+  return enemy;
 
 }
 
@@ -6349,7 +6615,9 @@ function resetTrainingBattle() {
 
   updateMoshUI();
 
-  spawnTrainingDummies();
+  resetTrainingEnemyLevels();
+
+  syncTrainingEnemyCardLevels();
 
   cameraX = 0;
 
@@ -6514,7 +6782,9 @@ function startTrainingBattle() {
 
   showScreen(battleScreen);
 
-  spawnTrainingDummies();
+  resetTrainingEnemyLevels();
+
+  syncBattleModeUi();
 
   yaniTimer =
     setInterval(
@@ -24216,6 +24486,15 @@ function createBattleUnitCard(character) {
       )
       : character.name;
 
+  const nameHtml =
+    isTrainingBattle()
+      ? (
+        '<span class="unit-card-name">' +
+        character.name +
+        "</span>"
+      )
+      : "";
+
 
   card.innerHTML = `
 
@@ -24230,6 +24509,8 @@ function createBattleUnitCard(character) {
     <strong>
       ${metaLabel}
     </strong>
+
+    ${nameHtml}
 
     <small class="unit-card-cost">
       ${costLabel}
@@ -26640,6 +26921,135 @@ const ENEMIES = {
 
     className:
       "battle-enemy battle-training-dummy",
+
+    behaviors: []
+
+  },
+
+  training_melee: {
+
+    id: "training_melee",
+
+    unitType: "training_melee",
+
+    name: "近接人形",
+
+    family: "training",
+
+    role: "trainingEnemy",
+
+    palette: null,
+
+    emoji: "🥊",
+
+    image: null,
+
+    hp: 1000,
+
+    attack: 30,
+
+    range: 45,
+
+    speed: 0.80,
+
+    attackInterval: 1200,
+
+    yaniReward: 0,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    trainingVisual: "melee",
+
+    className:
+      "battle-enemy battle-training-enemy battle-training-melee",
+
+    behaviors: []
+
+  },
+
+  training_heavy: {
+
+    id: "training_heavy",
+
+    unitType: "training_heavy",
+
+    name: "重量人形",
+
+    family: "training",
+
+    role: "trainingEnemy",
+
+    palette: null,
+
+    emoji: "🪨",
+
+    image: null,
+
+    hp: 1800,
+
+    attack: 40,
+
+    range: 45,
+
+    speed: 0.40,
+
+    attackInterval: 1500,
+
+    yaniReward: 0,
+
+    spawnOffsetX: 0,
+
+    attackKind: "single",
+
+    trainingVisual: "heavy",
+
+    className:
+      "battle-enemy battle-training-enemy battle-training-heavy",
+
+    behaviors: []
+
+  },
+
+  training_ranged: {
+
+    id: "training_ranged",
+
+    unitType: "training_ranged",
+
+    name: "射撃人形",
+
+    family: "training",
+
+    role: "trainingEnemy",
+
+    palette: null,
+
+    emoji: "🎯",
+
+    image: null,
+
+    hp: 800,
+
+    attack: 25,
+
+    range: 220,
+
+    speed: 0.55,
+
+    attackInterval: 1500,
+
+    yaniReward: 0,
+
+    spawnOffsetX: 0,
+
+    attackKind: "projectile",
+
+    trainingVisual: "ranged",
+
+    className:
+      "battle-enemy battle-training-enemy battle-training-ranged",
 
     behaviors: []
 
@@ -30727,6 +31137,20 @@ function tryAttack(
 
   if (!playerAttack) {
 
+    if (
+      attacker.attackKind ===
+      "projectile"
+    ) {
+
+      fireTrainingEnemyProjectile(
+        attacker,
+        target
+      );
+
+      return;
+
+    }
+
     if (isEnemyAoeAttack(attacker)) {
 
       getAlliedUnitsInEnemyAttackRange(
@@ -32581,6 +33005,217 @@ function applyProjectileImpact(
 }
 
 
+function fireTrainingEnemyProjectile(
+  attacker,
+  target
+) {
+
+  if (
+    !attacker ||
+    !projectileLayer ||
+    attacker.dead
+  ) {
+
+    return;
+
+  }
+
+  const startX =
+    Number.isFinite(attacker.x)
+      ? attacker.x
+      : getEnemySpawnX();
+
+  const aimX =
+    target &&
+    Number.isFinite(target.x)
+      ? target.x
+      : PLAYER_BASE_X;
+
+  const element =
+    document.createElement("div");
+
+  element.className =
+    "battle-projectile battle-training-enemy-projectile";
+
+  element.style.left =
+    startX + "px";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  const attackPower =
+    Number(attacker.attack) || 0;
+
+  projectiles.push({
+
+    element: element,
+
+    x: startX,
+
+    minX: Math.min(
+      aimX - 40,
+      PLAYER_BASE_X - 40
+    ),
+
+    speed: 180,
+
+    hitRadius: 28,
+
+    aoeRadius: 0,
+
+    attack: attackPower,
+
+    attackPower: attackPower,
+
+    resolvedAttack: attackPower,
+
+    pierceTargetCount: 1,
+
+    hitEnemies: new Set(),
+
+    type: "trainingEnemyProjectile",
+
+    hostile: true,
+
+    hitsPlayerBase: !target,
+
+    baseDamaged: false,
+
+    source: attacker,
+
+    onHitStatus: null
+
+  });
+
+}
+
+
+function findFirstHostileProjectileHit(
+  projectile,
+  previousX
+) {
+
+  let hit = null;
+
+  let hitX = -Infinity;
+
+  const minX =
+    Math.min(
+      previousX,
+      projectile.x
+    ) -
+    projectile.hitRadius;
+
+  const maxX =
+    Math.max(
+      previousX,
+      projectile.x
+    ) +
+    projectile.hitRadius;
+
+  const hitAllies =
+    projectile.hitEnemies instanceof
+      Set
+      ? projectile.hitEnemies
+      : null;
+
+  playerUnits.forEach((unit) => {
+
+    if (
+      !unit ||
+      unit.dead
+    ) {
+
+      return;
+
+    }
+
+    if (
+      hitAllies &&
+      hitAllies.has(unit)
+    ) {
+
+      return;
+
+    }
+
+    if (
+      unit.x >= minX &&
+      unit.x <= maxX &&
+      unit.x > hitX
+    ) {
+
+      hit = unit;
+
+      hitX = unit.x;
+
+    }
+
+  });
+
+  return hit;
+
+}
+
+
+function applyHostileProjectileImpact(
+  projectile,
+  target
+) {
+
+  if (
+    !projectile ||
+    !target
+  ) {
+
+    return;
+
+  }
+
+  damageCharacter(
+    target,
+    getProjectileAttackPower(
+      projectile
+    ),
+    false,
+    projectile.source
+  );
+
+}
+
+
+function applyHostileProjectilePlayerBaseDamage(
+  projectile
+) {
+
+  if (
+    !projectile ||
+    projectile.baseDamaged
+  ) {
+
+    return;
+
+  }
+
+  projectile.baseDamaged = true;
+
+  playerBaseHp -=
+    getProjectileAttackPower(
+      projectile
+    );
+
+  updateBaseUI();
+
+  if (playerBaseHp <= 0) {
+
+    loseBattle();
+
+  }
+
+}
+
+
 function applyProjectileEnemyBaseDamage(
   projectile
 ) {
@@ -32675,6 +33310,73 @@ function updateProjectiles() {
 
     const previousX =
       projectile.x;
+
+    if (projectile.hostile) {
+
+      projectile.x -=
+        projectile.speed *
+        (elapsed / 1000);
+
+      projectile.element.style.left =
+        projectile.x + "px";
+
+      const allyHit =
+        findFirstHostileProjectileHit(
+          projectile,
+          previousX
+        );
+
+      if (allyHit) {
+
+        applyHostileProjectileImpact(
+          projectile,
+          allyHit
+        );
+
+        removeProjectile(projectile);
+
+        return;
+
+      }
+
+      if (
+        projectile.hitsPlayerBase &&
+        previousX > PLAYER_BASE_X &&
+        projectile.x <= PLAYER_BASE_X
+      ) {
+
+        applyHostileProjectilePlayerBaseDamage(
+          projectile
+        );
+
+        removeProjectile(projectile);
+
+        return;
+
+      }
+
+      if (
+        projectile.x <=
+        (
+          Number.isFinite(
+            projectile.minX
+          )
+            ? projectile.minX
+            : PLAYER_BASE_X - 80
+        )
+      ) {
+
+        removeProjectile(projectile);
+
+        return;
+
+      }
+
+      remaining.push(projectile);
+
+      return;
+
+    }
 
     projectile.x +=
       projectile.speed *
@@ -32984,7 +33686,24 @@ function attackPlayerBase(enemy) {
 
   enemy.attackCooldown =
     now +
-    enemy.attackInterval;
+    getUnitAttackInterval(
+      enemy
+    );
+
+
+  if (
+    enemy.attackKind ===
+    "projectile"
+  ) {
+
+    fireTrainingEnemyProjectile(
+      enemy,
+      null
+    );
+
+    return;
+
+  }
 
 
   enemy.element
@@ -33067,15 +33786,27 @@ function damageCharacter(
 
 
   if (
-    playerAttack &&
-    !isAllyUnit(target) &&
+    isTrainingBattle() &&
     damage > 0
   ) {
 
-    spawnDamageNumber(
-      target,
-      damage
-    );
+    if (
+      (
+        playerAttack &&
+        !isAllyUnit(target)
+      ) ||
+      (
+        !playerAttack &&
+        isAllyUnit(target)
+      )
+    ) {
+
+      spawnDamageNumber(
+        target,
+        damage
+      );
+
+    }
 
   }
 
@@ -33209,34 +33940,6 @@ function defeatCharacter(
       .classList.add(
         "defeated"
       );
-
-  }
-
-
-  if (
-    isTrainingBattle() &&
-    target &&
-    target.trainingDummy
-  ) {
-
-    window.setTimeout(
-      () => {
-
-        if (!isTrainingBattle()) {
-
-          return;
-
-        }
-
-        respawnTrainingDummy(
-          target
-        );
-
-      },
-      TRAINING_DUMMY_RESPAWN_MS
-    );
-
-    return;
 
   }
 
@@ -33752,6 +34455,78 @@ if (battleTrainingExit) {
     () => {
 
       exitTrainingBattle();
+
+    }
+  );
+
+}
+
+
+const battleTrainingEnemyCards =
+  document.getElementById(
+    "battle-training-enemy-cards"
+  );
+
+
+if (battleTrainingEnemyCards) {
+
+  battleTrainingEnemyCards.addEventListener(
+    "click",
+    (event) => {
+
+      if (!isTrainingBattle()) {
+
+        return;
+
+      }
+
+      const lvButton =
+        event.target.closest(
+          ".battle-training-enemy-lv-btn"
+        );
+
+      if (lvButton) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+
+        const type =
+          lvButton.dataset
+            .trainingEnemyType;
+
+        const delta =
+          Number(
+            lvButton.dataset
+              .trainingEnemyDelta
+          );
+
+        adjustTrainingEnemyLevel(
+          type,
+          delta
+        );
+
+        return;
+
+      }
+
+      const spawnButton =
+        event.target.closest(
+          ".battle-training-enemy-card-spawn"
+        );
+
+      if (!spawnButton) {
+
+        return;
+
+      }
+
+      event.preventDefault();
+
+      spawnTrainingEnemyFromCard(
+        spawnButton.dataset
+          .trainingEnemy
+      );
 
     }
   );

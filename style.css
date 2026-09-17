@@ -8906,6 +8906,138 @@ h3,
 }
 
 
+.battle-training-enemy-cards {
+  display: flex;
+
+  justify-content: center;
+
+  align-items: center;
+
+  gap:
+    clamp(4px, 0.8vw, 8px);
+
+  pointer-events: auto;
+
+  max-width: 100%;
+}
+
+
+.battle-training-enemy-card {
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: stretch;
+
+  gap: 2px;
+
+  min-width:
+    clamp(54px, 9vw, 72px);
+
+  max-width: 78px;
+}
+
+
+.battle-training-enemy-card-spawn {
+  pointer-events: auto;
+
+  min-height: 22px;
+
+  padding: 2px 6px;
+
+  border: 1px solid #c7b48a;
+
+  border-radius: 3px;
+
+  background:
+    linear-gradient(
+      #3a342c,
+      #18140f
+    );
+
+  color: #f3e7c8;
+
+  font-size:
+    clamp(10px, 1.3vw, 12px);
+
+  font-weight: 900;
+
+  letter-spacing: 0.04em;
+
+  cursor: pointer;
+}
+
+
+.battle-training-enemy-card-spawn:active {
+  transform: scale(0.96);
+
+  background: #4a4034;
+}
+
+
+.battle-training-enemy-card-controls {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 2px;
+}
+
+
+.battle-training-enemy-lv-btn {
+  pointer-events: auto;
+
+  flex: 0 0 auto;
+
+  width: 20px;
+
+  height: 18px;
+
+  padding: 0;
+
+  border: 1px solid #8a7a5c;
+
+  border-radius: 3px;
+
+  background: #221c16;
+
+  color: #f3e7c8;
+
+  font-size: 12px;
+
+  font-weight: 900;
+
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+
+.battle-training-enemy-lv-btn:active {
+  background: #4a4034;
+}
+
+
+.battle-training-enemy-lv {
+  flex: 1;
+
+  min-width: 0;
+
+  color: #d7c5a0;
+
+  font-size:
+    clamp(9px, 1.15vw, 11px);
+
+  font-weight: 800;
+
+  text-align: center;
+
+  white-space: nowrap;
+}
+
+
 .battle-training-subtitle {
   margin-top: 2px;
 
@@ -8983,9 +9115,14 @@ h3,
 
 
 #battle-screen.is-training .battle-header {
-  height: 8%;
+  height: 10%;
 
-  min-height: 34px;
+  min-height: 42px;
+
+  grid-template-columns:
+    minmax(72px, 0.9fr)
+    minmax(160px, 1.4fr)
+    minmax(110px, 0.9fr);
 
   padding-top:
     max(2px, env(safe-area-inset-top, 0px));
@@ -9193,6 +9330,34 @@ h3,
 }
 
 
+#battle-screen.is-training #battle-unit-cards .unit-card-name {
+  display: -webkit-box;
+
+  -webkit-box-orient: vertical;
+
+  -webkit-line-clamp: 2;
+
+  overflow: hidden;
+
+  max-width: 100%;
+
+  min-height: 0;
+
+  color: #d7c5a0;
+
+  font-size:
+    clamp(7px, 0.95vw, 10px);
+
+  font-weight: 700;
+
+  line-height: 1.15;
+
+  text-align: center;
+
+  word-break: break-word;
+}
+
+
 #battle-screen.is-training #battle-unit-cards .unit-card small {
   font-size: 10px;
 
@@ -9356,12 +9521,14 @@ h3,
 }
 
 
-.battle-training-dummy {
+.battle-training-dummy,
+.battle-training-enemy {
   z-index: 4;
 }
 
 
-.battle-training-dummy .enemy-body {
+.battle-training-dummy .enemy-body,
+.battle-training-enemy .enemy-body {
   font-size: 0;
 
   width: 46px;
@@ -9385,9 +9552,22 @@ h3,
 }
 
 
+.training-dummy-heavy {
+  width: 42px;
+
+  height: 74px;
+}
+
+
+.training-dummy-ranged {
+  width: 36px;
+}
+
+
 .training-dummy-head,
 .training-dummy-torso,
-.training-dummy-base {
+.training-dummy-base,
+.training-dummy-arm {
   display: block;
 
   position: absolute;
@@ -9428,6 +9608,43 @@ h3,
 }
 
 
+.training-dummy-heavy .training-dummy-torso {
+  width: 30px;
+
+  height: 38px;
+
+  background: #a89878;
+}
+
+
+.training-dummy-heavy .training-dummy-head {
+  width: 20px;
+
+  height: 20px;
+}
+
+
+.training-dummy-arm {
+  top: 24px;
+
+  left: calc(50% + 14px);
+
+  width: 16px;
+
+  height: 6px;
+
+  border-radius: 3px;
+
+  transform: none;
+}
+
+
+.training-dummy-melee .training-dummy-arm,
+.training-dummy-heavy .training-dummy-arm {
+  display: none;
+}
+
+
 .training-dummy-base {
   bottom: 0;
 
@@ -9441,11 +9658,33 @@ h3,
 }
 
 
-.battle-training-dummy .enemy-label {
+.battle-training-dummy .enemy-label,
+.battle-training-enemy .enemy-label {
   color: #d8c9a6;
 
   font-size:
-    clamp(9px, 1.1vw, 12px);
+    clamp(8px, 1.05vw, 11px);
+}
+
+
+.battle-training-enemy-projectile {
+  width: 14px;
+
+  height: 6px;
+
+  margin-top: -3px;
+
+  border-radius: 3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #f0c878,
+      #c45a2a
+    );
+
+  box-shadow:
+    0 0 6px rgba(255, 140, 60, 0.55);
 }
 
 
@@ -9502,9 +9741,40 @@ h3,
 @media (max-width: 740px) and (max-height: 420px) {
 
   #battle-screen.is-training .battle-header {
-    height: 9%;
+    height: 12%;
 
-    min-height: 30px;
+    min-height: 40px;
+
+    grid-template-columns:
+      minmax(58px, 0.85fr)
+      minmax(150px, 1.5fr)
+      minmax(96px, 0.85fr);
+  }
+
+  .battle-training-enemy-card {
+    min-width: 48px;
+
+    max-width: 58px;
+  }
+
+  .battle-training-enemy-card-spawn {
+    min-height: 18px;
+
+    padding: 1px 4px;
+
+    font-size: 9px;
+  }
+
+  .battle-training-enemy-lv-btn {
+    width: 16px;
+
+    height: 16px;
+
+    font-size: 10px;
+  }
+
+  .battle-training-enemy-lv {
+    font-size: 8px;
   }
 
   #battle-screen.is-training .battle-ui {
@@ -9529,7 +9799,7 @@ h3,
   }
 
   #battle-screen.is-training #battle-unit-cards .unit-icon {
-    min-height: 38px;
+    min-height: 34px;
   }
 
   #battle-screen.is-training #battle-viewport::before,
