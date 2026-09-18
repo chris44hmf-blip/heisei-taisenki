@@ -5696,6 +5696,66 @@ function shiftUnitClocks(unit, pausedMs) {
 
   }
 
+  if (
+    unit.pendingFrontAoe &&
+    typeof unit.pendingFrontAoe.fireAt ===
+      "number"
+  ) {
+
+    unit.pendingFrontAoe.fireAt +=
+      pausedMs;
+
+  }
+
+  if (
+    unit.pendingMeleeImpact &&
+    typeof unit.pendingMeleeImpact.fireAt ===
+      "number"
+  ) {
+
+    unit.pendingMeleeImpact.fireAt +=
+      pausedMs;
+
+  }
+
+  if (
+    unit.delayedMultiHit &&
+    Array.isArray(
+      unit.delayedMultiHit.pendingHits
+    )
+  ) {
+
+    unit.delayedMultiHit.pendingHits
+      .forEach(
+        (hit) => {
+
+          if (
+            hit &&
+            typeof hit.fireAt ===
+              "number"
+          ) {
+
+            hit.fireAt +=
+              pausedMs;
+
+          }
+
+        }
+      );
+
+  }
+
+  if (
+    unit.delayedMultiHit &&
+    typeof unit.delayedMultiHit.finishAt ===
+      "number"
+  ) {
+
+    unit.delayedMultiHit.finishAt +=
+      pausedMs;
+
+  }
+
 }
 
 
@@ -5740,6 +5800,38 @@ function shiftBattleClocks(pausedMs) {
     }
   );
 
+  activeDropAoeEffects.forEach(
+    (drop) => {
+
+      if (!drop) {
+
+        return;
+
+      }
+
+      if (
+        typeof drop.spawnAt ===
+          "number"
+      ) {
+
+        drop.spawnAt +=
+          pausedMs;
+
+      }
+
+      if (
+        typeof drop.fallEndsAt ===
+          "number"
+      ) {
+
+        drop.fallEndsAt +=
+          pausedMs;
+
+      }
+
+    }
+  );
+
   playerUnits.forEach(
     (unit) => {
 
@@ -5776,6 +5868,62 @@ function shiftBattleClocks(pausedMs) {
 }
 
 
+function pauseDropAoeAnimations() {
+
+  activeDropAoeEffects.forEach(
+    (drop) => {
+
+      if (
+        drop &&
+        drop.animation &&
+        typeof drop.animation.pause ===
+          "function"
+      ) {
+
+        try {
+
+          drop.animation.pause();
+
+        } catch (error) {
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+
+function resumeDropAoeAnimations() {
+
+  activeDropAoeEffects.forEach(
+    (drop) => {
+
+      if (
+        drop &&
+        drop.animation &&
+        typeof drop.animation.play ===
+          "function"
+      ) {
+
+        try {
+
+          drop.animation.play();
+
+        } catch (error) {
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+
 function pauseBattle() {
 
   if (
@@ -5795,6 +5943,8 @@ function pauseBattle() {
   endCameraPan();
 
   endCameraPinch();
+
+  pauseDropAoeAnimations();
 
   showBattlePauseMenu();
 
@@ -5823,6 +5973,8 @@ function resumeBattle() {
   battlePausedAt = 0;
 
   shiftBattleClocks(pausedMs);
+
+  resumeDropAoeAnimations();
 
   hideBattlePauseMenu();
 
@@ -6819,6 +6971,8 @@ function startTrainingBattle() {
 
         updateEnemySpawns();
 
+        updatePendingCombatDelays();
+
         updateUnits();
 
         updateEnemies();
@@ -7039,6 +7193,8 @@ moshTimer =
         }
 
         updateEnemySpawns();
+
+        updatePendingCombatDelays();
 
         updateUnits();
 
@@ -31486,19 +31642,6 @@ function clearPendingFrontAoe(unit) {
 
   }
 
-  const pending =
-    unit.pendingFrontAoe;
-
-  if (
-    pending.timeoutId != null
-  ) {
-
-    window.clearTimeout(
-      pending.timeoutId
-    );
-
-  }
-
   unit.pendingFrontAoe = null;
 
 }
@@ -31514,19 +31657,6 @@ function clearPendingMeleeImpact(
   ) {
 
     return;
-
-  }
-
-  const pending =
-    unit.pendingMeleeImpact;
-
-  if (
-    pending.timeoutId != null
-  ) {
-
-    window.clearTimeout(
-      pending.timeoutId
-    );
 
   }
 
@@ -31672,43 +31802,11 @@ function beginMeleeSingleAttack(
     attacker
   );
 
-  const token = {};
-
-  const timeoutId =
-    window.setTimeout(
-      () => {
-
-        const pending =
-          attacker.pendingMeleeImpact;
-
-        if (
-          !pending ||
-          pending.token !==
-            token
-        ) {
-
-          return;
-
-        }
-
-        attacker.pendingMeleeImpact =
-          null;
-
-        applyMeleeSingleImpact(
-          attacker,
-          pending.target,
-          pending.towardEnemyBase
-        );
-
-      },
-      delayMs
-    );
-
   attacker.pendingMeleeImpact = {
 
-    token: token,
-
-    timeoutId: timeoutId,
+    fireAt:
+      Date.now() +
+      delayMs,
 
     target:
       towardEnemyBase
@@ -31808,72 +31906,161 @@ function beginFrontAoeAttack(
 
   clearPendingFrontAoe(attacker);
 
-  const token = {};
-
-  const timeoutId =
-    window.setTimeout(
-      () => {
-
-        const pending =
-          attacker.pendingFrontAoe;
-
-        if (
-          !pending ||
-          pending.token !== token
-        ) {
-
-          return;
-
-        }
-
-        attacker.pendingFrontAoe =
-          null;
-
-        if (
-          !attacker ||
-          attacker.dead
-        ) {
-
-          return;
-
-        }
-
-        if (
-          pending.towardEnemyBase
-        ) {
-
-          applyFrontAoeEnemyBaseAttack(
-            attacker,
-            behavior,
-            pending.impactX
-          );
-
-        } else {
-
-          applyFrontAoeDamage(
-            attacker,
-            behavior,
-            pending.impactX
-          );
-
-        }
-
-      },
-      delayMs
-    );
-
   attacker.pendingFrontAoe = {
 
-    token: token,
-
-    timeoutId: timeoutId,
+    fireAt:
+      Date.now() +
+      delayMs,
 
     impactX: impactX,
 
     towardEnemyBase:
-      towardEnemyBase
+      towardEnemyBase,
+
+    behavior: behavior
 
   };
+
+}
+
+
+function resolveDuePendingFrontAoe(
+  unit,
+  now
+) {
+
+  const pending =
+    unit &&
+    unit.pendingFrontAoe;
+
+  if (
+    !pending ||
+    typeof pending.fireAt !==
+      "number" ||
+    now < pending.fireAt
+  ) {
+
+    return;
+
+  }
+
+  const behavior =
+    pending.behavior;
+
+  const impactX =
+    pending.impactX;
+
+  const towardEnemyBase =
+    pending.towardEnemyBase;
+
+  unit.pendingFrontAoe =
+    null;
+
+  if (
+    !unit ||
+    unit.dead ||
+    !behavior
+  ) {
+
+    return;
+
+  }
+
+  if (towardEnemyBase) {
+
+    applyFrontAoeEnemyBaseAttack(
+      unit,
+      behavior,
+      impactX
+    );
+
+  } else {
+
+    applyFrontAoeDamage(
+      unit,
+      behavior,
+      impactX
+    );
+
+  }
+
+}
+
+
+function resolveDuePendingMeleeImpact(
+  unit,
+  now
+) {
+
+  const pending =
+    unit &&
+    unit.pendingMeleeImpact;
+
+  if (
+    !pending ||
+    typeof pending.fireAt !==
+      "number" ||
+    now < pending.fireAt
+  ) {
+
+    return;
+
+  }
+
+  unit.pendingMeleeImpact =
+    null;
+
+  applyMeleeSingleImpact(
+    unit,
+    pending.target,
+    pending.towardEnemyBase
+  );
+
+}
+
+
+function updatePendingCombatDelays() {
+
+  if (!isBattleActive()) {
+
+    return;
+
+  }
+
+  const now =
+    Date.now();
+
+  playerUnits.forEach(
+    (unit) => {
+
+      if (
+        !unit ||
+        unit.dead
+      ) {
+
+        return;
+
+      }
+
+      resolveDuePendingFrontAoe(
+        unit,
+        now
+      );
+
+      resolveDuePendingMeleeImpact(
+        unit,
+        now
+      );
+
+      resolveDueDelayedMultiHits(
+        unit,
+        now
+      );
+
+    }
+  );
+
+  updateDropAoeEffects(now);
 
 }
 
@@ -32371,6 +32558,26 @@ function beginDropAoeAttack(
 
     resolved: false,
 
+    phase: "waiting",
+
+    spawnAt:
+      Date.now() +
+      spawnDelayMs,
+
+    fallDurationMs:
+      fallDurationMs,
+
+    fallDistancePx:
+      fallDistancePx,
+
+    effectImage:
+      behavior.effectImage,
+
+    effectWidth: effectWidth,
+
+    effectRotateDeg:
+      effectRotateDeg,
+
     impactX: impactX,
 
     attackPower: attackPower,
@@ -32398,139 +32605,168 @@ function beginDropAoeAttack(
 
   activeDropAoeEffects.push(drop);
 
-  window.setTimeout(
-    () => {
+}
 
-      if (
-        drop.resolved ||
-        activeDropAoeEffects.indexOf(
-          drop
-        ) < 0 ||
-        !projectileLayer ||
-        !behavior.effectImage
-      ) {
 
-        return;
+function startDropAoeFall(drop) {
 
+  if (
+    !drop ||
+    drop.resolved ||
+    drop.phase !== "waiting" ||
+    !projectileLayer ||
+    !drop.effectImage
+  ) {
+
+    return;
+
+  }
+
+  const element =
+    document.createElement(
+      "div"
+    );
+
+  element.className =
+    "battle-drop-aoe-effect";
+
+  const image =
+    document.createElement(
+      "img"
+    );
+
+  image.src =
+    drop.effectImage;
+
+  image.alt = "";
+
+  image.style.width =
+    drop.effectWidth + "px";
+
+  image.style.transform =
+    "rotate(" +
+    drop.effectRotateDeg +
+    "deg)";
+
+  element.appendChild(image);
+
+  element.style.left =
+    drop.impactX + "px";
+
+  element.style.bottom =
+    "calc(22% + " +
+    drop.effectOffsetY +
+    "px)";
+
+  element.style.transform =
+    "translate(-50%, 0) translateY(-" +
+    drop.fallDistancePx +
+    "px)";
+
+  projectileLayer.appendChild(
+    element
+  );
+
+  drop.element = element;
+
+  drop.phase = "falling";
+
+  // Fall translate only on the
+  // wrapper; tip-down rotate stays
+  // on the image for the full fall.
+  const animation =
+    element.animate(
+      [
+        {
+          transform:
+            "translate(-50%, 0) translateY(-" +
+            drop.fallDistancePx +
+            "px)"
+        },
+        {
+          transform:
+            "translate(-50%, 0) translateY(0px)"
+        }
+      ],
+      {
+        duration:
+          drop.fallDurationMs,
+        // Mild ease-in: slow start,
+        // slight late accel. Avoid
+        // extreme end warp.
+        easing:
+          "cubic-bezier(0.40, 0.00, 0.70, 1.00)",
+        fill: "forwards"
       }
+    );
 
-      const element =
-        document.createElement(
-          "div"
-        );
+  drop.animation =
+    animation;
 
-      element.className =
-        "battle-drop-aoe-effect";
+  drop.fallEndsAt =
+    Date.now() +
+    drop.fallDurationMs;
 
-      const image =
-        document.createElement(
-          "img"
-        );
+}
 
-      image.src =
-        behavior.effectImage;
 
-      image.alt = "";
+function updateDropAoeEffects(now) {
 
-      image.style.width =
-        effectWidth + "px";
+  if (!isBattleActive()) {
 
-      image.style.transform =
-        "rotate(" +
-        effectRotateDeg +
-        "deg)";
+    return;
 
-      element.appendChild(image);
+  }
 
-      element.style.left =
-        impactX + "px";
+  const time =
+    typeof now === "number"
+      ? now
+      : Date.now();
 
-      element.style.bottom =
-        "calc(22% + " +
-        effectOffsetY +
-        "px)";
+  activeDropAoeEffects
+    .slice()
+    .forEach(
+      (drop) => {
 
-      element.style.transform =
-        "translate(-50%, 0) translateY(-" +
-        fallDistancePx +
-        "px)";
+        if (
+          !drop ||
+          drop.resolved
+        ) {
 
-      projectileLayer.appendChild(
-        element
-      );
+          return;
 
-      drop.element = element;
+        }
 
-      // Fall translate only on the
-      // wrapper; tip-down rotate stays
-      // on the image for the full fall.
-      const animation =
-        element.animate(
-          [
-            {
-              transform:
-                "translate(-50%, 0) translateY(-" +
-                fallDistancePx +
-                "px)"
-            },
-            {
-              transform:
-                "translate(-50%, 0) translateY(0px)"
-            }
-          ],
-          {
-            duration:
-              fallDurationMs,
-            // Mild ease-in: slow start,
-            // slight late accel. Avoid
-            // extreme end warp.
-            easing:
-              "cubic-bezier(0.40, 0.00, 0.70, 1.00)",
-            fill: "forwards"
-          }
-        );
+        if (
+          drop.phase ===
+            "waiting" &&
+          typeof drop.spawnAt ===
+            "number" &&
+          time >= drop.spawnAt
+        ) {
 
-      drop.animation =
-        animation;
+          startDropAoeFall(drop);
 
-      const finishFall =
-        () => {
+          return;
+
+        }
+
+        if (
+          drop.phase ===
+            "falling" &&
+          typeof drop.fallEndsAt ===
+            "number" &&
+          time >= drop.fallEndsAt
+        ) {
 
           resolveDropAoeImpact(
             drop
           );
 
-        };
-
-      if (
-        animation &&
-        typeof animation.finished ===
-          "object" &&
-        animation.finished &&
-        typeof animation.finished.then ===
-          "function"
-      ) {
-
-        animation.finished
-          .then(
-            finishFall
-          )
-          .catch(
-            finishFall
-          );
-
-      } else {
-
-        window.setTimeout(
-          finishFall,
-          fallDurationMs
-        );
+        }
 
       }
-
-    },
-    spawnDelayMs
-  );
+    );
 
 }
 
@@ -33242,22 +33478,6 @@ function clearDelayedMultiHit(unit) {
 
   if (
     Array.isArray(
-      state.timeoutIds
-    )
-  ) {
-
-    state.timeoutIds.forEach(
-      (timeoutId) => {
-
-        clearTimeout(timeoutId);
-
-      }
-    );
-
-  }
-
-  if (
-    Array.isArray(
       state.effectElements
     )
   ) {
@@ -33530,139 +33750,32 @@ function beginDelayedMultiHitSingle(
 
     token: 1,
 
-    timeoutIds: [],
+    pendingHits: [],
 
-    effectElements: []
+    finishAt: null,
+
+    effectElements: [],
+
+    behavior: behavior,
+
+    patterns: patterns,
+
+    impactX: impactX,
+
+    effectLifetimeMs:
+      effectLifetimeMs,
+
+    towardEnemyBase:
+      towardEnemyBase,
+
+    lockedTarget: lockedTarget,
+
+    hitCount: hitCount
 
   };
 
   attacker.delayedMultiHit =
     state;
-
-  const scheduleHit = (
-    hitIndex,
-    delayMs
-  ) => {
-
-    const timeoutId =
-      window.setTimeout(
-        () => {
-
-          if (
-            !attacker.delayedMultiHit ||
-            attacker.delayedMultiHit !==
-              state ||
-            state.token !== 1 ||
-            !state.active
-          ) {
-
-            return;
-
-          }
-
-          if (
-            attacker.dead ||
-            !battleRunning
-          ) {
-
-            clearDelayedMultiHit(
-              attacker
-            );
-
-            return;
-
-          }
-
-          const pattern =
-            patterns[
-              hitIndex %
-              patterns.length
-            ];
-
-          spawnDelayedMultiHitSlash(
-            behavior,
-            pattern,
-            impactX,
-            effectLifetimeMs,
-            state
-          );
-
-          if (towardEnemyBase) {
-
-            enemyBaseHp -=
-              getUnitAttackPower(
-                attacker
-              );
-
-            if (enemyBaseHp < 0) {
-
-              enemyBaseHp = 0;
-
-            }
-
-            updateBaseUI();
-
-            if (enemyBaseHp <= 0) {
-
-              tryResolveBattleVictory();
-
-            }
-
-          } else if (
-            lockedTarget &&
-            !lockedTarget.dead
-          ) {
-
-            damageCharacter(
-              lockedTarget,
-              getUnitAttackPower(
-                attacker
-              ),
-              true,
-              attacker
-            );
-
-          }
-
-          if (
-            hitIndex >=
-            hitCount - 1
-          ) {
-
-            const finishId =
-              window.setTimeout(
-                () => {
-
-                  if (
-                    attacker.delayedMultiHit ===
-                    state
-                  ) {
-
-                    clearDelayedMultiHit(
-                      attacker
-                    );
-
-                  }
-
-                },
-                effectLifetimeMs + 40
-              );
-
-            state.timeoutIds.push(
-              finishId
-            );
-
-          }
-
-        },
-        delayMs
-      );
-
-    state.timeoutIds.push(
-      timeoutId
-    );
-
-  };
 
   for (
     let hitIndex = 0;
@@ -33670,13 +33783,159 @@ function beginDelayedMultiHitSingle(
     hitIndex += 1
   ) {
 
-    scheduleHit(
-      hitIndex,
-      chargeMs +
-      postAttackDelayMs +
-      hitIndex *
-      hitIntervalMs
-    );
+    state.pendingHits.push({
+
+      hitIndex: hitIndex,
+
+      fireAt:
+        Date.now() +
+        chargeMs +
+        postAttackDelayMs +
+        hitIndex *
+        hitIntervalMs,
+
+      done: false
+
+    });
+
+  }
+
+}
+
+
+function resolveDueDelayedMultiHits(
+  unit,
+  now
+) {
+
+  const state =
+    unit &&
+    unit.delayedMultiHit;
+
+  if (
+    !state ||
+    !state.active ||
+    !Array.isArray(
+      state.pendingHits
+    )
+  ) {
+
+    return;
+
+  }
+
+  if (
+    unit.dead ||
+    !battleRunning
+  ) {
+
+    clearDelayedMultiHit(unit);
+
+    return;
+
+  }
+
+  if (!isBattleActive()) {
+
+    return;
+
+  }
+
+  state.pendingHits.forEach(
+    (hit) => {
+
+      if (
+        !hit ||
+        hit.done ||
+        typeof hit.fireAt !==
+          "number" ||
+        now < hit.fireAt
+      ) {
+
+        return;
+
+      }
+
+      hit.done = true;
+
+      if (state.towardEnemyBase) {
+
+        enemyBaseHp -=
+          getUnitAttackPower(
+            unit
+          );
+
+        if (enemyBaseHp < 0) {
+
+          enemyBaseHp = 0;
+
+        }
+
+        updateBaseUI();
+
+        if (enemyBaseHp <= 0) {
+
+          tryResolveBattleVictory();
+
+        }
+
+      } else if (
+        state.lockedTarget &&
+        !state.lockedTarget.dead
+      ) {
+
+        damageCharacter(
+          state.lockedTarget,
+          getUnitAttackPower(
+            unit
+          ),
+          true,
+          unit
+        );
+
+      }
+
+      const pattern =
+        (
+          state.patterns &&
+          state.patterns.length > 0
+        )
+          ? state.patterns[
+            hit.hitIndex %
+            state.patterns.length
+          ]
+          : null;
+
+      spawnDelayedMultiHitSlash(
+        state.behavior,
+        pattern,
+        state.impactX,
+        state.effectLifetimeMs,
+        state
+      );
+
+      if (
+        hit.hitIndex >=
+        state.hitCount - 1
+      ) {
+
+        state.finishAt =
+          now +
+          state.effectLifetimeMs +
+          40;
+
+      }
+
+    }
+  );
+
+  if (
+    typeof state.finishAt ===
+      "number" &&
+    now >= state.finishAt
+  ) {
+
+    clearDelayedMultiHit(unit);
 
   }
 
