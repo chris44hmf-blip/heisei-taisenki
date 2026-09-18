@@ -5756,6 +5756,24 @@ function shiftUnitClocks(unit, pausedMs) {
 
   }
 
+  if (
+    unit.attackDash &&
+    typeof unit.attackDash.startedAt ===
+      "number"
+  ) {
+
+    unit.attackDash.startedAt +=
+      pausedMs;
+
+  }
+
+  if (unit.sprintStartedAt) {
+
+    unit.sprintStartedAt +=
+      pausedMs;
+
+  }
+
 }
 
 
