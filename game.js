@@ -12168,6 +12168,83 @@ const CHARACTERS = {
 
   },
 
+  mc: {
+
+    id: "mc",
+
+    name: "「M」C",
+
+    group: "BANDMAN",
+
+    number: 23,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "mc"
+      ),
+
+    stats: {
+
+      hp: 390,
+
+      attack: 105,
+
+      attackInterval: 2000,
+
+      speed: 0.65,
+
+      range: 90,
+
+      yaniCost: 270,
+
+      deployCooldownMs: 4500
+
+    },
+
+    battle: {
+
+      spriteSize: 108,
+
+      attackSpriteMs: 400,
+
+      hurtSpriteMs: 320,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE,
+
+      lungeDistance: 78,
+
+      lungeDurationMs: 300,
+
+      lungeStopGap: 10
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
