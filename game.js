@@ -11722,7 +11722,7 @@ const CHARACTERS = {
 
     id: "kimi_ni_utau",
 
-    name: "《君に歌うよ。》",
+    name: "君に歌うよ。",
 
     group: "BANDMAN",
 
@@ -11830,7 +11830,7 @@ const CHARACTERS = {
 
     id: "deathvoice_kato",
 
-    name: "《デスボイス加藤》",
+    name: "デスボイス加藤",
 
     group: "BANDMAN",
 
@@ -11928,7 +11928,7 @@ const CHARACTERS = {
 
     id: "dash_takemoto",
 
-    name: "《ダッシュ竹本》",
+    name: "ダッシュ竹本",
 
     group: "BANDMAN",
 
@@ -12013,7 +12013,7 @@ const CHARACTERS = {
 
     id: "slapper_sato",
 
-    name: "《スラッパー佐藤》",
+    name: "スラッパー佐藤",
 
     group: "BANDMAN",
 
