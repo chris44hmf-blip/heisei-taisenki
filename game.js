@@ -12316,6 +12316,92 @@ const CHARACTERS = {
 
   },
 
+  fumi_machigaeta: {
+
+    id: "fumi_machigaeta",
+
+    name: "踏み間違え太",
+
+    group: "BANDMAN",
+
+    number: 25,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "fumi_machigaeta"
+      ),
+
+    stats: {
+
+      hp: 300,
+
+      attack: 220,
+
+      attackInterval: 3000,
+
+      speed: 0.75,
+
+      range: 105,
+
+      yaniCost: 260,
+
+      deployCooldownMs: 5000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 420,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 18,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.FRONT_AOE,
+
+      impactOffsetX: 55,
+
+      aoeRadius: 82,
+
+      impactDelayMs: 180,
+
+      effectImage:
+        "images/characters/fumi_machigaeta/fumi_machigaeta_effect.webp",
+
+      effectWidth: 150,
+
+      effectLifetimeMs: 360,
+
+      selfDestructOnImpact: true
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
@@ -31182,7 +31268,12 @@ function spawnFrontAoeEffect(
     typeof behavior.effectLifetimeMs ===
       "number"
       ? behavior.effectLifetimeMs
-      : 400;
+      : (
+        typeof behavior.effectDurationMs ===
+          "number"
+          ? behavior.effectDurationMs
+          : 400
+      );
 
   window.setTimeout(
     () => {
@@ -31279,6 +31370,11 @@ function applyFrontAoeDamage(
     attacker
   );
 
+  maybeSelfDestructOnFrontAoeImpact(
+    attacker,
+    behavior
+  );
+
 }
 
 
@@ -31333,6 +31429,48 @@ function applyFrontAoeEnemyBaseAttack(
     tryResolveBattleVictory();
 
   }
+
+  maybeSelfDestructOnFrontAoeImpact(
+    attacker,
+    behavior
+  );
+
+}
+
+
+function maybeSelfDestructOnFrontAoeImpact(
+  attacker,
+  behavior
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    !behavior ||
+    behavior.selfDestructOnImpact !==
+      true
+  ) {
+
+    return;
+
+  }
+
+  // Full self-loss: not fixed damage.
+  // Always enter the normal ally
+  // death pipeline after impact.
+  attacker.hp = 0;
+
+  if (attacker.hpBar) {
+
+    attacker.hpBar.style.width =
+      "0%";
+
+  }
+
+  defeatCharacter(
+    attacker,
+    false
+  );
 
 }
 
