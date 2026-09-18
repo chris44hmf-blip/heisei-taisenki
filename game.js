@@ -11227,6 +11227,90 @@ const CHARACTERS = {
 
   },
 
+  reception_oneesan: {
+
+    id: "reception_oneesan",
+
+    name: "受付のヲ姉さん",
+
+    group: "IPPANJIN",
+
+    number: 12,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "reception_oneesan"
+      ),
+
+    stats: {
+
+      hp: 220,
+
+      attack: 38,
+
+      attackInterval: 1250,
+
+      speed: 0.65,
+
+      range: 190,
+
+      yaniCost: 140,
+
+      deployCooldownMs: 2800
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 300,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 210,
+
+      launchOffsetX: 34,
+
+      launchDelayMs: 90,
+
+      hitRadius: 28,
+
+      effectImage:
+        "images/characters/reception_oneesan/reception_oneesan_effect.webp",
+
+      effectWidth: 72
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
