@@ -11718,6 +11718,114 @@ const CHARACTERS = {
 
   },
 
+  kimi_ni_utau: {
+
+    id: "kimi_ni_utau",
+
+    name: "《君に歌うよ。》",
+
+    group: "BANDMAN",
+
+    number: 18,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "kimi_ni_utau"
+      ),
+
+    stats: {
+
+      hp: 360,
+
+      attack: 62,
+
+      attackInterval: 1450,
+
+      speed: 0.75,
+
+      range: 225,
+
+      yaniCost: 240,
+
+      deployCooldownMs: 4200
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 330,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 22,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 370
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type:
+        ATTACK_TYPE.CYCLING_PROJECTILE,
+
+      projectileSpeed: 190,
+
+      launchOffsetX: 38,
+
+      launchDelayMs: 90,
+
+      hitRadius: 30,
+
+      stages: [
+
+        {
+          effectImage:
+            "images/characters/kimi_ni_utau/kimi_ni_utau_effect_1.webp",
+          effectWidth: 118,
+          damageMultiplier: 1.00,
+          pierceTargetCount: 1
+        },
+
+        {
+          effectImage:
+            "images/characters/kimi_ni_utau/kimi_ni_utau_effect_2.webp",
+          effectWidth: 118,
+          damageMultiplier: 1.25,
+          pierceTargetCount: 1
+        },
+
+        {
+          effectImage:
+            "images/characters/kimi_ni_utau/kimi_ni_utau_effect_3.webp",
+          effectWidth: 132,
+          damageMultiplier: 1.60,
+          pierceTargetCount: 1
+        }
+
+      ]
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
