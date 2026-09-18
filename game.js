@@ -11150,6 +11150,83 @@ const CHARACTERS = {
 
   },
 
+  tenkan_aniki: {
+
+    id: "tenkan_aniki",
+
+    name: "転換アニキ",
+
+    group: "IPPANJIN",
+
+    number: 11,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "tenkan_aniki"
+      ),
+
+    stats: {
+
+      hp: 620,
+
+      attack: 75,
+
+      attackInterval: 1800,
+
+      speed: 0.50,
+
+      range: 55,
+
+      yaniCost: 190,
+
+      deployCooldownMs: 3800
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 320,
+
+      hurtSpriteMs: 320,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 380
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE,
+
+      lungeDistance: 45,
+
+      lungeDurationMs: 260,
+
+      lungeStopGap: 12
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
