@@ -11466,6 +11466,89 @@ const CHARACTERS = {
 
   },
 
+  cheki_neki: {
+
+    id: "cheki_neki",
+
+    name: "チェキネキ",
+
+    group: "IPPANJIN",
+
+    number: 15,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "cheki_neki"
+      ),
+
+    stats: {
+
+      hp: 180,
+
+      attack: 70,
+
+      attackInterval: 2200,
+
+      speed: 0.90,
+
+      range: 120,
+
+      yaniCost: 160,
+
+      deployCooldownMs: 3200
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 340,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 360
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE,
+
+      dashToTarget: true,
+
+      returnAfterDash: true,
+
+      dashDistance: 90,
+
+      dashDurationMs: 260,
+
+      dashStopGap: 10,
+
+      returnDurationMs: 250
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
@@ -31432,6 +31515,23 @@ function tryAttack(
   if (
     playerAttack &&
     behavior &&
+    hasMeleeDashReturn(behavior)
+  ) {
+
+    beginMeleeDashReturn(
+      attacker,
+      behavior,
+      target
+    );
+
+    return;
+
+  }
+
+
+  if (
+    playerAttack &&
+    behavior &&
     hasMeleeLunge(behavior)
   ) {
 
@@ -32096,6 +32196,272 @@ function hasMeleeLunge(behavior) {
 }
 
 
+function hasMeleeDashReturn(behavior) {
+
+  return !!(
+    behavior &&
+    behavior.dashToTarget === true &&
+    behavior.returnAfterDash === true &&
+    (
+      !behavior.type ||
+      behavior.type ===
+        ATTACK_TYPE.MELEE_SINGLE
+    )
+  );
+
+}
+
+
+function beginMeleeDashReturn(
+  attacker,
+  behavior,
+  target,
+  options
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    isAttackDashActive(attacker)
+  ) {
+
+    return;
+
+  }
+
+  const settings =
+    options ||
+    {};
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  const startX =
+    attacker.x;
+
+  const stopGap =
+    typeof behavior.dashStopGap ===
+      "number" &&
+    behavior.dashStopGap >= 0
+      ? behavior.dashStopGap
+      : 10;
+
+  const maxDashDistance =
+    typeof behavior.dashDistance ===
+      "number" &&
+    behavior.dashDistance > 0
+      ? behavior.dashDistance
+      : 90;
+
+  const durationMs =
+    typeof behavior.dashDurationMs ===
+      "number" &&
+    behavior.dashDurationMs > 0
+      ? behavior.dashDurationMs
+      : 260;
+
+  const returnDurationMs =
+    typeof behavior.returnDurationMs ===
+      "number" &&
+    behavior.returnDurationMs > 0
+      ? behavior.returnDurationMs
+      : 250;
+
+  let stopX =
+    startX +
+    maxDashDistance;
+
+  if (towardEnemyBase) {
+
+    stopX =
+      Math.min(
+        stopX,
+        ENEMY_BASE_X -
+        stopGap
+      );
+
+  } else if (
+    target &&
+    Number.isFinite(target.x)
+  ) {
+
+    // Approach from the left.
+    // Do not pass the target center.
+    stopX =
+      Math.min(
+        stopX,
+        target.x -
+        stopGap
+      );
+
+  }
+
+  stopX =
+    Math.max(
+      startX,
+      stopX
+    );
+
+  clearUnitSpriteTimer(attacker);
+
+  setUnitSprite(
+    attacker,
+    "attack"
+  );
+
+  const finishOut = () => {
+
+    attacker.x =
+      stopX;
+
+    resolveMeleeLungeImpact(
+      attacker,
+      behavior,
+      towardEnemyBase
+        ? null
+        : target,
+      towardEnemyBase
+    );
+
+    showUnitAttack(attacker);
+
+    beginMeleeDashReturnHome(
+      attacker,
+      behavior,
+      startX,
+      returnDurationMs
+    );
+
+  };
+
+  if (
+    stopX - startX <=
+    2
+  ) {
+
+    finishOut();
+
+    return;
+
+  }
+
+  attacker.attackDash = {
+
+    active: true,
+
+    mode: "dashOut",
+
+    startX: startX,
+
+    stopX: stopX,
+
+    returnToX: startX,
+
+    startedAt: Date.now(),
+
+    durationMs: durationMs,
+
+    returnDurationMs:
+      returnDurationMs,
+
+    behavior: behavior,
+
+    primaryTarget:
+      towardEnemyBase
+        ? null
+        : (
+          target ||
+          null
+        ),
+
+    towardEnemyBase:
+      towardEnemyBase
+
+  };
+
+}
+
+
+function beginMeleeDashReturnHome(
+  attacker,
+  behavior,
+  returnToX,
+  returnDurationMs
+) {
+
+  if (
+    !attacker ||
+    attacker.dead
+  ) {
+
+    clearAttackDash(attacker);
+
+    return;
+
+  }
+
+  const homeX =
+    Number.isFinite(returnToX)
+      ? returnToX
+      : attacker.x;
+
+  const duration =
+    typeof returnDurationMs ===
+      "number" &&
+    returnDurationMs > 0
+      ? returnDurationMs
+      : 250;
+
+  if (
+    Math.abs(
+      attacker.x -
+      homeX
+    ) <= 2
+  ) {
+
+    attacker.x =
+      homeX;
+
+    clearAttackDash(attacker);
+
+    clearUnitSpriteTimer(attacker);
+
+    setUnitSprite(
+      attacker,
+      "idle"
+    );
+
+    return;
+
+  }
+
+  attacker.attackDash = {
+
+    active: true,
+
+    mode: "dashReturn",
+
+    startX: attacker.x,
+
+    stopX: homeX,
+
+    startedAt: Date.now(),
+
+    durationMs: duration,
+
+    behavior: behavior || null,
+
+    primaryTarget: null,
+
+    towardEnemyBase: false
+
+  };
+
+}
+
+
 function beginMeleeLunge(
   attacker,
   behavior,
@@ -32517,6 +32883,52 @@ function finishAttackDash(unit) {
 
   unit.x =
     dash.stopX;
+
+
+  if (
+    dash.mode === "dashReturn"
+  ) {
+
+    clearAttackDash(unit);
+
+    clearUnitSpriteTimer(unit);
+
+    setUnitSprite(
+      unit,
+      "idle"
+    );
+
+    return;
+
+  }
+
+
+  if (
+    dash.mode === "dashOut" ||
+    hasMeleeDashReturn(dash.behavior)
+  ) {
+
+    resolveMeleeLungeImpact(
+      unit,
+      dash.behavior,
+      dash.primaryTarget,
+      Boolean(
+        dash.towardEnemyBase
+      )
+    );
+
+    showUnitAttack(unit);
+
+    beginMeleeDashReturnHome(
+      unit,
+      dash.behavior,
+      dash.returnToX,
+      dash.returnDurationMs
+    );
+
+    return;
+
+  }
 
 
   if (
@@ -33914,6 +34326,24 @@ function attackEnemyBase(unit) {
   ) {
 
     beginDropAoeAttack(
+      unit,
+      behavior,
+      null,
+      {
+        towardEnemyBase: true
+      }
+    );
+
+    return;
+
+  }
+
+
+  if (
+    hasMeleeDashReturn(behavior)
+  ) {
+
+    beginMeleeDashReturn(
       unit,
       behavior,
       null,
