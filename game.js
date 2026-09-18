@@ -11924,6 +11924,91 @@ const CHARACTERS = {
 
   },
 
+  dash_takemoto: {
+
+    id: "dash_takemoto",
+
+    name: "《ダッシュ竹本》",
+
+    group: "BANDMAN",
+
+    number: 20,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "dash_takemoto"
+      ),
+
+    stats: {
+
+      hp: 300,
+
+      attack: 68,
+
+      attackInterval: 900,
+
+      speed: 1.45,
+
+      range: 48,
+
+      yaniCost: 250,
+
+      deployCooldownMs: 4000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 280,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 28,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    traits: {
+
+      sprintAcceleration: {
+
+        startMultiplier: 1.0,
+
+        maxMultiplier: 1.52,
+
+        rampDurationMs: 1400
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
@@ -26347,6 +26432,8 @@ function spawnCharacter(characterId) {
 
     staggerWalkPhaseMs: 0,
 
+    sprintStartedAt: 0,
+
     currentAttackStage: 0,
 
     dead: false
@@ -26446,66 +26533,173 @@ function getUnitMoveSpeed(unit) {
   const trait =
     getStaggerWalkTrait(unit);
 
-  if (!trait) {
+  let moveSpeed = base;
 
-    return base;
+  if (trait) {
+
+    const periodMs =
+      typeof trait.periodMs ===
+        "number" &&
+      trait.periodMs > 0
+        ? trait.periodMs
+        : 1100;
+
+    const minMultiplier =
+      typeof trait.minMultiplier ===
+        "number"
+        ? trait.minMultiplier
+        : 0.75;
+
+    const maxMultiplier =
+      typeof trait.maxMultiplier ===
+        "number"
+        ? trait.maxMultiplier
+        : 1.25;
+
+    const phaseMs =
+      Number(
+        unit.staggerWalkPhaseMs
+      ) || 0;
+
+    const cycle =
+      (
+        (
+          Date.now() +
+          phaseMs
+        ) %
+        periodMs
+      ) /
+      periodMs;
+
+    // Smooth sine: always > 0, mean 1.0
+    // when min/max are symmetric.
+    const wave =
+      0.5 +
+      0.5 *
+      Math.sin(
+        cycle *
+        Math.PI *
+        2
+      );
+
+    const multiplier =
+      minMultiplier +
+      (
+        maxMultiplier -
+        minMultiplier
+      ) *
+      wave;
+
+    moveSpeed =
+      base * multiplier;
 
   }
 
-  const periodMs =
-    typeof trait.periodMs ===
-      "number" &&
-    trait.periodMs > 0
-      ? trait.periodMs
-      : 1100;
+  return (
+    moveSpeed *
+    getUnitSprintMultiplier(
+      unit
+    )
+  );
 
-  const minMultiplier =
-    typeof trait.minMultiplier ===
+}
+
+
+function getSprintAccelerationTrait(unit) {
+
+  if (
+    !unit ||
+    !unit.traits ||
+    !unit.traits.sprintAcceleration
+  ) {
+
+    return null;
+
+  }
+
+  return unit.traits.sprintAcceleration;
+
+}
+
+
+function resetUnitSprintAcceleration(
+  unit
+) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  unit.sprintStartedAt = 0;
+
+}
+
+
+function getUnitSprintMultiplier(unit) {
+
+  const trait =
+    getSprintAccelerationTrait(
+      unit
+    );
+
+  if (!trait) {
+
+    return 1;
+
+  }
+
+  const startMultiplier =
+    typeof trait.startMultiplier ===
       "number"
-      ? trait.minMultiplier
-      : 0.75;
+      ? trait.startMultiplier
+      : 1;
 
   const maxMultiplier =
     typeof trait.maxMultiplier ===
       "number"
       ? trait.maxMultiplier
-      : 1.25;
+      : startMultiplier;
 
-  const phaseMs =
-    Number(
-      unit.staggerWalkPhaseMs
-    ) || 0;
+  const rampDurationMs =
+    typeof trait.rampDurationMs ===
+      "number" &&
+    trait.rampDurationMs > 0
+      ? trait.rampDurationMs
+      : 1400;
 
-  const cycle =
-    (
-      (
-        Date.now() +
-        phaseMs
-      ) %
-      periodMs
-    ) /
-    periodMs;
+  if (
+    !unit.sprintStartedAt
+  ) {
 
-  // Smooth sine: always > 0, mean 1.0
-  // when min/max are symmetric.
-  const wave =
-    0.5 +
-    0.5 *
-    Math.sin(
-      cycle *
-      Math.PI *
-      2
+    unit.sprintStartedAt =
+      Date.now();
+
+  }
+
+  const elapsed =
+    Math.max(
+      0,
+      Date.now() -
+      unit.sprintStartedAt
     );
 
-  const multiplier =
-    minMultiplier +
+  const t =
+    Math.min(
+      1,
+      elapsed /
+      rampDurationMs
+    );
+
+  return (
+    startMultiplier +
     (
       maxMultiplier -
-      minMultiplier
+      startMultiplier
     ) *
-    wave;
-
-  return base * multiplier;
+    t
+  );
 
 }
 
@@ -26612,6 +26806,10 @@ function startHealthKnockback(
 
   unit.knockbackDurationMs =
     durationMs;
+
+  resetUnitSprintAcceleration(
+    unit
+  );
 
   if (unit.element) {
 
@@ -29290,6 +29488,10 @@ function updateUnits() {
         isAttackDashActive(unit)
       ) {
 
+        resetUnitSprintAcceleration(
+          unit
+        );
+
         if (
           isHealthKnockbackActive(
             unit
@@ -29318,6 +29520,10 @@ function updateUnits() {
         isDelayedMultiHitActive(unit)
       ) {
 
+        resetUnitSprintAcceleration(
+          unit
+        );
+
         unit.element.style.left =
           unit.x + "px";
 
@@ -29331,6 +29537,10 @@ function updateUnits() {
           unit
         )
       ) {
+
+        resetUnitSprintAcceleration(
+          unit
+        );
 
         unit.element.style.left =
           unit.x + "px";
@@ -29374,6 +29584,10 @@ function updateUnits() {
 
         } else {
 
+          resetUnitSprintAcceleration(
+            unit
+          );
+
           tryAttack(
             unit,
             target,
@@ -29409,6 +29623,10 @@ function updateUnits() {
             );
 
         } else {
+
+          resetUnitSprintAcceleration(
+            unit
+          );
 
           attackEnemyBase(
             unit
@@ -32039,6 +32257,10 @@ function tryAttack(
     getUnitAttackInterval(
       attacker
     );
+
+  resetUnitSprintAcceleration(
+    attacker
+  );
 
 
   attacker.element
@@ -35240,6 +35462,10 @@ function defeatCharacter(
 ) {
 
   target.dead = true;
+
+  resetUnitSprintAcceleration(
+    target
+  );
 
   clearAttackDash(
     target
