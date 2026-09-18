@@ -12245,6 +12245,77 @@ const CHARACTERS = {
 
   },
 
+  bass_shika_mitemasen: {
+
+    id: "bass_shika_mitemasen",
+
+    name: "ベースしか見てません",
+
+    group: "BANDMAN",
+
+    number: 24,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "bass_shika_mitemasen"
+      ),
+
+    stats: {
+
+      hp: 340,
+
+      attack: 58,
+
+      attackInterval: 800,
+
+      speed: 0.80,
+
+      range: 85,
+
+      yaniCost: 250,
+
+      deployCooldownMs: 4000
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 240,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
