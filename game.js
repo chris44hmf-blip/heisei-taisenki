@@ -12009,6 +12009,90 @@ const CHARACTERS = {
 
   },
 
+  slapper_sato: {
+
+    id: "slapper_sato",
+
+    name: "《スラッパー佐藤》",
+
+    group: "BANDMAN",
+
+    number: 21,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "slapper_sato"
+      ),
+
+    stats: {
+
+      hp: 310,
+
+      attack: 46,
+
+      attackInterval: 950,
+
+      speed: 0.85,
+
+      range: 185,
+
+      yaniCost: 230,
+
+      deployCooldownMs: 3800
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 280,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 260,
+
+      launchOffsetX: 34,
+
+      launchDelayMs: 70,
+
+      hitRadius: 18,
+
+      effectImage:
+        "images/characters/slapper_sato/slapper_sato_effect.webp",
+
+      effectWidth: 36
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
