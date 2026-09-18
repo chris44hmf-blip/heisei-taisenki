@@ -6499,6 +6499,8 @@ function clearTrainingUnitStates() {
 
       clearPendingFrontAoe(unit);
 
+      clearPendingMeleeImpact(unit);
+
       clearAllStatusEffects(unit);
 
       clearAllUnitBuffs(unit);
@@ -12082,6 +12084,79 @@ const CHARACTERS = {
         "images/characters/slapper_sato/slapper_sato_effect.webp",
 
       effectWidth: 36
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  breakrab: {
+
+    id: "breakrab",
+
+    name: "ブレイクラブ",
+
+    group: "BANDMAN",
+
+    number: 22,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "breakrab"
+      ),
+
+    stats: {
+
+      hp: 580,
+
+      attack: 125,
+
+      attackInterval: 2400,
+
+      speed: 0.55,
+
+      range: 65,
+
+      yaniCost: 300,
+
+      deployCooldownMs: 5000
+
+    },
+
+    battle: {
+
+      spriteSize: 112,
+
+      attackSpriteMs: 420,
+
+      hurtSpriteMs: 320,
+
+      deathKnockbackPx: 18,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 390
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE,
+
+      impactDelayMs: 180
 
     },
 
@@ -29617,6 +29692,24 @@ function updateUnits() {
 
 
       if (
+        isPendingMeleeImpactActive(
+          unit
+        )
+      ) {
+
+        resetUnitSprintAcceleration(
+          unit
+        );
+
+        unit.element.style.left =
+          unit.x + "px";
+
+        return;
+
+      }
+
+
+      if (
         updateHealthKnockbackMotion(
           unit
         )
@@ -31125,6 +31218,225 @@ function clearPendingFrontAoe(unit) {
 }
 
 
+function clearPendingMeleeImpact(
+  unit
+) {
+
+  if (
+    !unit ||
+    !unit.pendingMeleeImpact
+  ) {
+
+    return;
+
+  }
+
+  const pending =
+    unit.pendingMeleeImpact;
+
+  if (
+    pending.timeoutId != null
+  ) {
+
+    window.clearTimeout(
+      pending.timeoutId
+    );
+
+  }
+
+  unit.pendingMeleeImpact =
+    null;
+
+}
+
+
+function isPendingMeleeImpactActive(
+  unit
+) {
+
+  return !!(
+    unit &&
+    unit.pendingMeleeImpact
+  );
+
+}
+
+
+function getMeleeImpactDelayMs(
+  behavior
+) {
+
+  if (
+    !behavior ||
+    typeof behavior.impactDelayMs !==
+      "number" ||
+    behavior.impactDelayMs <= 0
+  ) {
+
+    return 0;
+
+  }
+
+  return behavior.impactDelayMs;
+
+}
+
+
+function applyMeleeSingleImpact(
+  attacker,
+  target,
+  towardEnemyBase
+) {
+
+  if (
+    !attacker ||
+    attacker.dead
+  ) {
+
+    return;
+
+  }
+
+  if (towardEnemyBase) {
+
+    enemyBaseHp -=
+      getUnitAttackPower(
+        attacker
+      );
+
+    updateBaseUI();
+
+    if (
+      enemyBaseHp <= 0
+    ) {
+
+      tryResolveBattleVictory();
+
+    }
+
+    return;
+
+  }
+
+  if (
+    !target ||
+    target.dead
+  ) {
+
+    return;
+
+  }
+
+  damageCharacter(
+    target,
+    getUnitAttackPower(
+      attacker
+    ),
+    true,
+    attacker
+  );
+
+}
+
+
+function beginMeleeSingleAttack(
+  attacker,
+  behavior,
+  target,
+  options
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    !behavior
+  ) {
+
+    return;
+
+  }
+
+  const settings =
+    options ||
+    {};
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  const delayMs =
+    getMeleeImpactDelayMs(
+      behavior
+    );
+
+  if (delayMs <= 0) {
+
+    applyMeleeSingleImpact(
+      attacker,
+      target,
+      towardEnemyBase
+    );
+
+    return;
+
+  }
+
+  clearPendingMeleeImpact(
+    attacker
+  );
+
+  const token = {};
+
+  const timeoutId =
+    window.setTimeout(
+      () => {
+
+        const pending =
+          attacker.pendingMeleeImpact;
+
+        if (
+          !pending ||
+          pending.token !==
+            token
+        ) {
+
+          return;
+
+        }
+
+        attacker.pendingMeleeImpact =
+          null;
+
+        applyMeleeSingleImpact(
+          attacker,
+          pending.target,
+          pending.towardEnemyBase
+        );
+
+      },
+      delayMs
+    );
+
+  attacker.pendingMeleeImpact = {
+
+    token: token,
+
+    timeoutId: timeoutId,
+
+    target:
+      towardEnemyBase
+        ? null
+        : target,
+
+    towardEnemyBase:
+      towardEnemyBase
+
+  };
+
+}
+
+
 function beginFrontAoeAttack(
   attacker,
   behavior,
@@ -32322,6 +32634,18 @@ function tryAttack(
   }
 
 
+  if (
+    playerAttack &&
+    isPendingMeleeImpactActive(
+      attacker
+    )
+  ) {
+
+    return;
+
+  }
+
+
   const now =
     Date.now();
 
@@ -32538,6 +32862,22 @@ function tryAttack(
   ) {
 
     beginDelayedMultiHitSingle(
+      attacker,
+      behavior,
+      target
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
+    ATTACK_TYPE.MELEE_SINGLE
+  ) {
+
+    beginMeleeSingleAttack(
       attacker,
       behavior,
       target
@@ -35201,6 +35541,28 @@ function attackEnemyBase(unit) {
 
   if (
     behavior.type ===
+    ATTACK_TYPE.MELEE_SINGLE &&
+    getMeleeImpactDelayMs(
+      behavior
+    ) > 0
+  ) {
+
+    beginMeleeSingleAttack(
+      unit,
+      behavior,
+      null,
+      {
+        towardEnemyBase: true
+      }
+    );
+
+    return;
+
+  }
+
+
+  if (
+    behavior.type ===
     ATTACK_TYPE.FRONT_AOE
   ) {
 
@@ -35560,6 +35922,10 @@ function defeatCharacter(
   );
 
   clearPendingFrontAoe(
+    target
+  );
+
+  clearPendingMeleeImpact(
     target
   );
 
