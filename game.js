@@ -10092,6 +10092,8 @@ const ATTACK_TYPE = {
 
   PROJECTILE_AOE: "projectileAoE",
 
+  PIERCING_PROJECTILE: "piercingProjectile",
+
   CYCLING_PROJECTILE: "cyclingProjectile",
 
   DELAYED_MULTI_HIT_SINGLE:
@@ -10132,6 +10134,8 @@ function isProjectileAttackType(behavior) {
       ATTACK_TYPE.PROJECTILE_SINGLE ||
     type ===
       ATTACK_TYPE.PROJECTILE_AOE ||
+    type ===
+      ATTACK_TYPE.PIERCING_PROJECTILE ||
     type ===
       ATTACK_TYPE.CYCLING_PROJECTILE
   );
@@ -11538,6 +11542,92 @@ const CHARACTERS = {
       dashStopGap: 10,
 
       returnDurationMs: 250
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  nesshou_man: {
+
+    id: "nesshou_man",
+
+    name: "熱唱マン",
+
+    group: "IPPANJIN",
+
+    number: 16,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "nesshou_man"
+      ),
+
+    stats: {
+
+      hp: 240,
+
+      attack: 42,
+
+      attackInterval: 1800,
+
+      speed: 0.55,
+
+      range: 230,
+
+      yaniCost: 180,
+
+      deployCooldownMs: 3500
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 340,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 22,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PIERCING_PROJECTILE,
+
+      projectileSpeed: 185,
+
+      launchOffsetX: 40,
+
+      launchDelayMs: 100,
+
+      hitRadius: 34,
+
+      pierceTargetCount: 3,
+
+      effectImage:
+        "images/characters/nesshou_man/nesshou_man_effect.webp",
+
+      effectWidth: 120
 
     },
 
@@ -33273,7 +33363,15 @@ function resolveProjectileShotConfig(
     ) &&
     stage.pierceTargetCount > 0
       ? stage.pierceTargetCount
-      : 1;
+      : (
+        Number.isInteger(
+          behavior &&
+          behavior.pierceTargetCount
+        ) &&
+        behavior.pierceTargetCount > 0
+          ? behavior.pierceTargetCount
+          : 1
+      );
 
   const selfRecoilDistance =
     typeof (
@@ -33670,6 +33768,8 @@ function applyProjectileImpact(
   if (
     projectile.type ===
       ATTACK_TYPE.PROJECTILE_SINGLE ||
+    projectile.type ===
+      ATTACK_TYPE.PIERCING_PROJECTILE ||
     projectile.type ===
       ATTACK_TYPE.CYCLING_PROJECTILE
   ) {
@@ -34152,10 +34252,8 @@ function updateProjectiles() {
           : 1;
 
       if (
-        projectile.type ===
-          ATTACK_TYPE.CYCLING_PROJECTILE &&
         projectile.hitEnemies.size <
-          pierceLimit
+        pierceLimit
       ) {
 
         remaining.push(projectile);
