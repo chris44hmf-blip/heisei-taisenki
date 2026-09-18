@@ -33482,6 +33482,26 @@ function clearDelayedMultiHit(unit) {
 
   if (
     Array.isArray(
+      state.timeoutIds
+    )
+  ) {
+
+    state.timeoutIds.forEach(
+      (timerId) => {
+
+        window.clearTimeout(
+          timerId
+        );
+
+      }
+    );
+
+    state.timeoutIds = [];
+
+  }
+
+  if (
+    Array.isArray(
       state.effectElements
     )
   ) {
@@ -33651,6 +33671,16 @@ function spawnDelayedMultiHitSlash(
       lifetimeMs
     );
 
+  if (
+    !Array.isArray(
+      state.timeoutIds
+    )
+  ) {
+
+    state.timeoutIds = [];
+
+  }
+
   state.timeoutIds.push(removeId);
 
 }
@@ -33759,6 +33789,8 @@ function beginDelayedMultiHitSingle(
     finishAt: null,
 
     effectElements: [],
+
+    timeoutIds: [],
 
     behavior: behavior,
 
