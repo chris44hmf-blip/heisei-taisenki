@@ -6497,6 +6497,8 @@ function clearTrainingUnitStates() {
 
       clearDelayedMultiHit(unit);
 
+      clearPendingFrontAoe(unit);
+
       clearAllStatusEffects(unit);
 
       clearAllUnitBuffs(unit);
@@ -11628,6 +11630,83 @@ const CHARACTERS = {
         "images/characters/nesshou_man/nesshou_man_effect.webp",
 
       effectWidth: 120
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
+  soukyu_fist: {
+
+    id: "soukyu_fist",
+
+    name: "蒼穹ヲ衝キ大地ヲ穿ツ拳",
+
+    group: "IPPANJIN",
+
+    number: 17,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "soukyu_fist"
+      ),
+
+    stats: {
+
+      hp: 400,
+
+      attack: 95,
+
+      attackInterval: 2600,
+
+      speed: 0.45,
+
+      range: 145,
+
+      yaniCost: 220,
+
+      deployCooldownMs: 4200
+
+    },
+
+    battle: {
+
+      spriteSize: 115,
+
+      attackSpriteMs: 420,
+
+      hurtSpriteMs: 320,
+
+      deathKnockbackPx: 18,
+
+      deathSecondMs: 140,
+
+      deathWaitMs: 400
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.FRONT_AOE,
+
+      impactOffsetX: 95,
+
+      aoeRadius: 58,
+
+      impactDelayMs: 170
 
     },
 
@@ -30374,14 +30453,20 @@ function spawnFrontAoeEffect(
 
 function applyFrontAoeDamage(
   attacker,
-  behavior
+  behavior,
+  impactXOverride
 ) {
 
   const forwardOffset =
-    typeof behavior.forwardOffset ===
+    typeof behavior.impactOffsetX ===
       "number"
-      ? behavior.forwardOffset
-      : 90;
+      ? behavior.impactOffsetX
+      : (
+        typeof behavior.forwardOffset ===
+          "number"
+          ? behavior.forwardOffset
+          : 90
+      );
 
   const aoeRadius =
     typeof behavior.aoeRadius ===
@@ -30390,8 +30475,12 @@ function applyFrontAoeDamage(
       : 80;
 
   const impactX =
-    attacker.x +
-    forwardOffset;
+    Number.isFinite(impactXOverride)
+      ? impactXOverride
+      : (
+        attacker.x +
+        forwardOffset
+      );
 
   spawnFrontAoeEffect(
     attacker,
@@ -30446,18 +30535,29 @@ function applyFrontAoeDamage(
 
 function applyFrontAoeEnemyBaseAttack(
   attacker,
-  behavior
+  behavior,
+  impactXOverride
 ) {
 
   const forwardOffset =
-    typeof behavior.forwardOffset ===
+    typeof behavior.impactOffsetX ===
       "number"
-      ? behavior.forwardOffset
-      : 90;
+      ? behavior.impactOffsetX
+      : (
+        typeof behavior.forwardOffset ===
+          "number"
+          ? behavior.forwardOffset
+          : 90
+      );
 
   const impactX =
-    attacker.x +
-    forwardOffset;
+    Number.isFinite(impactXOverride)
+      ? impactXOverride
+      : Math.min(
+        attacker.x +
+        forwardOffset,
+        ENEMY_BASE_X
+      );
 
   // Shared FRONT_AOE visual only.
   // Base damage stays single-hit and
@@ -30484,6 +30584,190 @@ function applyFrontAoeEnemyBaseAttack(
     tryResolveBattleVictory();
 
   }
+
+}
+
+
+function clearPendingFrontAoe(unit) {
+
+  if (
+    !unit ||
+    !unit.pendingFrontAoe
+  ) {
+
+    return;
+
+  }
+
+  const pending =
+    unit.pendingFrontAoe;
+
+  if (
+    pending.timeoutId != null
+  ) {
+
+    window.clearTimeout(
+      pending.timeoutId
+    );
+
+  }
+
+  unit.pendingFrontAoe = null;
+
+}
+
+
+function beginFrontAoeAttack(
+  attacker,
+  behavior,
+  options
+) {
+
+  if (
+    !attacker ||
+    attacker.dead ||
+    !behavior
+  ) {
+
+    return;
+
+  }
+
+  const settings =
+    options ||
+    {};
+
+  const towardEnemyBase =
+    Boolean(
+      settings.towardEnemyBase
+    );
+
+  const forwardOffset =
+    typeof behavior.impactOffsetX ===
+      "number"
+      ? behavior.impactOffsetX
+      : (
+        typeof behavior.forwardOffset ===
+          "number"
+          ? behavior.forwardOffset
+          : 90
+      );
+
+  let impactX =
+    attacker.x +
+    forwardOffset;
+
+  if (towardEnemyBase) {
+
+    // Do not place the ground fist
+    // past the enemy base.
+    impactX =
+      Math.min(
+        impactX,
+        ENEMY_BASE_X
+      );
+
+  }
+
+  const delayMs =
+    typeof behavior.impactDelayMs ===
+      "number" &&
+    behavior.impactDelayMs > 0
+      ? behavior.impactDelayMs
+      : 0;
+
+  if (delayMs <= 0) {
+
+    if (towardEnemyBase) {
+
+      applyFrontAoeEnemyBaseAttack(
+        attacker,
+        behavior,
+        impactX
+      );
+
+    } else {
+
+      applyFrontAoeDamage(
+        attacker,
+        behavior,
+        impactX
+      );
+
+    }
+
+    return;
+
+  }
+
+  clearPendingFrontAoe(attacker);
+
+  const token = {};
+
+  const timeoutId =
+    window.setTimeout(
+      () => {
+
+        const pending =
+          attacker.pendingFrontAoe;
+
+        if (
+          !pending ||
+          pending.token !== token
+        ) {
+
+          return;
+
+        }
+
+        attacker.pendingFrontAoe =
+          null;
+
+        if (
+          !attacker ||
+          attacker.dead
+        ) {
+
+          return;
+
+        }
+
+        if (
+          pending.towardEnemyBase
+        ) {
+
+          applyFrontAoeEnemyBaseAttack(
+            attacker,
+            behavior,
+            pending.impactX
+          );
+
+        } else {
+
+          applyFrontAoeDamage(
+            attacker,
+            behavior,
+            pending.impactX
+          );
+
+        }
+
+      },
+      delayMs
+    );
+
+  attacker.pendingFrontAoe = {
+
+    token: token,
+
+    timeoutId: timeoutId,
+
+    impactX: impactX,
+
+    towardEnemyBase:
+      towardEnemyBase
+
+  };
 
 }
 
@@ -31710,7 +31994,7 @@ function tryAttack(
     ATTACK_TYPE.FRONT_AOE
   ) {
 
-    applyFrontAoeDamage(
+    beginFrontAoeAttack(
       attacker,
       behavior
     );
@@ -34408,9 +34692,12 @@ function attackEnemyBase(unit) {
     ATTACK_TYPE.FRONT_AOE
   ) {
 
-    applyFrontAoeEnemyBaseAttack(
+    beginFrontAoeAttack(
       unit,
-      behavior
+      behavior,
+      {
+        towardEnemyBase: true
+      }
     );
 
     return;
@@ -34753,6 +35040,10 @@ function defeatCharacter(
   );
 
   clearDelayedMultiHit(
+    target
+  );
+
+  clearPendingFrontAoe(
     target
   );
 
