@@ -11311,6 +11311,77 @@ const CHARACTERS = {
 
   },
 
+  headbang_gal: {
+
+    id: "headbang_gal",
+
+    name: "ヘドバンぎゃる☆",
+
+    group: "IPPANJIN",
+
+    number: 13,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "headbang_gal"
+      ),
+
+    stats: {
+
+      hp: 280,
+
+      attack: 52,
+
+      attackInterval: 1000,
+
+      speed: 1.05,
+
+      range: 80,
+
+      yaniCost: 150,
+
+      deployCooldownMs: 2800
+
+    },
+
+    battle: {
+
+      spriteSize: 105,
+
+      attackSpriteMs: 300,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 24,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.MELEE_SINGLE
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
