@@ -6663,28 +6663,7 @@ function clearTrainingUnitStates() {
 
       }
 
-      clearAttackDash(unit);
-
-      clearDelayedMultiHit(unit);
-
-      clearPendingFrontAoe(unit);
-
-      clearPendingMeleeImpact(unit);
-
-      clearAllStatusEffects(unit);
-
-      clearAllUnitBuffs(unit);
-
-      clearHealthKnockback(unit);
-
-      clearUnitSpriteTimer(unit);
-
-      clearUnitBpmOver(unit);
-
-      unit.currentAttackStage = 0;
-
-      unit.triggeredHealthKnockbacks =
-        new Set();
+      clearUnitCombatState(unit);
 
       if (
         unit.element &&
@@ -6703,8 +6682,15 @@ function clearTrainingUnitStates() {
   enemyUnits.slice().forEach(
     (enemy) => {
 
+      if (!enemy) {
+
+        return;
+
+      }
+
+      clearUnitCombatState(enemy);
+
       if (
-        enemy &&
         enemy.element &&
         enemy.element.parentNode
       ) {
@@ -36611,6 +36597,55 @@ updateMoshUI();
    END BATTLE
 ========================= */
 
+function clearUnitCombatState(unit) {
+
+  if (!unit) {
+
+    return;
+
+  }
+
+  clearAttackDash(unit);
+
+  clearDelayedMultiHit(unit);
+
+  clearPendingFrontAoe(unit);
+
+  clearPendingMeleeImpact(unit);
+
+  clearAllStatusEffects(unit);
+
+  clearAllUnitBuffs(unit);
+
+  clearHealthKnockback(unit);
+
+  resetUnitSprintAcceleration(unit);
+
+  clearUnitSpriteTimer(unit);
+
+  clearUnitBpmOver(unit);
+
+  unit.currentAttackStage = 0;
+
+  unit.triggeredHealthKnockbacks =
+    new Set();
+
+}
+
+
+function clearAllUnitCombatStates() {
+
+  playerUnits.forEach(
+    clearUnitCombatState
+  );
+
+  enemyUnits.forEach(
+    clearUnitCombatState
+  );
+
+}
+
+
 function stopBattle() {
 
   clearActiveMedalSnapshot();
@@ -36631,6 +36666,8 @@ function stopBattle() {
   clearInterval(battleTimer);
   clearEnemySpawnTimers();
   clearInterval(moshTimer);
+
+  clearAllUnitCombatStates();
 
   clearProjectiles();
 
