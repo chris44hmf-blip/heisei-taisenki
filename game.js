@@ -11826,6 +11826,104 @@ const CHARACTERS = {
 
   },
 
+  deathvoice_kato: {
+
+    id: "deathvoice_kato",
+
+    name: "《デスボイス加藤》",
+
+    group: "BANDMAN",
+
+    number: 19,
+
+    rarity: CHARACTER_RARITY.BANDMAN,
+
+    images:
+      getCharacterImages(
+        "deathvoice_kato"
+      ),
+
+    stats: {
+
+      hp: 430,
+
+      attack: 72,
+
+      attackInterval: 2100,
+
+      speed: 0.70,
+
+      range: 135,
+
+      yaniCost: 270,
+
+      deployCooldownMs: 4700
+
+    },
+
+    battle: {
+
+      spriteSize: 108,
+
+      attackSpriteMs: 360,
+
+      hurtSpriteMs: 300,
+
+      deathKnockbackPx: 22,
+
+      deathSecondMs: 130,
+
+      deathWaitMs: 370
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.FRONT_AOE,
+
+      impactOffsetX: 80,
+
+      aoeRadius: 72,
+
+      impactDelayMs: 120,
+
+      effectImage:
+        "images/characters/deathvoice_kato/deathvoice_kato_effect.webp",
+
+      effectWidth: 145,
+
+      effectLifetimeMs: 260
+
+    },
+
+    traits: {
+
+      attackKnockback: {
+
+        chance: 0.30,
+
+        distance: 32,
+
+        durationMs: 200
+
+      }
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
