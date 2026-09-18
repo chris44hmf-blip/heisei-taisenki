@@ -11382,6 +11382,90 @@ const CHARACTERS = {
 
   },
 
+  bandman_girlfriend: {
+
+    id: "bandman_girlfriend",
+
+    name: "多分バンドマンの彼女",
+
+    group: "IPPANJIN",
+
+    number: 14,
+
+    rarity: CHARACTER_RARITY.IPPANJIN,
+
+    images:
+      getCharacterImages(
+        "bandman_girlfriend"
+      ),
+
+    stats: {
+
+      hp: 260,
+
+      attack: 65,
+
+      attackInterval: 1600,
+
+      speed: 0.60,
+
+      range: 210,
+
+      yaniCost: 170,
+
+      deployCooldownMs: 3300
+
+    },
+
+    battle: {
+
+      spriteSize: 100,
+
+      attackSpriteMs: 320,
+
+      hurtSpriteMs: 280,
+
+      deathKnockbackPx: 20,
+
+      deathSecondMs: 120,
+
+      deathWaitMs: 350
+
+    },
+
+    ui: {
+
+      menuScale: 1
+
+    },
+
+    attackBehavior: {
+
+      type: ATTACK_TYPE.PROJECTILE_SINGLE,
+
+      projectileSpeed: 165,
+
+      launchOffsetX: 36,
+
+      launchDelayMs: 100,
+
+      hitRadius: 30,
+
+      effectImage:
+        "images/characters/bandman_girlfriend/bandman_girlfriend_effect.webp",
+
+      effectWidth: 88
+
+    },
+
+    unlock: {
+
+      type: "gacha"
+
+    }
+
+  },
+
   cutting_samurai: {
 
     id: "cutting_samurai",
