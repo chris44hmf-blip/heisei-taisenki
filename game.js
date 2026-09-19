@@ -415,6 +415,45 @@ const HOME_TURNTABLE_STOP_VELOCITY = 10;
 
 const HOME_TURNTABLE_MAX_FRAME_DT_SEC = 0.05;
 
+/* Ally visual foundation (must init before refreshHome) */
+const ALLY_VISUAL_DEFAULTS = {
+  bodyScale: 1,
+  groundOffsetPx: 0,
+  altitudeMode: "ground",
+  altitudeOffsetPx: 0
+};
+
+const ALLY_VISUAL_ALTITUDE_MODES = {
+  ground: "ground",
+  float: "float",
+  air: "air",
+  special: "special"
+};
+
+/*
+  Visual-only depth lanes.
+  yPx uses +up convention:
+  BACK is slightly higher (farther),
+  FRONT is slightly lower (nearer).
+*/
+const ALLY_VISUAL_LANES = [
+  {
+    id: "back",
+    yPx: 2,
+    zIndex: 9
+  },
+  {
+    id: "center",
+    yPx: 0,
+    zIndex: 10
+  },
+  {
+    id: "front",
+    yPx: -2,
+    zIndex: 11
+  }
+];
+
 let homeTurntableRotationDeg = 0;
 
 let homeTurntableAngularVelocity = 0;
@@ -608,11 +647,32 @@ function updateHomeTurntableVisuals() {
     const frontness =
       (cos + 1) * 0.5;
 
-    const scale =
+    const depthScale =
       HOME_TURNTABLE_SCALE_BACK +
       (HOME_TURNTABLE_SCALE_FRONT -
         HOME_TURNTABLE_SCALE_BACK) *
         frontness;
+
+    let bodyScale = 1;
+
+    const characterId =
+      node.dataset.characterId;
+
+    if (
+      characterId &&
+      CHARACTERS[characterId]
+    ) {
+
+      bodyScale =
+        getCharacterVisualConfig(
+          CHARACTERS[characterId],
+          null
+        ).bodyScale;
+
+    }
+
+    const scale =
+      depthScale * bodyScale;
 
     const zIndex =
       Math.round(
@@ -11910,6 +11970,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-A anchor: head size baseline */
+      bodyScale: 1,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE
@@ -11976,6 +12049,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 0.94
+
+    },
+
+    visual: {
+
+      /* Was spriteSize 85 — enlarge head toward sena */
+      bodyScale: 1.22,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -12477,6 +12563,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* Crowd-surf idle: not standing GROUND */
+      bodyScale: 1.05,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "special",
+
+      altitudeOffsetPx: 12
 
     },
 
@@ -13223,6 +13322,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* Large raised-arm decoration — keep head near anchor */
+      bodyScale: 0.91,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -14454,6 +14566,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* Wings/halo are decoration; lift for float pose */
+      bodyScale: 1.18,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "float",
+
+      altitudeOffsetPx: 14
 
     },
 
@@ -20794,6 +20919,14 @@ function buildBsGachaSummaryCard(
 
   }
 
+  image.style.transform =
+    "scale(" +
+    getCharacterMenuScale(character) +
+    ")";
+
+  image.style.transformOrigin =
+    "center center";
+
   const rarityEl =
     document.createElement("p");
 
@@ -25580,18 +25713,68 @@ function beginDeployCooldown(characterId) {
 
 function getCharacterMenuScale(character) {
 
+  let legacyScale = 1;
+
   if (
     character &&
     character.ui &&
     typeof character.ui.menuScale ===
-      "number"
+      "number" &&
+    Number.isFinite(
+      character.ui.menuScale
+    ) &&
+    character.ui.menuScale > 0
   ) {
 
-    return character.ui.menuScale;
+    legacyScale =
+      character.ui.menuScale;
 
   }
 
-  return 1;
+  const root =
+    character &&
+    character.id &&
+    CHARACTERS[character.id]
+      ? CHARACTERS[character.id]
+      : character;
+
+  const visual =
+    getCharacterVisualConfig(
+      root,
+      character
+    );
+
+  return legacyScale * visual.bodyScale;
+
+}
+
+
+function getAllyBattleSpriteDisplayPx(
+  formBattle,
+  visual
+) {
+
+  const base =
+    formBattle &&
+    typeof formBattle.spriteSize ===
+      "number" &&
+    Number.isFinite(
+      formBattle.spriteSize
+    ) &&
+    formBattle.spriteSize > 0
+      ? formBattle.spriteSize
+      : 105;
+
+  const scale =
+    visual &&
+    typeof visual.bodyScale ===
+      "number" &&
+    Number.isFinite(visual.bodyScale) &&
+    visual.bodyScale > 0
+      ? visual.bodyScale
+      : 1;
+
+  return base * scale;
 
 }
 
@@ -25604,46 +25787,8 @@ function getCharacterMenuScale(character) {
    menuScale until later STEPs.
    Coordinate: +Y = up on screen
    (increases CSS bottom).
+   Constants: ALLY_VISUAL_* (early).
 ========================= */
-
-const ALLY_VISUAL_DEFAULTS = {
-  bodyScale: 1,
-  groundOffsetPx: 0,
-  altitudeMode: "ground",
-  altitudeOffsetPx: 0
-};
-
-const ALLY_VISUAL_ALTITUDE_MODES = {
-  ground: "ground",
-  float: "float",
-  air: "air",
-  special: "special"
-};
-
-/*
-  Visual-only depth lanes.
-  yPx uses +up convention:
-  BACK is slightly higher (farther),
-  FRONT is slightly lower (nearer).
-*/
-const ALLY_VISUAL_LANES = [
-  {
-    id: "back",
-    yPx: 2,
-    zIndex: 9
-  },
-  {
-    id: "center",
-    yPx: 0,
-    zIndex: 10
-  },
-  {
-    id: "front",
-    yPx: -2,
-    zIndex: 11
-  }
-];
-
 
 function sanitizeAllyVisualNumber(
   value,
@@ -28629,13 +28774,6 @@ function spawnCharacter(characterId) {
     );
 
 
-  sprite.style.width =
-    formBattle.spriteSize + "px";
-
-  sprite.style.height =
-    formBattle.spriteSize + "px";
-
-
   const visualConfig =
     getCharacterVisualConfig(
       data,
@@ -28644,6 +28782,18 @@ function spawnCharacter(characterId) {
 
   const visualLane =
     pickAllyVisualLane();
+
+  const displaySpritePx =
+    getAllyBattleSpriteDisplayPx(
+      formBattle,
+      visualConfig
+    );
+
+  sprite.style.width =
+    displaySpritePx + "px";
+
+  sprite.style.height =
+    displaySpritePx + "px";
 
   applyAllyBattleVisualPlacement(
     element,
