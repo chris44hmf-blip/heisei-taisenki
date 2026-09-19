@@ -13330,7 +13330,7 @@ const CHARACTERS = {
       /* Large raised-arm decoration — keep head near anchor */
       bodyScale: 1.25,
 
-      groundOffsetPx: -3,
+      groundOffsetPx: -5,
 
       altitudeMode: "ground",
 
