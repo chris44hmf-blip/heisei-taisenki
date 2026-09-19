@@ -12150,6 +12150,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-D BATCH-1 provisional: bass is decoration; head vs kaede */
+      bodyScale: 1.06,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.PROJECTILE_AOE,
@@ -12233,6 +12246,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-D BATCH-1 provisional: ss90 + guitar — enlarge head toward kaede */
+      bodyScale: 1.18,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -12840,6 +12866,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-D BATCH-1 provisional: backpack tower shrinks head in box */
+      bodyScale: 1.2,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE,
@@ -12914,6 +12953,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-D BATCH-1 provisional: desk/case wide — keep seated head near band */
+      bodyScale: 1.08,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -12998,6 +13050,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-D BATCH-1 provisional: hair is decoration — head toward sena */
+      bodyScale: 1.24,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -13236,6 +13301,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-D BATCH-1 provisional: scarf/mic width — head toward sena */
+      bodyScale: 1.14,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
