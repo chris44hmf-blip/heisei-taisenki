@@ -25596,6 +25596,380 @@ function getCharacterMenuScale(character) {
 }
 
 
+/* =========================
+   ALLY VISUAL (V1 foundation)
+   bodyScale / ground / altitude
+   are metadata only in V1.
+   Display still uses spriteSize /
+   menuScale until later STEPs.
+   Coordinate: +Y = up on screen
+   (increases CSS bottom).
+========================= */
+
+const ALLY_VISUAL_DEFAULTS = {
+  bodyScale: 1,
+  groundOffsetPx: 0,
+  altitudeMode: "ground",
+  altitudeOffsetPx: 0
+};
+
+const ALLY_VISUAL_ALTITUDE_MODES = {
+  ground: "ground",
+  float: "float",
+  air: "air",
+  special: "special"
+};
+
+/*
+  Visual-only depth lanes.
+  yPx uses +up convention:
+  BACK is slightly higher (farther),
+  FRONT is slightly lower (nearer).
+*/
+const ALLY_VISUAL_LANES = [
+  {
+    id: "back",
+    yPx: 2,
+    zIndex: 9
+  },
+  {
+    id: "center",
+    yPx: 0,
+    zIndex: 10
+  },
+  {
+    id: "front",
+    yPx: -2,
+    zIndex: 11
+  }
+];
+
+
+function sanitizeAllyVisualNumber(
+  value,
+  fallback
+) {
+
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value)
+  ) {
+
+    return fallback;
+
+  }
+
+  return value;
+
+}
+
+
+function sanitizeAllyBodyScale(value) {
+
+  const scale =
+    sanitizeAllyVisualNumber(
+      value,
+      ALLY_VISUAL_DEFAULTS.bodyScale
+    );
+
+  if (scale <= 0) {
+
+    return ALLY_VISUAL_DEFAULTS.bodyScale;
+
+  }
+
+  return scale;
+
+}
+
+
+function sanitizeAllyAltitudeMode(
+  value
+) {
+
+  if (
+    value ===
+      ALLY_VISUAL_ALTITUDE_MODES.float ||
+    value ===
+      ALLY_VISUAL_ALTITUDE_MODES.air ||
+    value ===
+      ALLY_VISUAL_ALTITUDE_MODES.special ||
+    value ===
+      ALLY_VISUAL_ALTITUDE_MODES.ground
+  ) {
+
+    return value;
+
+  }
+
+  return ALLY_VISUAL_DEFAULTS.altitudeMode;
+
+}
+
+
+function normalizeAllyVisualPartial(
+  source
+) {
+
+  if (
+    !source ||
+    typeof source !== "object"
+  ) {
+
+    return null;
+
+  }
+
+  const visual = {};
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      source,
+      "bodyScale"
+    )
+  ) {
+
+    visual.bodyScale =
+      sanitizeAllyBodyScale(
+        source.bodyScale
+      );
+
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      source,
+      "groundOffsetPx"
+    )
+  ) {
+
+    visual.groundOffsetPx =
+      sanitizeAllyVisualNumber(
+        source.groundOffsetPx,
+        ALLY_VISUAL_DEFAULTS.groundOffsetPx
+      );
+
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      source,
+      "altitudeMode"
+    )
+  ) {
+
+    visual.altitudeMode =
+      sanitizeAllyAltitudeMode(
+        source.altitudeMode
+      );
+
+  }
+
+  if (
+    Object.prototype.hasOwnProperty.call(
+      source,
+      "altitudeOffsetPx"
+    )
+  ) {
+
+    visual.altitudeOffsetPx =
+      sanitizeAllyVisualNumber(
+        source.altitudeOffsetPx,
+        ALLY_VISUAL_DEFAULTS.altitudeOffsetPx
+      );
+
+  }
+
+  return visual;
+
+}
+
+
+function getCharacterVisualConfig(
+  character,
+  form
+) {
+
+  const base =
+    Object.assign(
+      {},
+      ALLY_VISUAL_DEFAULTS
+    );
+
+  const characterVisual =
+    normalizeAllyVisualPartial(
+      character && character.visual
+    );
+
+  if (characterVisual) {
+
+    Object.assign(
+      base,
+      characterVisual
+    );
+
+  }
+
+  const formVisual =
+    normalizeAllyVisualPartial(
+      form &&
+      form !== character &&
+      form.visual
+    );
+
+  if (formVisual) {
+
+    Object.assign(
+      base,
+      formVisual
+    );
+
+  }
+
+  base.bodyScale =
+    sanitizeAllyBodyScale(
+      base.bodyScale
+    );
+
+  base.groundOffsetPx =
+    sanitizeAllyVisualNumber(
+      base.groundOffsetPx,
+      ALLY_VISUAL_DEFAULTS.groundOffsetPx
+    );
+
+  base.altitudeMode =
+    sanitizeAllyAltitudeMode(
+      base.altitudeMode
+    );
+
+  base.altitudeOffsetPx =
+    sanitizeAllyVisualNumber(
+      base.altitudeOffsetPx,
+      ALLY_VISUAL_DEFAULTS.altitudeOffsetPx
+    );
+
+  return base;
+
+}
+
+
+function pickAllyVisualLane() {
+
+  const index =
+    Math.floor(
+      Math.random() *
+        ALLY_VISUAL_LANES.length
+    );
+
+  return ALLY_VISUAL_LANES[
+    Math.max(
+      0,
+      Math.min(
+        ALLY_VISUAL_LANES.length - 1,
+        index
+      )
+    )
+  ];
+
+}
+
+
+function getAllyVisualLaneById(
+  laneId
+) {
+
+  for (
+    let i = 0;
+    i < ALLY_VISUAL_LANES.length;
+    i += 1
+  ) {
+
+    if (
+      ALLY_VISUAL_LANES[i].id ===
+      laneId
+    ) {
+
+      return ALLY_VISUAL_LANES[i];
+
+    }
+
+  }
+
+  return ALLY_VISUAL_LANES[1];
+
+}
+
+
+function getAllyVisualBottomOffsetPx(
+  lane,
+  visual
+) {
+
+  const laneY =
+    lane &&
+    typeof lane.yPx === "number"
+      ? lane.yPx
+      : 0;
+
+  const groundY =
+    visual &&
+    typeof visual.groundOffsetPx ===
+      "number"
+      ? visual.groundOffsetPx
+      : 0;
+
+  const altitudeY =
+    visual &&
+    typeof visual.altitudeOffsetPx ===
+      "number"
+      ? visual.altitudeOffsetPx
+      : 0;
+
+  return laneY + groundY + altitudeY;
+
+}
+
+
+function applyAllyBattleVisualPlacement(
+  element,
+  lane,
+  visual
+) {
+
+  if (!element) {
+
+    return;
+
+  }
+
+  const resolvedLane =
+    lane || ALLY_VISUAL_LANES[1];
+
+  const resolvedVisual =
+    visual || ALLY_VISUAL_DEFAULTS;
+
+  const yPx =
+    getAllyVisualBottomOffsetPx(
+      resolvedLane,
+      resolvedVisual
+    );
+
+  element.style.setProperty(
+    "--ally-visual-y",
+    yPx + "px"
+  );
+
+  element.style.setProperty(
+    "--ally-visual-z",
+    String(resolvedLane.zIndex)
+  );
+
+  element.dataset.visualLane =
+    resolvedLane.id;
+
+}
+
+
 const FORMATION_FRONT_SLOT_LAYOUT = [
   { left: 52.45, top: 35.92, width: 5.68, height: 11.16 },
   { left: 59.87, top: 35.92, width: 5.68, height: 11.16 },
@@ -28262,6 +28636,22 @@ function spawnCharacter(characterId) {
     formBattle.spriteSize + "px";
 
 
+  const visualConfig =
+    getCharacterVisualConfig(
+      data,
+      form
+    );
+
+  const visualLane =
+    pickAllyVisualLane();
+
+  applyAllyBattleVisualPlacement(
+    element,
+    visualLane,
+    visualConfig
+  );
+
+
   applySpawnPosition(
     element,
     getAllySpawnX()
@@ -28298,6 +28688,12 @@ function spawnCharacter(characterId) {
     images: formImages,
 
     battle: formBattle,
+
+    visual: visualConfig,
+
+    visualLane: visualLane.id,
+
+    visualLaneYPx: visualLane.yPx,
 
     element: element,
 

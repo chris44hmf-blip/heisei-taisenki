@@ -6544,13 +6544,19 @@ h2 {
 /* せな */
 
 .battle-unit {
+  --ally-visual-y: 0px;
+
+  --ally-visual-z: 10;
+
   position: absolute;
 
-  bottom: 14%;
+  bottom: calc(14% + var(--ally-visual-y));
 
   left: 110px;
 
   right: auto;
+
+  z-index: var(--ally-visual-z);
 
   display: flex;
 
@@ -7105,9 +7111,17 @@ h2 {
 }
 
 .battle-unit {
+  --ally-visual-y: 0px;
+
+  --ally-visual-z: 10;
+
   left: 110px;
 
   right: auto;
+
+  bottom: calc(14% + var(--ally-visual-y));
+
+  z-index: var(--ally-visual-z);
 }
 
 .battle-enemy {
