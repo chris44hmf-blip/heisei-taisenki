@@ -108,6 +108,12 @@ function showScreen(screen) {
 
   screen.classList.add("active");
 
+  if (screen === homeScreen) {
+
+    refreshHome();
+
+  }
+
 }
 
 
@@ -144,8 +150,12 @@ startButton.addEventListener(
    HOME
 ========================= */
 
+const HOME_FRONT_SLOT_COUNT = 5;
+
 const menuButtons =
-  document.querySelectorAll(".menu-button");
+  document.querySelectorAll(
+    "#home-screen .menu-button"
+  );
 
 
 menuButtons.forEach((button) => {
@@ -185,14 +195,6 @@ menuButtons.forEach((button) => {
 
       }
 
-      if (menu === "rehearsal") {
-
-        startTrainingBattle();
-
-        return;
-
-      }
-
       if (menu === "gacha") {
 
         openGachaLobby();
@@ -201,6 +203,20 @@ menuButtons.forEach((button) => {
 
       }
 
+      if (
+        menu === "shop" ||
+        menu === "settings" ||
+        menu === "quest"
+      ) {
+
+        console.log(
+          "未実装ホームメニュー:",
+          menu
+        );
+
+        return;
+
+      }
 
       console.log(
         "選択されたメニュー:",
@@ -211,6 +227,207 @@ menuButtons.forEach((button) => {
   );
 
 });
+
+
+function getHomeMenuCharacterImage(
+  characterId
+) {
+
+  if (
+    !characterId ||
+    typeof characterId !== "string"
+  ) {
+
+    return null;
+
+  }
+
+  const character =
+    CHARACTERS[characterId];
+
+  if (!character) {
+
+    return null;
+
+  }
+
+  const displayForm =
+    getHighestUnlockedCharacterForm(
+      character
+    ) || character;
+
+  if (
+    displayForm &&
+    displayForm.images &&
+    displayForm.images.menu
+  ) {
+
+    return {
+      src: displayForm.images.menu,
+      alt: character.name || "",
+      characterId: character.id
+    };
+
+  }
+
+  if (
+    character.images &&
+    character.images.menu
+  ) {
+
+    return {
+      src: character.images.menu,
+      alt: character.name || "",
+      characterId: character.id
+    };
+
+  }
+
+  return null;
+
+}
+
+
+function updateHomeFrontlineCharacters() {
+
+  if (!homeScreen) {
+
+    return;
+
+  }
+
+  const nodes =
+    homeScreen.querySelectorAll(
+      ".home-character[data-home-slot]"
+    );
+
+  nodes.forEach((node) => {
+
+    const slotIndex =
+      Number(node.dataset.homeSlot);
+
+    const image =
+      node.querySelector(
+        ".home-character-image"
+      );
+
+    if (
+      !Number.isInteger(slotIndex) ||
+      slotIndex < 0 ||
+      slotIndex >=
+        HOME_FRONT_SLOT_COUNT ||
+      !image
+    ) {
+
+      node.classList.add("is-empty");
+
+      if (image) {
+
+        image.hidden = true;
+        image.removeAttribute("src");
+        image.alt = "";
+
+      }
+
+      return;
+
+    }
+
+    const characterId =
+      Array.isArray(battleDeck)
+        ? battleDeck[slotIndex]
+        : null;
+
+    const menuImage =
+      getHomeMenuCharacterImage(
+        characterId
+      );
+
+    if (!menuImage) {
+
+      node.classList.add("is-empty");
+      node.removeAttribute(
+        "data-character-id"
+      );
+
+      image.hidden = true;
+      image.removeAttribute("src");
+      image.alt = "";
+
+      return;
+
+    }
+
+    node.classList.remove("is-empty");
+    node.dataset.characterId =
+      menuImage.characterId;
+
+    image.hidden = false;
+    image.src = menuImage.src;
+    image.alt = menuImage.alt;
+
+  });
+
+}
+
+
+function refreshHomeResources() {
+
+  if (
+    typeof updateBeatsDisplay ===
+    "function"
+  ) {
+
+    updateBeatsDisplay();
+
+  }
+
+  if (
+    typeof updateDrinkTicketsDisplay ===
+    "function"
+  ) {
+
+    updateDrinkTicketsDisplay();
+
+  }
+
+  if (
+    typeof updateGyaraDisplay ===
+    "function"
+  ) {
+
+    updateGyaraDisplay();
+
+  }
+
+  if (
+    typeof updateBsPassDisplay ===
+    "function"
+  ) {
+
+    updateBsPassDisplay();
+
+  }
+
+}
+
+
+function refreshHome() {
+
+  refreshHomeResources();
+
+  updateHomeFrontlineCharacters();
+
+  if (
+    typeof updateHomeLocation ===
+    "function"
+  ) {
+
+    updateHomeLocation();
+
+  }
+
+}
 
 
 function openGachaLobby() {
@@ -24068,6 +24285,12 @@ function initBattleDeck() {
 
 
 initBattleDeck();
+
+if (typeof refreshHome === "function") {
+
+  refreshHome();
+
+}
 
 
 function getDeployCooldownMs(character) {

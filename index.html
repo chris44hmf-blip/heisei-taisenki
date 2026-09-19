@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=enhance-list-scroll-1">
+  <link rel="stylesheet" href="style.css?v=home-implement-1">
 </head>
 
 <body>
@@ -100,139 +100,140 @@
 
 </section>
 
-    <!-- ホーム画面 -->
+    <!-- ホーム画面 HOME DESIGN-3 -->
     <section id="home-screen" class="screen">
 
-      <!-- 上部ステータス -->
-      <header class="top-bar">
-
-        <div class="player-info">
-          <span class="rank">RANK 1</span>
-        </div>
-
-        <div class="resources">
+      <header class="home-top-bar" aria-label="ステータス">
+        <div class="home-status">
+          <span class="home-rank rank" id="home-rank">
+            RANK <span id="home-rank-value">1</span>
+          </span>
 
           <div
-            class="resource resource-beats"
+            class="home-resource resource resource-beats"
             id="home-beats-resource"
             role="button"
             tabindex="0"
             aria-label="BEATS"
           >
-            <span
-              class="resource-icon"
-              aria-hidden="true"
-            >♪</span>
-            <span id="beats">1000</span>
+            <span class="resource-icon" aria-hidden="true">♪</span>
+            <span class="home-resource-label">BEATS</span>
+            <span id="beats">0</span>
           </div>
 
-          <div
-            class="resource"
-            aria-label="ドリチケ"
-          >
-            <span
-              class="resource-icon"
-              aria-hidden="true"
-            >🎫</span>
+          <div class="home-resource resource" aria-label="ドリチケ">
+            <span class="home-resource-label">ドリチケ</span>
             <span id="drink-tickets">0</span>
           </div>
 
-          <div
-            class="resource"
-            aria-label="ギャラ"
-          >
-            <span
-              class="resource-icon"
-              aria-hidden="true"
-            >💰</span>
+          <div class="home-resource resource" aria-label="ギャラ">
+            <span class="home-resource-label">ギャラ</span>
             <span id="gyara">0</span>
           </div>
 
-          <div
-            class="resource"
-            aria-label="BS PASS"
-          >
-            <span
-              class="resource-icon"
-              aria-hidden="true"
-            >🎟</span>
-            <span id="bs-pass">300</span>
+          <div class="home-resource resource" aria-label="BS PASS">
+            <span class="home-resource-label">BS PASS</span>
+            <span id="bs-pass">0</span>
           </div>
 
-          <div
-            class="resource"
-            aria-label="スタミナ"
-          >
-            <span
-              class="resource-icon"
-              aria-hidden="true"
-            >❤️</span>
-            <span id="stamina">100</span>/100
+          <div class="home-resource resource" aria-label="スタミナ">
+            <span class="home-resource-label">スタミナ</span>
+            <span id="stamina">100</span><span class="home-stamina-max">/100</span>
           </div>
-
         </div>
-
       </header>
 
+      <div class="home-body">
 
-      <!-- ホーム中央 -->
-      <div class="home-main">
+        <div class="home-turntable-stage" aria-label="前衛編成">
+          <div class="home-turntable" aria-hidden="true"></div>
 
-        <div class="home-message">
-          <span class="year-label">現在地</span>
-
-          <strong id="home-current-year">平成元年</strong>
-
-          <p>平成から抜け出せ。</p>
+          <div class="home-character-layer">
+            <div
+              class="home-character is-empty"
+              data-home-pos="p3"
+              data-home-slot="3"
+            >
+              <img class="home-character-image" alt="" draggable="false" hidden>
+            </div>
+            <div
+              class="home-character is-empty"
+              data-home-pos="p2"
+              data-home-slot="2"
+            >
+              <img class="home-character-image" alt="" draggable="false" hidden>
+            </div>
+            <div
+              class="home-character is-empty"
+              data-home-pos="p4"
+              data-home-slot="4"
+            >
+              <img class="home-character-image" alt="" draggable="false" hidden>
+            </div>
+            <div
+              class="home-character is-empty"
+              data-home-pos="p1"
+              data-home-slot="1"
+            >
+              <img class="home-character-image" alt="" draggable="false" hidden>
+            </div>
+            <div
+              class="home-character is-empty"
+              data-home-pos="p0"
+              data-home-slot="0"
+            >
+              <img class="home-character-image" alt="" draggable="false" hidden>
+            </div>
+          </div>
         </div>
 
-        <!-- キャラ画像 -->
-<div class="character-area">
+        <nav class="home-menu" aria-label="ホームメニュー">
+          <button
+            class="menu-button menu-button-sortie"
+            type="button"
+            data-menu="sortie"
+          >出陣</button>
 
-  <div class="character-placeholder">
-    <img
-      src="images/characters/sena/sena_menu.webp"
-      alt="せな"
-      class="home-character-image"
-    >
-  </div>
+          <button
+            class="menu-button menu-button-lg"
+            type="button"
+            data-menu="formation"
+          >編成</button>
 
-  <div class="character-name">
-    せな
-  </div>
+          <button
+            class="menu-button menu-button-lg"
+            type="button"
+            data-menu="training"
+          >育成</button>
 
-</div>
+          <div class="home-menu-row">
+            <button
+              class="menu-button menu-button-md"
+              type="button"
+              data-menu="gacha"
+            >ガチャ</button>
+            <button
+              class="menu-button menu-button-md"
+              type="button"
+              data-menu="shop"
+            >ショップ</button>
+          </div>
 
-      <!-- メニュー -->
-      <nav class="home-menu">
+          <div class="home-menu-row">
+            <button
+              class="menu-button menu-button-md"
+              type="button"
+              data-menu="settings"
+            >設定</button>
+            <button
+              class="menu-button menu-button-md"
+              type="button"
+              data-menu="quest"
+            >クエスト</button>
+          </div>
+        </nav>
 
-        <button class="menu-button" data-menu="formation">
-          <span>👥</span>
-          編成
-        </button>
-
-        <button class="menu-button sortie" data-menu="sortie">
-          <span>⚔️</span>
-          出陣
-        </button>
-
-        <button class="menu-button rehearsal" data-menu="rehearsal">
-          <span>🎛</span>
-          訓練所
-          <small class="menu-button-sub">REHEARSAL STUDIO</small>
-        </button>
-
-        <button class="menu-button" data-menu="gacha">
-          <span>🎫</span>
-          ガチャ
-        </button>
-
-        <button class="menu-button" data-menu="training">
-          <span>🔥</span>
-          育成
-        </button>
-
-      </nav>
+      </div>
 
     </section>
 
@@ -2095,7 +2096,7 @@
   </div>
 
 
-  <script src="game.js?v=multi-hit-timeout-ids-1"></script>
+  <script src="game.js?v=home-implement-1"></script>
 
 </body>
 </html>
