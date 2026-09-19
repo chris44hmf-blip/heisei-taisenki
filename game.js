@@ -13328,7 +13328,7 @@ const CHARACTERS = {
     visual: {
 
       /* Large raised-arm decoration — keep head near anchor */
-      bodyScale: 1.05,
+      bodyScale: 1.25,
 
       groundOffsetPx: 0,
 
