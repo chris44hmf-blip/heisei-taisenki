@@ -523,10 +523,30 @@ h2 {
 }
 
 
+/*
+  Character orbit layer shares the turntable ellipse.
+  Angles are from FRONT (bottom), increasing CCW:
+  P0=0° / P1=72° / P2=144° / P3=216° / P4=288°
+  Future rotation can replace left/bottom with:
+  left = 50% + sin(angle) * --home-orbit-rx
+  bottom = 50% - cos(angle) * --home-orbit-ry
+*/
 .home-character-layer {
+  --home-orbit-rx: 41%;
+
+  --home-orbit-ry: 34%;
+
   position: absolute;
 
-  inset: 0;
+  left: 50%;
+
+  bottom: clamp(4%, 3vh, 10%);
+
+  width: min(92%, clamp(280px, 68vw, 520px));
+
+  aspect-ratio: 2.35 / 1;
+
+  transform: translateX(-54%);
 
   z-index: 2;
 
@@ -535,6 +555,8 @@ h2 {
 
 
 .home-character {
+  --home-angle: 0deg;
+
   position: absolute;
 
   display: flex;
@@ -543,11 +565,23 @@ h2 {
 
   justify-content: center;
 
-  width: clamp(72px, 16vw, 150px);
+  left: calc(
+    50% + sin(var(--home-angle)) * var(--home-orbit-rx)
+  );
 
-  height: clamp(96px, 34vh, 220px);
+  bottom: calc(
+    50% - cos(var(--home-angle)) * var(--home-orbit-ry)
+  );
 
-  transform: translateX(-50%);
+  width: clamp(64px, 13.5vw, 128px);
+
+  height: clamp(88px, 30vh, 188px);
+
+  max-width: 28%;
+
+  max-height: 78%;
+
+  transform: translate(-50%, 0);
 
   opacity: 1;
 
@@ -569,6 +603,10 @@ h2 {
 
   height: 100%;
 
+  max-width: 100%;
+
+  max-height: 100%;
+
   object-fit: contain;
 
   object-position: center bottom;
@@ -581,67 +619,77 @@ h2 {
 }
 
 
-/* depth positions: P0 front → P2/P3 back */
+/* depth positions on shared ellipse orbit */
 .home-character[data-home-pos="p0"] {
-  left: 46%;
+  --home-angle: 0deg;
 
-  bottom: 2%;
+  width: clamp(96px, 18.5vw, 168px);
 
-  width: clamp(110px, 22vw, 196px);
+  height: clamp(132px, 42vh, 248px);
 
-  height: clamp(150px, 48vh, 280px);
+  max-width: 34%;
+
+  max-height: 92%;
 
   z-index: 5;
 }
 
 
 .home-character[data-home-pos="p1"] {
-  left: 68%;
+  --home-angle: 72deg;
 
-  bottom: 14%;
+  width: clamp(78px, 14.5vw, 132px);
 
-  width: clamp(88px, 17vw, 150px);
+  height: clamp(108px, 34vh, 200px);
 
-  height: clamp(120px, 40vh, 230px);
+  max-width: 26%;
+
+  max-height: 78%;
 
   z-index: 4;
 }
 
 
 .home-character[data-home-pos="p4"] {
-  left: 24%;
+  --home-angle: 288deg;
 
-  bottom: 14%;
+  width: clamp(78px, 14.5vw, 132px);
 
-  width: clamp(88px, 17vw, 150px);
+  height: clamp(108px, 34vh, 200px);
 
-  height: clamp(120px, 40vh, 230px);
+  max-width: 26%;
+
+  max-height: 78%;
 
   z-index: 4;
 }
 
 
 .home-character[data-home-pos="p2"] {
-  left: 58%;
+  --home-angle: 144deg;
 
-  bottom: 28%;
+  width: clamp(58px, 11vw, 100px);
 
-  width: clamp(64px, 12.5vw, 112px);
+  height: clamp(84px, 26vh, 152px);
 
-  height: clamp(92px, 30vh, 170px);
+  max-width: 20%;
+
+  max-height: 64%;
 
   z-index: 2;
 }
 
 
 .home-character[data-home-pos="p3"] {
-  left: 34%;
+  --home-angle: 216deg;
 
-  bottom: 28%;
+  width: clamp(58px, 11vw, 100px);
 
-  width: clamp(64px, 12.5vw, 112px);
+  height: clamp(84px, 26vh, 152px);
 
-  height: clamp(92px, 30vh, 170px);
+  max-width: 20%;
+
+  max-height: 64%;
 
   z-index: 2;
 }
@@ -790,6 +838,12 @@ h2 {
     gap: 6px;
   }
 
+  .home-character-layer {
+    --home-orbit-rx: 40%;
+
+    --home-orbit-ry: 33%;
+  }
+
   #home-screen .menu-button-sortie {
     min-height: 38px;
 
@@ -811,12 +865,15 @@ h2 {
 
 @media (min-width: 900px) and (min-height: 410px) {
 
-  .home-character[data-home-pos="p0"] {
-    left: 45%;
-  }
-
+  .home-character-layer,
   .home-turntable {
     transform: translateX(-52%);
+  }
+
+  .home-character-layer {
+    --home-orbit-rx: 42%;
+
+    --home-orbit-ry: 35%;
   }
 
 }
