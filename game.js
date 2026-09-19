@@ -103,6 +103,17 @@ const battleQuit =
 
 function showScreen(screen) {
 
+  if (
+    homeScreen &&
+    screen !== homeScreen &&
+    typeof endHomeTurntableDrag ===
+      "function"
+  ) {
+
+    endHomeTurntableDrag();
+
+  }
+
   document
     .querySelectorAll(".screen")
     .forEach((item) => {
@@ -366,10 +377,543 @@ function updateHomeFrontlineCharacters() {
       menuImage.characterId;
 
     image.hidden = false;
-    image.src = menuImage.src;
+
+    if (image.getAttribute("src") !== menuImage.src) {
+
+      image.src = menuImage.src;
+
+    }
+
     image.alt = menuImage.alt;
 
   });
+
+  updateHomeTurntableVisuals();
+
+}
+
+
+const HOME_TURNTABLE_SLOT_STEP_DEG = 72;
+
+/* Tune here: fraction of orbit-layer width ≈ one full turn */
+const HOME_TURNTABLE_DRAG_WIDTH_RATIO = 0.6;
+
+const HOME_TURNTABLE_SCALE_FRONT = 1;
+
+const HOME_TURNTABLE_SCALE_BACK = 0.62;
+
+let homeTurntableRotationDeg = 0;
+
+let homeTurntableDragging = false;
+
+let homeTurntablePointerId = null;
+
+let homeTurntableStartX = 0;
+
+let homeTurntableStartRotationDeg = 0;
+
+let homeTurntablePendingX = null;
+
+let homeTurntableRafId = 0;
+
+
+function getHomeTurntableStage() {
+
+  return homeScreen
+    ? homeScreen.querySelector(
+        ".home-turntable-stage"
+      )
+    : null;
+
+}
+
+
+function getHomeCharacterLayer() {
+
+  return homeScreen
+    ? homeScreen.querySelector(
+        ".home-character-layer"
+      )
+    : null;
+
+}
+
+
+function getHomeTurntableDegPerPx() {
+
+  const layer =
+    getHomeCharacterLayer();
+
+  const width =
+    layer && layer.clientWidth > 0
+      ? layer.clientWidth
+      : window.innerWidth;
+
+  const dragWidth =
+    Math.max(
+      width * HOME_TURNTABLE_DRAG_WIDTH_RATIO,
+      1
+    );
+
+  return 360 / dragWidth;
+
+}
+
+
+function getHomeOrbitRadiiPx() {
+
+  const layer =
+    getHomeCharacterLayer();
+
+  if (!layer) {
+
+    return { rx: 0, ry: 0 };
+
+  }
+
+  const styles =
+    getComputedStyle(layer);
+
+  const rxPct =
+    parseFloat(
+      styles.getPropertyValue(
+        "--home-orbit-rx"
+      )
+    ) || 41;
+
+  const ryPct =
+    parseFloat(
+      styles.getPropertyValue(
+        "--home-orbit-ry"
+      )
+    ) || 34;
+
+  return {
+    rx: layer.clientWidth * (rxPct / 100),
+    ry: layer.clientHeight * (ryPct / 100)
+  };
+
+}
+
+
+function normalizeHomeAngleDeg(angle) {
+
+  let value = angle % 360;
+
+  if (value > 180) {
+
+    value -= 360;
+
+  } else if (value <= -180) {
+
+    value += 360;
+
+  }
+
+  return value;
+
+}
+
+
+function getHomeSlotAngleDeg(slotIndex) {
+
+  return (
+    slotIndex *
+      HOME_TURNTABLE_SLOT_STEP_DEG +
+    homeTurntableRotationDeg
+  );
+
+}
+
+
+function updateHomeTurntableVisuals() {
+
+  if (!homeScreen) {
+
+    return;
+
+  }
+
+  const nodes =
+    homeScreen.querySelectorAll(
+      ".home-character[data-home-slot]"
+    );
+
+  if (!nodes.length) {
+
+    return;
+
+  }
+
+  const radii =
+    getHomeOrbitRadiiPx();
+
+  nodes.forEach((node) => {
+
+    const slotIndex =
+      Number(node.dataset.homeSlot);
+
+    if (
+      !Number.isInteger(slotIndex) ||
+      slotIndex < 0 ||
+      slotIndex >=
+        HOME_FRONT_SLOT_COUNT
+    ) {
+
+      return;
+
+    }
+
+    const angleDeg =
+      getHomeSlotAngleDeg(slotIndex);
+
+    const rad =
+      (angleDeg * Math.PI) / 180;
+
+    const cos =
+      Math.cos(rad);
+
+    const sin =
+      Math.sin(rad);
+
+    const x =
+      sin * radii.rx;
+
+    const y =
+      cos * radii.ry;
+
+    const frontness =
+      (cos + 1) * 0.5;
+
+    const scale =
+      HOME_TURNTABLE_SCALE_BACK +
+      (HOME_TURNTABLE_SCALE_FRONT -
+        HOME_TURNTABLE_SCALE_BACK) *
+        frontness;
+
+    const zIndex =
+      Math.round(
+        10 + cos * 10
+      );
+
+    node.style.setProperty(
+      "--home-angle",
+      angleDeg + "deg"
+    );
+
+    node.style.setProperty(
+      "--home-scale",
+      String(scale)
+    );
+
+    node.style.transform =
+      "translate(-50%, 0) translate(" +
+      x.toFixed(2) +
+      "px, " +
+      y.toFixed(2) +
+      "px) scale(" +
+      scale.toFixed(4) +
+      ")";
+
+    node.style.zIndex =
+      String(zIndex);
+
+    node.dataset.homeAngle =
+      String(
+        Math.round(
+          normalizeHomeAngleDeg(angleDeg) *
+            10
+        ) / 10
+      );
+
+  });
+
+}
+
+
+function flushHomeTurntableDragFrame() {
+
+  homeTurntableRafId = 0;
+
+  if (
+    !homeTurntableDragging ||
+    homeTurntablePendingX === null
+  ) {
+
+    return;
+
+  }
+
+  const deltaX =
+    homeTurntablePendingX -
+    homeTurntableStartX;
+
+  homeTurntableRotationDeg =
+    homeTurntableStartRotationDeg +
+    deltaX * getHomeTurntableDegPerPx();
+
+  updateHomeTurntableVisuals();
+
+}
+
+
+function scheduleHomeTurntableDragFrame(
+  clientX
+) {
+
+  homeTurntablePendingX = clientX;
+
+  if (homeTurntableRafId) {
+
+    return;
+
+  }
+
+  homeTurntableRafId =
+    requestAnimationFrame(
+      flushHomeTurntableDragFrame
+    );
+
+}
+
+
+function endHomeTurntableDrag() {
+
+  const stage =
+    getHomeTurntableStage();
+
+  if (
+    homeTurntableRafId
+  ) {
+
+    cancelAnimationFrame(
+      homeTurntableRafId
+    );
+
+    homeTurntableRafId = 0;
+
+  }
+
+  if (
+    homeTurntableDragging &&
+    homeTurntablePendingX !== null
+  ) {
+
+    const deltaX =
+      homeTurntablePendingX -
+      homeTurntableStartX;
+
+    homeTurntableRotationDeg =
+      homeTurntableStartRotationDeg +
+      deltaX * getHomeTurntableDegPerPx();
+
+  }
+
+  if (
+    homeTurntableDragging &&
+    stage &&
+    homeTurntablePointerId !== null
+  ) {
+
+    try {
+
+      if (
+        stage.hasPointerCapture(
+          homeTurntablePointerId
+        )
+      ) {
+
+        stage.releasePointerCapture(
+          homeTurntablePointerId
+        );
+
+      }
+
+    } catch (error) {
+
+      /* ignore release errors */
+
+    }
+
+  }
+
+  homeTurntableDragging = false;
+
+  homeTurntablePointerId = null;
+
+  homeTurntablePendingX = null;
+
+  if (stage) {
+
+    stage.classList.remove(
+      "is-dragging"
+    );
+
+  }
+
+  updateHomeTurntableVisuals();
+
+}
+
+
+function onHomeTurntablePointerDown(
+  event
+) {
+
+  if (
+    !homeScreen ||
+    !homeScreen.classList.contains(
+      "active"
+    )
+  ) {
+
+    return;
+
+  }
+
+  if (
+    event.pointerType === "mouse" &&
+    event.button !== 0
+  ) {
+
+    return;
+
+  }
+
+  const stage =
+    getHomeTurntableStage();
+
+  if (!stage) {
+
+    return;
+
+  }
+
+  homeTurntableDragging = true;
+
+  homeTurntablePointerId =
+    event.pointerId;
+
+  homeTurntableStartX =
+    event.clientX;
+
+  homeTurntableStartRotationDeg =
+    homeTurntableRotationDeg;
+
+  homeTurntablePendingX =
+    event.clientX;
+
+  stage.classList.add("is-dragging");
+
+  try {
+
+    stage.setPointerCapture(
+      event.pointerId
+    );
+
+  } catch (error) {
+
+    /* capture optional */
+
+  }
+
+  event.preventDefault();
+
+}
+
+
+function onHomeTurntablePointerMove(
+  event
+) {
+
+  if (
+    !homeTurntableDragging ||
+    event.pointerId !==
+      homeTurntablePointerId
+  ) {
+
+    return;
+
+  }
+
+  scheduleHomeTurntableDragFrame(
+    event.clientX
+  );
+
+  event.preventDefault();
+
+}
+
+
+function onHomeTurntablePointerUp(
+  event
+) {
+
+  if (
+    event.pointerId !==
+      homeTurntablePointerId
+  ) {
+
+    return;
+
+  }
+
+  if (
+    typeof event.clientX === "number"
+  ) {
+
+    homeTurntablePendingX =
+      event.clientX;
+
+  }
+
+  endHomeTurntableDrag();
+
+}
+
+
+function initHomeTurntableDrag() {
+
+  const stage =
+    getHomeTurntableStage();
+
+  if (
+    !stage ||
+    stage.dataset.turntableBound === "1"
+  ) {
+
+    return;
+
+  }
+
+  stage.dataset.turntableBound = "1";
+
+  stage.addEventListener(
+    "pointerdown",
+    onHomeTurntablePointerDown
+  );
+
+  stage.addEventListener(
+    "pointermove",
+    onHomeTurntablePointerMove
+  );
+
+  stage.addEventListener(
+    "pointerup",
+    onHomeTurntablePointerUp
+  );
+
+  stage.addEventListener(
+    "pointercancel",
+    onHomeTurntablePointerUp
+  );
+
+  window.addEventListener(
+    "resize",
+    updateHomeTurntableVisuals
+  );
+
+  updateHomeTurntableVisuals();
 
 }
 
@@ -429,6 +973,8 @@ function refreshHome() {
     updateHomeLocation();
 
   }
+
+  updateHomeTurntableVisuals();
 
 }
 
@@ -24479,6 +25025,8 @@ function initBattleDeck() {
 
 
 initBattleDeck();
+
+initHomeTurntableDrag();
 
 if (typeof refreshHome === "function") {
 
