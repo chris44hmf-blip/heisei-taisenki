@@ -106,11 +106,11 @@ function showScreen(screen) {
   if (
     homeScreen &&
     screen !== homeScreen &&
-    typeof endHomeTurntableDrag ===
+    typeof haltHomeTurntableInteraction ===
       "function"
   ) {
 
-    endHomeTurntableDrag();
+    haltHomeTurntableInteraction();
 
   }
 
@@ -402,9 +402,26 @@ const HOME_TURNTABLE_SCALE_FRONT = 1;
 
 const HOME_TURNTABLE_SCALE_BACK = 0.62;
 
+/* Physics (deg/sec). Tune in one place for iPhone feel. */
+const HOME_TURNTABLE_VELOCITY_SAMPLE_MS = 100;
+
+const HOME_TURNTABLE_MIN_INERTIA_VELOCITY = 80;
+
+const HOME_TURNTABLE_MAX_INERTIA_VELOCITY = 1200;
+
+const HOME_TURNTABLE_FRICTION_PER_SEC = 0.18;
+
+const HOME_TURNTABLE_STOP_VELOCITY = 10;
+
+const HOME_TURNTABLE_MAX_FRAME_DT_SEC = 0.05;
+
 let homeTurntableRotationDeg = 0;
 
+let homeTurntableAngularVelocity = 0;
+
 let homeTurntableDragging = false;
+
+let homeTurntableInertiaActive = false;
 
 let homeTurntablePointerId = null;
 
@@ -414,7 +431,13 @@ let homeTurntableStartRotationDeg = 0;
 
 let homeTurntablePendingX = null;
 
-let homeTurntableRafId = 0;
+let homeTurntableDragRafId = 0;
+
+let homeTurntableInertiaRafId = 0;
+
+let homeTurntableInertiaLastTs = 0;
+
+let homeTurntableVelocitySamples = [];
 
 
 function getHomeTurntableStage() {
@@ -631,9 +654,164 @@ function updateHomeTurntableVisuals() {
 }
 
 
+function resetHomeTurntableVelocitySamples(
+  rotationDeg,
+  timestamp
+) {
+
+  const time =
+    typeof timestamp === "number"
+      ? timestamp
+      : performance.now();
+
+  homeTurntableVelocitySamples = [
+    {
+      t: time,
+      rot: rotationDeg
+    }
+  ];
+
+}
+
+
+function recordHomeTurntableVelocitySample(
+  rotationDeg
+) {
+
+  const now = performance.now();
+
+  homeTurntableVelocitySamples.push({
+    t: now,
+    rot: rotationDeg
+  });
+
+  const cutoff =
+    now - HOME_TURNTABLE_VELOCITY_SAMPLE_MS;
+
+  while (
+    homeTurntableVelocitySamples.length >
+      1 &&
+    homeTurntableVelocitySamples[0].t <
+      cutoff
+  ) {
+
+    homeTurntableVelocitySamples.shift();
+
+  }
+
+}
+
+
+function getHomeTurntableReleaseVelocity() {
+
+  const samples =
+    homeTurntableVelocitySamples;
+
+  if (samples.length < 2) {
+
+    return 0;
+
+  }
+
+  const first = samples[0];
+
+  const last =
+    samples[samples.length - 1];
+
+  const dtMs = last.t - first.t;
+
+  if (dtMs < 8) {
+
+    return 0;
+
+  }
+
+  const velocityDegPerSec =
+    ((last.rot - first.rot) / dtMs) *
+    1000;
+
+  if (
+    !Number.isFinite(velocityDegPerSec)
+  ) {
+
+    return 0;
+
+  }
+
+  const capped = Math.max(
+    -HOME_TURNTABLE_MAX_INERTIA_VELOCITY,
+    Math.min(
+      HOME_TURNTABLE_MAX_INERTIA_VELOCITY,
+      velocityDegPerSec
+    )
+  );
+
+  return capped;
+
+}
+
+
+function cancelHomeTurntableDragRaf() {
+
+  if (homeTurntableDragRafId) {
+
+    cancelAnimationFrame(
+      homeTurntableDragRafId
+    );
+
+    homeTurntableDragRafId = 0;
+
+  }
+
+}
+
+
+function cancelHomeTurntableInertiaRaf() {
+
+  if (homeTurntableInertiaRafId) {
+
+    cancelAnimationFrame(
+      homeTurntableInertiaRafId
+    );
+
+    homeTurntableInertiaRafId = 0;
+
+  }
+
+}
+
+
+function stopHomeTurntableInertia(
+  options
+) {
+
+  const normalizeRotation =
+    !options ||
+    options.normalize !== false;
+
+  cancelHomeTurntableInertiaRaf();
+
+  homeTurntableInertiaActive = false;
+
+  homeTurntableAngularVelocity = 0;
+
+  homeTurntableInertiaLastTs = 0;
+
+  if (normalizeRotation) {
+
+    homeTurntableRotationDeg =
+      normalizeHomeAngleDeg(
+        homeTurntableRotationDeg
+      );
+
+  }
+
+}
+
+
 function flushHomeTurntableDragFrame() {
 
-  homeTurntableRafId = 0;
+  homeTurntableDragRafId = 0;
 
   if (
     !homeTurntableDragging ||
@@ -652,6 +830,10 @@ function flushHomeTurntableDragFrame() {
     homeTurntableStartRotationDeg +
     deltaX * getHomeTurntableDegPerPx();
 
+  recordHomeTurntableVelocitySample(
+    homeTurntableRotationDeg
+  );
+
   updateHomeTurntableVisuals();
 
 }
@@ -663,13 +845,13 @@ function scheduleHomeTurntableDragFrame(
 
   homeTurntablePendingX = clientX;
 
-  if (homeTurntableRafId) {
+  if (homeTurntableDragRafId) {
 
     return;
 
   }
 
-  homeTurntableRafId =
+  homeTurntableDragRafId =
     requestAnimationFrame(
       flushHomeTurntableDragFrame
     );
@@ -677,22 +859,180 @@ function scheduleHomeTurntableDragFrame(
 }
 
 
-function endHomeTurntableDrag() {
+function stepHomeTurntableInertia(
+  timestamp
+) {
+
+  homeTurntableInertiaRafId = 0;
+
+  if (!homeTurntableInertiaActive) {
+
+    return;
+
+  }
+
+  if (
+    !homeScreen ||
+    !homeScreen.classList.contains(
+      "active"
+    ) ||
+    document.visibilityState ===
+      "hidden"
+  ) {
+
+    stopHomeTurntableInertia();
+
+    updateHomeTurntableVisuals();
+
+    return;
+
+  }
+
+  const lastTs =
+    homeTurntableInertiaLastTs ||
+    timestamp;
+
+  let deltaSec =
+    (timestamp - lastTs) / 1000;
+
+  if (
+    !Number.isFinite(deltaSec) ||
+    deltaSec < 0
+  ) {
+
+    deltaSec = 0;
+
+  }
+
+  deltaSec = Math.min(
+    deltaSec,
+    HOME_TURNTABLE_MAX_FRAME_DT_SEC
+  );
+
+  homeTurntableInertiaLastTs =
+    timestamp;
+
+  homeTurntableRotationDeg +=
+    homeTurntableAngularVelocity *
+    deltaSec;
+
+  homeTurntableAngularVelocity *=
+    Math.pow(
+      HOME_TURNTABLE_FRICTION_PER_SEC,
+      deltaSec
+    );
+
+  updateHomeTurntableVisuals();
+
+  if (
+    Math.abs(
+      homeTurntableAngularVelocity
+    ) <=
+    HOME_TURNTABLE_STOP_VELOCITY
+  ) {
+
+    stopHomeTurntableInertia();
+
+    updateHomeTurntableVisuals();
+
+    return;
+
+  }
+
+  homeTurntableInertiaRafId =
+    requestAnimationFrame(
+      stepHomeTurntableInertia
+    );
+
+}
+
+
+function startHomeTurntableInertia(
+  velocityDegPerSec
+) {
+
+  stopHomeTurntableInertia({
+    normalize: false
+  });
+
+  homeTurntableAngularVelocity =
+    velocityDegPerSec;
+
+  if (
+    Math.abs(
+      homeTurntableAngularVelocity
+    ) <
+    HOME_TURNTABLE_MIN_INERTIA_VELOCITY
+  ) {
+
+    homeTurntableAngularVelocity = 0;
+
+    homeTurntableRotationDeg =
+      normalizeHomeAngleDeg(
+        homeTurntableRotationDeg
+      );
+
+    updateHomeTurntableVisuals();
+
+    return;
+
+  }
+
+  homeTurntableInertiaActive = true;
+
+  homeTurntableInertiaLastTs = 0;
+
+  homeTurntableInertiaRafId =
+    requestAnimationFrame(
+      stepHomeTurntableInertia
+    );
+
+}
+
+
+function releaseHomeTurntablePointerCapture() {
 
   const stage =
     getHomeTurntableStage();
 
   if (
-    homeTurntableRafId
+    !stage ||
+    homeTurntablePointerId === null
   ) {
 
-    cancelAnimationFrame(
-      homeTurntableRafId
-    );
-
-    homeTurntableRafId = 0;
+    return;
 
   }
+
+  try {
+
+    if (
+      stage.hasPointerCapture(
+        homeTurntablePointerId
+      )
+    ) {
+
+      stage.releasePointerCapture(
+        homeTurntablePointerId
+      );
+
+    }
+
+  } catch (error) {
+
+    /* ignore release errors */
+
+  }
+
+}
+
+
+function finishHomeTurntableDragState() {
+
+  const stage =
+    getHomeTurntableStage();
+
+  cancelHomeTurntableDragRaf();
 
   if (
     homeTurntableDragging &&
@@ -707,35 +1047,13 @@ function endHomeTurntableDrag() {
       homeTurntableStartRotationDeg +
       deltaX * getHomeTurntableDegPerPx();
 
-  }
-
-  if (
-    homeTurntableDragging &&
-    stage &&
-    homeTurntablePointerId !== null
-  ) {
-
-    try {
-
-      if (
-        stage.hasPointerCapture(
-          homeTurntablePointerId
-        )
-      ) {
-
-        stage.releasePointerCapture(
-          homeTurntablePointerId
-        );
-
-      }
-
-    } catch (error) {
-
-      /* ignore release errors */
-
-    }
+    recordHomeTurntableVelocitySample(
+      homeTurntableRotationDeg
+    );
 
   }
+
+  releaseHomeTurntablePointerCapture();
 
   homeTurntableDragging = false;
 
@@ -751,7 +1069,49 @@ function endHomeTurntableDrag() {
 
   }
 
+}
+
+
+function endHomeTurntableDragWithInertia() {
+
+  if (!homeTurntableDragging) {
+
+    return;
+
+  }
+
+  finishHomeTurntableDragState();
+
+  const velocity =
+    getHomeTurntableReleaseVelocity();
+
+  homeTurntableVelocitySamples = [];
+
+  startHomeTurntableInertia(velocity);
+
+}
+
+
+function endHomeTurntableDragWithoutInertia() {
+
+  if (homeTurntableDragging) {
+
+    finishHomeTurntableDragState();
+
+  }
+
+  homeTurntableVelocitySamples = [];
+
+  stopHomeTurntableInertia();
+
   updateHomeTurntableVisuals();
+
+}
+
+
+function haltHomeTurntableInteraction() {
+
+  endHomeTurntableDragWithoutInertia();
 
 }
 
@@ -789,6 +1149,13 @@ function onHomeTurntablePointerDown(
 
   }
 
+  /* Grab spinning disc: stop inertia, keep angle, no jump */
+  stopHomeTurntableInertia({
+    normalize: false
+  });
+
+  homeTurntableAngularVelocity = 0;
+
   homeTurntableDragging = true;
 
   homeTurntablePointerId =
@@ -802,6 +1169,11 @@ function onHomeTurntablePointerDown(
 
   homeTurntablePendingX =
     event.clientX;
+
+  resetHomeTurntableVelocitySamples(
+    homeTurntableRotationDeg,
+    performance.now()
+  );
 
   stage.classList.add("is-dragging");
 
@@ -867,7 +1239,39 @@ function onHomeTurntablePointerUp(
 
   }
 
-  endHomeTurntableDrag();
+  endHomeTurntableDragWithInertia();
+
+}
+
+
+function onHomeTurntablePointerCancel(
+  event
+) {
+
+  if (
+    event.pointerId !==
+      homeTurntablePointerId
+  ) {
+
+    return;
+
+  }
+
+  endHomeTurntableDragWithoutInertia();
+
+}
+
+
+function onHomeTurntableVisibilityChange() {
+
+  if (
+    document.visibilityState ===
+      "hidden"
+  ) {
+
+    haltHomeTurntableInteraction();
+
+  }
 
 }
 
@@ -905,12 +1309,17 @@ function initHomeTurntableDrag() {
 
   stage.addEventListener(
     "pointercancel",
-    onHomeTurntablePointerUp
+    onHomeTurntablePointerCancel
   );
 
   window.addEventListener(
     "resize",
     updateHomeTurntableVisuals
+  );
+
+  document.addEventListener(
+    "visibilitychange",
+    onHomeTurntableVisibilityChange
   );
 
   updateHomeTurntableVisuals();
