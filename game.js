@@ -396,7 +396,7 @@ function updateHomeFrontlineCharacters() {
 const HOME_TURNTABLE_SLOT_STEP_DEG = 72;
 
 /* Tune here: fraction of orbit-layer width ≈ one full turn */
-const HOME_TURNTABLE_DRAG_WIDTH_RATIO = 0.6;
+const HOME_TURNTABLE_DRAG_WIDTH_RATIO = 1.0;
 
 const HOME_TURNTABLE_SCALE_FRONT = 1;
 
