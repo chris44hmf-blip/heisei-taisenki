@@ -17,7 +17,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="style.css?v=home-fix1-orbit">
+  <link rel="stylesheet" href="style.css?v=sortie-select-1">
 </head>
 
 <body>
@@ -234,6 +234,56 @@
         </nav>
 
       </div>
+
+    </section>
+
+    <!-- 出陣先選択 SORTIE SELECT DESIGN-1 -->
+    <section id="sortie-select-screen" class="screen">
+
+      <header class="sortie-select-header">
+        <button
+          id="sortie-select-back"
+          class="sortie-select-back"
+          type="button"
+        >戻る</button>
+
+        <h2 class="sortie-select-title">出陣先選択</h2>
+      </header>
+
+      <div class="sortie-select-body">
+        <button
+          class="sortie-select-panel"
+          type="button"
+          data-sortie="story"
+        >
+          <span class="sortie-select-panel-title">ストーリー</span>
+          <span class="sortie-select-panel-sub">平成元年〜平成31年</span>
+        </button>
+
+        <button
+          class="sortie-select-panel"
+          type="button"
+          data-sortie="event"
+        >
+          <span class="sortie-select-panel-title">イベント</span>
+          <span class="sortie-select-panel-sub">期間限定・特殊ステージ</span>
+        </button>
+
+        <button
+          class="sortie-select-panel"
+          type="button"
+          data-sortie="training"
+        >
+          <span class="sortie-select-panel-title">訓練所</span>
+          <span class="sortie-select-panel-sub">── REHEARSAL STUDIO ──</span>
+        </button>
+      </div>
+
+      <div
+        id="sortie-select-notice"
+        class="sortie-select-notice"
+        aria-live="polite"
+      ></div>
 
     </section>
 
@@ -2096,7 +2146,7 @@
   </div>
 
 
-  <script src="game.js?v=home-implement-1"></script>
+  <script src="game.js?v=sortie-select-1"></script>
 
 </body>
 </html>

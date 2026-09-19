@@ -8,6 +8,11 @@ const titleScreen =
 const homeScreen =
   document.getElementById("home-screen");
 
+const sortieSelectScreen =
+  document.getElementById(
+    "sortie-select-screen"
+  );
+
 const timelineScreen =
   document.getElementById("timeline-screen");
 
@@ -169,9 +174,7 @@ menuButtons.forEach((button) => {
 
       if (menu === "sortie") {
 
-        renderStageSelect();
-
-        showScreen(timelineScreen);
+        openSortieSelect();
 
         return;
 
@@ -430,6 +433,197 @@ function refreshHome() {
 }
 
 
+function openSortieSelect() {
+
+  if (!sortieSelectScreen) {
+
+    return;
+
+  }
+
+  hideSortieSelectNotice();
+
+  showScreen(sortieSelectScreen);
+
+}
+
+
+function openStoryFromSortieSelect() {
+
+  if (
+    typeof renderStageSelect ===
+    "function"
+  ) {
+
+    renderStageSelect();
+
+  }
+
+  showScreen(timelineScreen);
+
+}
+
+
+function openTrainingFromSortieSelect() {
+
+  if (
+    typeof startTrainingBattle ===
+    "function"
+  ) {
+
+    startTrainingBattle();
+
+  }
+
+}
+
+
+let sortieSelectNoticeTimer = null;
+
+
+function hideSortieSelectNotice() {
+
+  const notice =
+    document.getElementById(
+      "sortie-select-notice"
+    );
+
+  if (notice) {
+
+    notice.classList.remove(
+      "is-visible"
+    );
+
+    notice.textContent = "";
+
+  }
+
+  if (sortieSelectNoticeTimer) {
+
+    clearTimeout(
+      sortieSelectNoticeTimer
+    );
+
+    sortieSelectNoticeTimer = null;
+
+  }
+
+}
+
+
+function showSortieSelectNotice(
+  message
+) {
+
+  const notice =
+    document.getElementById(
+      "sortie-select-notice"
+    );
+
+  if (!notice) {
+
+    return;
+
+  }
+
+  notice.textContent = message;
+
+  notice.classList.add("is-visible");
+
+  if (sortieSelectNoticeTimer) {
+
+    clearTimeout(
+      sortieSelectNoticeTimer
+    );
+
+  }
+
+  sortieSelectNoticeTimer =
+    setTimeout(() => {
+
+      notice.classList.remove(
+        "is-visible"
+      );
+
+      sortieSelectNoticeTimer = null;
+
+    }, 1600);
+
+}
+
+
+function showEventComingSoon() {
+
+  showSortieSelectNotice(
+    "イベントは準備中です"
+  );
+
+}
+
+
+const sortieSelectBack =
+  document.getElementById(
+    "sortie-select-back"
+  );
+
+
+if (sortieSelectBack) {
+
+  sortieSelectBack.addEventListener(
+    "click",
+    () => {
+
+      showScreen(homeScreen);
+
+    }
+  );
+
+}
+
+
+const sortieSelectPanels =
+  document.querySelectorAll(
+    "#sortie-select-screen [data-sortie]"
+  );
+
+
+sortieSelectPanels.forEach((button) => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      const target =
+        button.dataset.sortie;
+
+      if (target === "story") {
+
+        openStoryFromSortieSelect();
+
+        return;
+
+      }
+
+      if (target === "training") {
+
+        openTrainingFromSortieSelect();
+
+        return;
+
+      }
+
+      if (target === "event") {
+
+        showEventComingSoon();
+
+      }
+
+    }
+  );
+
+});
+
+
 function openGachaLobby() {
 
   if (!gachaLobbyScreen) {
@@ -518,7 +712,7 @@ timelineBack.addEventListener(
   "click",
   () => {
 
-    showScreen(homeScreen);
+    openSortieSelect();
 
   }
 );
@@ -7013,7 +7207,7 @@ function exitTrainingBattle() {
 
   if (!isTrainingBattle()) {
 
-    showScreen(homeScreen);
+    openSortieSelect();
 
     return;
 
@@ -7038,7 +7232,7 @@ function exitTrainingBattle() {
 
   }
 
-  showScreen(homeScreen);
+  openSortieSelect();
 
 }
 
