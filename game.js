@@ -14653,14 +14653,14 @@ const CHARACTERS = {
 
     visual: {
 
-      /* V2-E head; V2-F ground -18: 320 effect canvas; skull+hat; ghosts excluded */
+      /* V2-F HOTFIX: intentional float (not ground contact) */
       bodyScale: 1.75,
 
-      groundOffsetPx: -18,
+      groundOffsetPx: 0,
 
-      altitudeMode: "ground",
+      altitudeMode: "float",
 
-      altitudeOffsetPx: 0
+      altitudeOffsetPx: 14
 
     },
 
