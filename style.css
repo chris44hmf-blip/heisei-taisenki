@@ -7131,6 +7131,44 @@ h2 {
 }
 
 
+.battle-enemy.has-enemy-sprite {
+  bottom: calc(14% + var(--enemy-visual-y, 0px));
+
+  width: auto;
+
+  min-width: 65px;
+}
+
+
+.battle-enemy.has-enemy-sprite .enemy-body {
+  font-size: 0;
+
+  line-height: 0;
+}
+
+
+.battle-enemy .enemy-sprite {
+  display: block;
+
+  width: calc(var(--enemy-sprite-px, 96) * 1px);
+
+  height: calc(var(--enemy-sprite-px, 96) * 1px);
+
+  object-fit: contain;
+
+  object-position: center bottom;
+
+  pointer-events: none;
+
+  user-select: none;
+}
+
+
+.battle-enemy.has-enemy-sprite.attacking {
+  animation: none;
+}
+
+
 /* キャラ本体 */
 
 .unit-body,

@@ -29650,10 +29650,9 @@ function startHealthKnockback(
     "hurt"
   );
 
+  showEnemyKnockbackHurt(unit);
+
 }
-
-
-function getHealthKnockbackSteps(trait) {
 
   if (!trait) {
 
@@ -30434,10 +30433,26 @@ function finishHealthKnockback(unit) {
 
   if (
     unit &&
+    unit.enemySpriteLock ===
+      "knockback"
+  ) {
+
+    unit.enemySpriteLock =
+      null;
+
+  }
+
+  if (
+    unit &&
     !unit.dead
   ) {
 
     setUnitSprite(
+      unit,
+      "idle"
+    );
+
+    setEnemySprite(
       unit,
       "idle"
     );
@@ -30669,6 +30684,302 @@ function showUnitKnockbackHurt(unit) {
       },
       unit.battle.hurtSpriteMs
     );
+
+}
+
+
+/* =========================
+   ENEMY SPRITES (STEP7-22-B)
+   Separate from ALLY_VISUAL.
+   States: idle / attack / hurt
+   Priority: death > knockback >
+   attack > idle
+========================= */
+
+const ENEMY_SPRITE_DEFAULTS = {
+  bodyScale: 1,
+  groundOffsetPx: 0,
+  displayPx: 96,
+  attackSpriteMs: 280
+};
+
+
+function getEnemySprites(unit) {
+
+  if (
+    !unit ||
+    !unit.sprites ||
+    typeof unit.sprites !== "object"
+  ) {
+
+    return null;
+
+  }
+
+  if (
+    !unit.sprites.idle ||
+    !unit.sprites.attack ||
+    !unit.sprites.hurt
+  ) {
+
+    return null;
+
+  }
+
+  return unit.sprites;
+
+}
+
+
+function getEnemyVisualConfig(def) {
+
+  const source =
+    def &&
+    def.visual &&
+    typeof def.visual === "object"
+      ? def.visual
+      : {};
+
+  const bodyScale =
+    typeof source.bodyScale ===
+      "number" &&
+    Number.isFinite(source.bodyScale) &&
+    source.bodyScale > 0
+      ? source.bodyScale
+      : ENEMY_SPRITE_DEFAULTS.bodyScale;
+
+  const groundOffsetPx =
+    typeof source.groundOffsetPx ===
+      "number" &&
+    Number.isFinite(
+      source.groundOffsetPx
+    )
+      ? source.groundOffsetPx
+      : ENEMY_SPRITE_DEFAULTS.groundOffsetPx;
+
+  const baseDisplayPx =
+    typeof source.displayPx ===
+      "number" &&
+    Number.isFinite(source.displayPx) &&
+    source.displayPx > 0
+      ? source.displayPx
+      : ENEMY_SPRITE_DEFAULTS.displayPx;
+
+  const attackSpriteMs =
+    typeof source.attackSpriteMs ===
+      "number" &&
+    Number.isFinite(
+      source.attackSpriteMs
+    ) &&
+    source.attackSpriteMs > 0
+      ? source.attackSpriteMs
+      : ENEMY_SPRITE_DEFAULTS.attackSpriteMs;
+
+  return {
+    bodyScale: bodyScale,
+    groundOffsetPx: groundOffsetPx,
+    displayPx:
+      baseDisplayPx * bodyScale,
+    attackSpriteMs: attackSpriteMs
+  };
+
+}
+
+
+function clearEnemySpriteTimer(unit) {
+
+  if (
+    unit &&
+    unit.enemySpriteTimer
+  ) {
+
+    clearTimeout(
+      unit.enemySpriteTimer
+    );
+
+    unit.enemySpriteTimer =
+      null;
+
+  }
+
+}
+
+
+function setEnemySprite(unit, state) {
+
+  const sprites =
+    getEnemySprites(unit);
+
+  if (
+    !sprites ||
+    !unit.sprite ||
+    !sprites[state]
+  ) {
+
+    return;
+
+  }
+
+  if (
+    unit.enemySpriteLock ===
+    "death"
+  ) {
+
+    if (state !== "hurt") {
+
+      return;
+
+    }
+
+  }
+
+  if (
+    unit.enemySpriteLock ===
+      "knockback" &&
+    (
+      state === "attack" ||
+      state === "idle"
+    )
+  ) {
+
+    return;
+
+  }
+
+  unit.sprite.src =
+    sprites[state];
+
+  unit.enemySpriteState =
+    state;
+
+}
+
+
+function showEnemyAttack(unit) {
+
+  if (
+    !getEnemySprites(unit) ||
+    !unit ||
+    unit.dead ||
+    unit.enemySpriteLock ===
+      "death" ||
+    isHealthKnockbackActive(unit)
+  ) {
+
+    return;
+
+  }
+
+  clearEnemySpriteTimer(unit);
+
+  setEnemySprite(
+    unit,
+    "attack"
+  );
+
+  const ms =
+    unit.enemyVisual &&
+    unit.enemyVisual.attackSpriteMs
+      ? unit.enemyVisual.attackSpriteMs
+      : ENEMY_SPRITE_DEFAULTS.attackSpriteMs;
+
+  unit.enemySpriteTimer =
+    setTimeout(
+      () => {
+
+        unit.enemySpriteTimer =
+          null;
+
+        if (
+          !unit ||
+          unit.dead ||
+          unit.enemySpriteLock ===
+            "death" ||
+          isHealthKnockbackActive(
+            unit
+          )
+        ) {
+
+          return;
+
+        }
+
+        setEnemySprite(
+          unit,
+          "idle"
+        );
+
+      },
+      ms
+    );
+
+}
+
+
+function showEnemyKnockbackHurt(unit) {
+
+  if (!getEnemySprites(unit)) {
+
+    return;
+
+  }
+
+  clearEnemySpriteTimer(unit);
+
+  unit.enemySpriteLock =
+    unit.dead
+      ? "death"
+      : "knockback";
+
+  setEnemySprite(
+    unit,
+    "hurt"
+  );
+
+}
+
+
+function showEnemyDeathHurt(unit) {
+
+  if (!getEnemySprites(unit)) {
+
+    return;
+
+  }
+
+  clearEnemySpriteTimer(unit);
+
+  unit.enemySpriteLock =
+    "death";
+
+  setEnemySprite(
+    unit,
+    "hurt"
+  );
+
+}
+
+
+function applyEnemySpriteVisual(
+  element,
+  visual
+) {
+
+  if (!element || !visual) {
+
+    return;
+
+  }
+
+  element.style.setProperty(
+    "--enemy-sprite-px",
+    String(visual.displayPx)
+  );
+
+  element.style.setProperty(
+    "--enemy-visual-y",
+    visual.groundOffsetPx + "px"
+  );
 
 }
 
@@ -31048,6 +31359,32 @@ const ENEMIES = {
     emoji: "🚲",
 
     image: null,
+
+    sprites: {
+
+      idle:
+        "images/enemies/chari_student/chari_student_idle.webp",
+
+      attack:
+        "images/enemies/chari_student/chari_student_attack.webp",
+
+      hurt:
+        "images/enemies/chari_student/chari_student_hurt.webp"
+
+    },
+
+    visual: {
+
+      /* STEP7-22-B: chari student baseline */
+      bodyScale: 1,
+
+      groundOffsetPx: 0,
+
+      displayPx: 100,
+
+      attackSpriteMs: 280
+
+    },
 
     hp: 140,
 
@@ -32178,12 +32515,55 @@ function createBattleEnemy(def) {
   const element =
     document.createElement("div");
 
+  const enemyVisual =
+    getEnemyVisualConfig(def);
+
+  const hasSprites =
+    Boolean(
+      def.sprites &&
+      def.sprites.idle &&
+      def.sprites.attack &&
+      def.sprites.hurt
+    );
+
 
   element.className =
-    def.className;
+    hasSprites
+      ? def.className +
+        " has-enemy-sprite"
+      : def.className;
 
 
-  element.innerHTML = `
+  if (hasSprites) {
+
+    element.innerHTML = `
+
+    <div class="character-hp">
+      <div class="character-hp-bar"></div>
+    </div>
+
+    <div class="enemy-body">
+      <img
+        class="enemy-sprite"
+        src="${def.sprites.idle}"
+        alt="${def.name}"
+      >
+    </div>
+
+    <div class="enemy-label">
+      ${def.name}
+    </div>
+
+  `;
+
+    applyEnemySpriteVisual(
+      element,
+      enemyVisual
+    );
+
+  } else {
+
+    element.innerHTML = `
 
     <div class="character-hp">
       <div class="character-hp-bar"></div>
@@ -32198,6 +32578,8 @@ function createBattleEnemy(def) {
     </div>
 
   `;
+
+  }
 
 
   applySpawnPosition(
@@ -32221,6 +32603,27 @@ function createBattleEnemy(def) {
       element.querySelector(
         ".character-hp-bar"
       ),
+
+    sprite:
+      element.querySelector(
+        ".enemy-sprite"
+      ),
+
+    sprites:
+      hasSprites
+        ? def.sprites
+        : null,
+
+    enemyVisual: enemyVisual,
+
+    enemySpriteState:
+      hasSprites
+        ? "idle"
+        : null,
+
+    enemySpriteLock: null,
+
+    enemySpriteTimer: null,
 
     hp: def.hp,
 
@@ -35557,6 +35960,10 @@ function tryAttack(
     attacker
   );
 
+  showEnemyAttack(
+    attacker
+  );
+
 
   if (!playerAttack) {
 
@@ -38582,6 +38989,11 @@ function attackPlayerBase(enemy) {
   );
 
 
+  showEnemyAttack(
+    enemy
+  );
+
+
   playerBaseHp -=
     enemy.attack;
 
@@ -38802,6 +39214,10 @@ function defeatCharacter(
     "hurt"
   );
 
+  showEnemyDeathHurt(
+    target
+  );
+
 
   if (!isAllyUnit(target)) {
 
@@ -38925,6 +39341,15 @@ function clearUnitCombatState(unit) {
   resetUnitSprintAcceleration(unit);
 
   clearUnitSpriteTimer(unit);
+
+  clearEnemySpriteTimer(unit);
+
+  if (unit) {
+
+    unit.enemySpriteLock =
+      null;
+
+  }
 
   clearUnitBpmOver(unit);
 
