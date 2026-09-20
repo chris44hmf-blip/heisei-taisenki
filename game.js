@@ -12251,8 +12251,8 @@ const CHARACTERS = {
 
     visual: {
 
-      /* V2-D BATCH-1 provisional: ss90 + guitar — enlarge head toward kaede */
-      bodyScale: 1.18,
+      /* V2-D BATCH-1 FIX-1: iPhone — slightly smaller head */
+      bodyScale: 1.14,
 
       groundOffsetPx: 1,
 
@@ -12868,8 +12868,8 @@ const CHARACTERS = {
 
     visual: {
 
-      /* V2-D BATCH-1 provisional: backpack tower shrinks head in box */
-      bodyScale: 1.2,
+      /* V2-D BATCH-1 FIX-1: iPhone — slightly smaller head */
+      bodyScale: 1.15,
 
       groundOffsetPx: 0,
 
