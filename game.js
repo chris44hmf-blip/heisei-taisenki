@@ -31437,6 +31437,32 @@ const ENEMIES = {
 
     image: null,
 
+    sprites: {
+
+      idle:
+        "images/enemies/salaryman/salaryman_idle.webp",
+
+      attack:
+        "images/enemies/salaryman/salaryman_attack.webp",
+
+      hurt:
+        "images/enemies/salaryman/salaryman_hurt.webp"
+
+    },
+
+    visual: {
+
+      /* STEP7-22-C: salaryman provisional vs chari baseline */
+      bodyScale: 1,
+
+      groundOffsetPx: 0,
+
+      displayPx: 100,
+
+      attackSpriteMs: 280
+
+    },
+
     hp: 220,
 
     attack: 24,
