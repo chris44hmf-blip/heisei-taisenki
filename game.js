@@ -29654,6 +29654,9 @@ function startHealthKnockback(
 
 }
 
+
+function getHealthKnockbackSteps(trait) {
+
   if (!trait) {
 
     return [];
