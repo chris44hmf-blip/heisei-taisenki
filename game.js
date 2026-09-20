@@ -31511,6 +31511,32 @@ const ENEMIES = {
 
     image: null,
 
+    sprites: {
+
+      idle:
+        "images/enemies/tissue_staff/tissue_staff_idle.webp",
+
+      attack:
+        "images/enemies/tissue_staff/tissue_staff_attack.webp",
+
+      hurt:
+        "images/enemies/tissue_staff/tissue_staff_hurt.webp"
+
+    },
+
+    visual: {
+
+      /* STEP7-22-D: tissue provisional vs chari/salaryman baseline */
+      bodyScale: 1,
+
+      groundOffsetPx: 0,
+
+      displayPx: 100,
+
+      attackSpriteMs: 280
+
+    },
+
     hp: 120,
 
     attack: 14,
