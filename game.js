@@ -12379,6 +12379,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: tall portrait; head clear; bottom pad */
+      bodyScale: 1.4,
+
+      groundOffsetPx: 3,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE
@@ -12684,6 +12697,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: head large; feet float in canvas */
+      bodyScale: 1.28,
+
+      groundOffsetPx: 5,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE,
@@ -12772,6 +12798,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: bags are decoration; head vs tenkan band */
+      bodyScale: 1.32,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -13137,6 +13176,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: standing adult; hair as head; mild enlarge */
+      bodyScale: 1.24,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.PROJECTILE_SINGLE,
@@ -13218,6 +13270,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: camera props excluded; slight bottom pad */
+      bodyScale: 1.12,
+
+      groundOffsetPx: 2,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -13493,6 +13558,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: guitar/mic decoration; head already strong in asset */
+      bodyScale: 1.08,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type:
@@ -13601,6 +13679,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: bald head clear; top/bottom pad */
+      bodyScale: 1.22,
+
+      groundOffsetPx: 3,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.FRONT_AOE,
@@ -13699,6 +13790,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: wide dash canvas; sticks/dust excluded */
+      bodyScale: 1.48,
+
+      groundOffsetPx: 2,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE
@@ -13781,6 +13885,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: bass decoration; head toward adult band */
+      bodyScale: 1.42,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -13868,6 +13985,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: eye-stalks excluded; squat face toward band */
+      bodyScale: 1.42,
+
+      groundOffsetPx: 2,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE,
@@ -13938,6 +14068,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: bald crouch head large; mic/cables excluded */
+      bodyScale: 1.28,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -14018,6 +14161,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: bass + hair spikes excluded; core head */
+      bodyScale: 1.48,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.MELEE_SINGLE
@@ -14086,6 +14242,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: pedalboard/guitar excluded; top pad */
+      bodyScale: 1.48,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -14172,6 +14341,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: extreme hair decoration; face toward band */
+      bodyScale: 1.65,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -14346,6 +14528,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: helmet only; plume+amps excluded */
+      bodyScale: 1.7,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.PROJECTILE_AOE,
@@ -14456,6 +14651,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: 320 effect canvas; skull+hat; ghosts excluded */
+      bodyScale: 1.75,
+
+      groundOffsetPx: 2,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.PROJECTILE_SINGLE,
@@ -14537,6 +14745,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: 320 drums canvas; each head toward band */
+      bodyScale: 1.72,
+
+      groundOffsetPx: 0,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -14754,6 +14975,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: LEGEND effects excluded; head toward adult */
+      bodyScale: 1.75,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.FRONT_AOE,
@@ -14875,6 +15109,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: LEGEND drums/effects excluded; head toward adult */
+      bodyScale: 1.72,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
@@ -15001,6 +15248,19 @@ const CHARACTERS = {
 
     },
 
+    visual: {
+
+      /* V2-E: LEGEND halo/effects excluded; head toward adult */
+      bodyScale: 1.75,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
+
+    },
+
     attackBehavior: {
 
       type: ATTACK_TYPE.DROP_AOE,
@@ -15116,6 +15376,19 @@ const CHARACTERS = {
     ui: {
 
       menuScale: 1
+
+    },
+
+    visual: {
+
+      /* V2-E: LEGEND aura excluded; head toward adult */
+      bodyScale: 1.78,
+
+      groundOffsetPx: 1,
+
+      altitudeMode: "ground",
+
+      altitudeOffsetPx: 0
 
     },
 
